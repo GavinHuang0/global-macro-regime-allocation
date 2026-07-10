@@ -1,0 +1,16 @@
+project:
+  random_seed: 42
+
+data:
+  start_date: "2000-01-01"
+  end_date: null
+  use_point_in_time_releases: true
+
+model:
+  n_regimes: 4
+  refit_frequency: "monthly"
+
+backtest:
+  rebalance_frequency: "monthly"
+  transaction_cost_bps: 5
+  long_only: true
