@@ -8,6 +8,15 @@ __pycache__/
 .env
 .env.*
 !.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*token*.json
+*tokens*.json
+*secret*.json
+secrets/
+credentials/
 
 data/raw/*
 data/processed/*

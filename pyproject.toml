@@ -18,6 +18,9 @@ dependencies = [
     "pyyaml>=6.0",
 ]
 
+[project.scripts]
+build-m01-dataset = "regime_allocation.cli.build_m01_dataset:main"
+
 [project.optional-dependencies]
 data = [
     "fredapi>=0.5",
@@ -34,6 +37,7 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]
 
 [tool.ruff]
 line-length = 100

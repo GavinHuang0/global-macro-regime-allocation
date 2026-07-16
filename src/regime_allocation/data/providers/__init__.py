@@ -1,0 +1,2 @@
+"""External data-provider adapters."""
+

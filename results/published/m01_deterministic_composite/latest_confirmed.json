@@ -1,0 +1,10 @@
+{
+  "growth_score": 0.01733227391203373,
+  "inflation_score": 0.44387503086905483,
+  "label_available_at": "2026-06-25",
+  "model_id": "m01_deterministic_composite",
+  "reference_month": "2026-05-01",
+  "regime_id": "growth_up_inflation_up",
+  "regime_label": "Growth composite up / inflation composite up",
+  "status": "latest_confirmed_deterministic_regime"
+}
