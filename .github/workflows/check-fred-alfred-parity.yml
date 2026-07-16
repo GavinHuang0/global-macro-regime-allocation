@@ -1,12 +1,13 @@
-Exit code: 0
-Wall time: 1.6 seconds
-Output:
 name: Check FRED and ALFRED parity
 
 on:
   push:
     branches:
       - codex/fred-api-parity-check
+  pull_request:
+    types:
+      - opened
+      - synchronize
   workflow_dispatch:
 
 permissions:
