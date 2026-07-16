@@ -1,6 +1,3 @@
-Exit code: 0
-Wall time: 1.7 seconds
-Output:
 """Provider-neutral observation-by-vintage matrix contracts and utilities."""
 
 from __future__ import annotations
