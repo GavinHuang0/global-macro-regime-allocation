@@ -13,35 +13,36 @@ later than the raw 26-year component panel.
 
 ## 1. First-release vintage rule
 
-Let `x[s,m]^v` be the published level of series `s` for reference month `m` as
-it appeared in vintage `v`. Let `j(s)` be the configured ALFRED release family
-for series `s`, and let `V[j(s)]` be that release family's calendar dates inside
-the frozen acquisition window. Define the admissible candidate set
+Let $x_{s,m}^{v}$ be the published level of series $s$ for reference month
+$m$ as it appeared in vintage $v$. Let $j(s)$ be the configured ALFRED
+release family for series $s$, and let $V_{j(s)}$ be that release family's
+calendar dates inside the frozen acquisition window. Define the admissible
+candidate set
 
-\[
+$$
 A_{s,m}=\left\{v\in V_{j(s)}:
 x_{s,m}^{v}\text{ is available and }
 0\leq v-\operatorname{end}(m)\leq92\text{ days}\right\}.
-\]
+$$
 
 The selected first-release vintage is
 
-\[
+$$
 v_s(m)=\min A_{s,m}.
-\]
+$$
 
 The transformed first-release feature is
 
-\[
+$$
 u_{s,m}=h_s\left(x_{s,m}^{v_s(m)},x_{s,m-1}^{v_s(m)}\right).
-\]
+$$
 
 The current and prior month therefore come from the same vintage. This matters
 because the prior month is often revised when the current month is released,
 and index base years can change. Differencing two independently frozen
 first-release levels would mix vintages and can create artificial jumps.
 
-If \(A_{s,m}\) is empty, the feature is unavailable. The 92-day admissibility rule
+If $A_{s,m}$ is empty, the feature is unavailable. The 92-day admissibility rule
 treats later first appearances as archive backfills rather than contemporaneous
 releases.
 
@@ -49,64 +50,65 @@ releases.
 
 The growth components are
 
-\[
+$$
 u_{\text{payroll},m}
-=PAYEMS_m^{v(m)}-PAYEMS_{m-1}^{v(m)},
-\]
+=\mathrm{PAYEMS}_m^{v(m)}-\mathrm{PAYEMS}_{m-1}^{v(m)},
+$$
 
-\[
+$$
 u_{\text{IP},m}
-=100\log\left(\frac{INDPRO_m^{v(m)}}{INDPRO_{m-1}^{v(m)}}\right),
-\]
+=100\log\left(\frac{\mathrm{INDPRO}_m^{v(m)}}{\mathrm{INDPRO}_{m-1}^{v(m)}}\right),
+$$
 
-\[
+$$
 u_{\text{consumption},m}
-=100\log\left(\frac{PCEC96_m^{v(m)}}{PCEC96_{m-1}^{v(m)}}\right),
-\]
+=100\log\left(\frac{\mathrm{PCEC96}_m^{v(m)}}{\mathrm{PCEC96}_{m-1}^{v(m)}}\right),
+$$
 
-\[
+$$
 u_{\text{unemployment},m}
-=-\left(UNRATE_m^{v(m)}-UNRATE_{m-1}^{v(m)}\right).
-\]
+=-\left(\mathrm{UNRATE}_m^{v(m)}-\mathrm{UNRATE}_{m-1}^{v(m)}\right).
+$$
 
 The inflation components are monthly log changes:
 
-\[
+$$
 u_{s,m}
 =100\log\left(\frac{x_{s,m}^{v_s(m)}}{x_{s,m-1}^{v_s(m)}}\right),
-\]
+$$
 
-for core CPI (`CPILFESL`), core PCE prices (`PCEPILFE`), core
-finished-goods producer prices, and average hourly earnings (`AHETPI`).
+for core CPI ($\mathrm{CPILFESL}$), core PCE prices ($\mathrm{PCEPILFE}$), core
+finished-goods producer prices, and average hourly earnings ($\mathrm{AHETPI}$).
 
-Producer prices use the BLS-designated transition from discontinued `PPILFE`
-through December 2015 to its replacement `WPSFD4131` from January 2016. Monthly
-changes are calculated inside each source; index levels are never spliced.
+Producer prices use the BLS-designated transition from discontinued
+$\mathrm{PPILFE}$ through December 2015 to its replacement $\mathrm{WPSFD4131}$
+from January 2016. Monthly changes are calculated inside each source; index
+levels are never spliced.
 
 ## 3. Strictly lagged expanding standardization
 
-For component `k`, let `H[k,m-1]` be all valid transformed observations strictly
-before month `m`, and let `n[k,m-1]` be their count. With sample standard
-deviation (`ddof=1`),
+For component $k$, let $H_{k,m-1}$ be all valid transformed observations
+strictly before month $m$, and let $n_{k,m-1}$ be their count. With sample
+standard deviation ($\operatorname{ddof}=1$),
 
-\[
+$$
 \widehat\mu_{k,m-1}
 =\frac{1}{n_{k,m-1}}\sum_{t<m}u_{k,t},
-\]
+$$
 
-\[
+$$
 \widehat\sigma_{k,m-1}
 =\sqrt{\frac{1}{n_{k,m-1}-1}
 \sum_{t<m}(u_{k,t}-\widehat\mu_{k,m-1})^2},
-\]
+$$
 
 and
 
-\[
+$$
 z_{k,m}
 =\frac{u_{k,m}-\widehat\mu_{k,m-1}}
 {\widehat\sigma_{k,m-1}}.
-\]
+$$
 
 No z-score is produced until at least 60 prior valid observations exist. The
 current month never contributes to its own mean or standard deviation. A zero
@@ -114,39 +116,39 @@ historical standard deviation also yields no score.
 
 ## 4. Equal-weight monthly composites
 
-Let `G` and `I` be the four growth and four inflation components. The raw axis
+Let $G$ and $I$ be the four growth and four inflation components. The raw axis
 scores are
 
-\[
+$$
 C_m^G=\frac{1}{4}\sum_{k\in G}z_{k,m},
 \qquad
 C_m^I=\frac{1}{4}\sum_{k\in I}z_{k,m}.
-\]
+$$
 
 All four terms are required. Missing a component makes the axis unavailable;
 the implementation never redistributes its 25% weight.
 
 ## 5. Three-month trailing smoothing
 
-\[
+$$
 G_m=\frac{C_m^G+C_{m-1}^G+C_{m-2}^G}{3},
 \qquad
 I_m=\frac{C_m^I+C_{m-1}^I+C_{m-2}^I}{3}.
-\]
+$$
 
-This is a trailing window containing only months `m`, `m-1`, and `m-2`; it is
+This is a trailing window containing only months $m$, $m-1$, and $m-2$; it is
 not a centered moving average.
 
 ## 6. Four deterministic regimes
 
-Exact zero is assigned to the nonnegative (`up`) side.
+Exact zero is assigned to the nonnegative ($\text{up}$) side.
 
 | Condition | Stable regime ID | Human label |
 |---|---|---|
-| `G_m >= 0`, `I_m >= 0` | `growth_up_inflation_up` | Growth composite up / inflation composite up |
-| `G_m < 0`, `I_m >= 0` | `growth_down_inflation_up` | Growth composite down / inflation composite up |
-| `G_m >= 0`, `I_m < 0` | `growth_up_inflation_down` | Growth composite up / inflation composite down |
-| `G_m < 0`, `I_m < 0` | `growth_down_inflation_down` | Growth composite down / inflation composite down |
+| $G_m \geq 0,\ I_m \geq 0$ | `growth_up_inflation_up` | Growth composite up / inflation composite up |
+| $G_m < 0,\ I_m \geq 0$ | `growth_down_inflation_up` | Growth composite down / inflation composite up |
+| $G_m \geq 0,\ I_m < 0$ | `growth_up_inflation_down` | Growth composite up / inflation composite down |
+| $G_m < 0,\ I_m < 0$ | `growth_down_inflation_down` | Growth composite down / inflation composite down |
 
 “Up” means that the trailing mean of an axis's four standardized components is
 nonnegative. It does not guarantee that every component is above its own mean,
@@ -158,11 +160,11 @@ avoid making those stronger claims.
 
 For a completed month,
 
-\[
+$$
 T_m=\max_{k\in G\cup I}v_k(m).
-\]
+$$
 
-`T_m` is stored as `label_available_at`; it is the latest selected admissible
+$T_m$ is stored as `label_available_at`; it is the latest selected admissible
 release-calendar vintage among the eight components. Any future backtest may
 use the label only on or after that date. This prevents reference-month dates
 from being mistaken for publication dates.
@@ -186,15 +188,16 @@ and the [December 2025 Employment Situation release](https://www.bls.gov/news.re
 
 ## 9. Deviation from the original recommendation
 
-The original proposal used real retail sales. ALFRED's `RRSFS`/`RSAFS`
-real-time archives begin in June 2001, so they cannot honestly provide the
-requested 26-year first-release history. Model 01 uses real personal consumption
-expenditures (`PCEC96`) as the closest long-history, seasonally adjusted real
-consumer-activity proxy. This materially changes the axis: real PCE includes
-services, is smoother, and is published later than advance retail sales. It is
-also released by BEA alongside core PCE, creating dependence between a growth
-and inflation component. Model 01 must therefore be tested against an `RRSFS`
-sensitivity version over the shorter common sample.
+The original proposal used real retail sales. ALFRED's
+$\mathrm{RRSFS}/\mathrm{RSAFS}$ real-time archives begin in June 2001, so they
+cannot honestly provide the requested 26-year first-release history. Model 01
+uses real personal consumption expenditures ($\mathrm{PCEC96}$) as the closest
+long-history, seasonally adjusted real consumer-activity proxy. This materially
+changes the axis: real PCE includes services, is smoother, and is published
+later than advance retail sales. It is also released by BEA alongside core PCE,
+creating dependence between a growth and inflation component. Model 01 must
+therefore be tested against an $\mathrm{RRSFS}$ sensitivity version over the
+shorter common sample.
 
 ## 10. Additional frozen design choices
 
