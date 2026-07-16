@@ -1,6 +1,3 @@
-Exit code: 0
-Wall time: 1.8 seconds
-Output:
 """Authenticated FRED API provider for point-in-time vintage matrices.
 
 The API key is accepted only as an in-memory constructor argument. It is never
