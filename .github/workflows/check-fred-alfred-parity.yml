@@ -1,0 +1,54 @@
+name: Check FRED and ALFRED parity
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fred-alfred-parity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compare:
+    name: Compare two series over 2019-2023
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out comparison branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install project
+        run: python -m pip install -e .
+
+      - name: Compare authenticated and keyless vintages
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: >-
+          python scripts/compare_fred_alfred.py
+          --comparison-start 2019-01-01
+          --comparison-end 2023-12-01
+          --observation-start 2018-01-01
+          --vintage-start 2018-01-01
+          --vintage-end 2024-03-31
+          --output-dir artifacts/provider-parity
+
+      - name: Upload comparison report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fred-alfred-parity-${{ github.run_id }}
+          path: artifacts/provider-parity/
+          if-no-files-found: warn
+          retention-days: 14

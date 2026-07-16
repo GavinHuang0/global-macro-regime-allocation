@@ -176,12 +176,18 @@ def test_build_dataset_end_to_end_without_network(
         series_id: str,
         raw_dir: Path,
         **_: object,
-    ) -> tuple[Path, bytes]:
+    ) -> build_m01_dataset._MatrixAcquisition:
         downloaded.append(series_id)
         raw_path = raw_dir / f"{series_id}_synthetic.zip"
         raw_path.parent.mkdir(parents=True, exist_ok=True)
         raw_path.write_bytes(payloads[series_id])
-        return raw_path, payloads[series_id]
+        return build_m01_dataset._MatrixAcquisition(
+            path=raw_path,
+            content=payloads[series_id],
+            provider_id="fred_api",
+            cache_origin="downloaded",
+            source_url=f"https://fred.stlouisfed.org/series/{series_id}",
+        )
 
     monkeypatch.setattr(
         build_m01_dataset,
@@ -208,6 +214,8 @@ def test_build_dataset_end_to_end_without_network(
     outputs = build_m01_dataset.build_dataset(
         project_root=tmp_path,
         config_path=config_path,
+        provider="fred",
+        environ={"FRED_API_KEY": "a" * 32},
     )
 
     assert set(outputs) == {"manifest", "components", "features", "history", "latest"}
@@ -314,7 +322,17 @@ def test_build_dataset_end_to_end_without_network(
     assert latest["regime_id"] == last_history_row["regime_id"]
     assert latest["regime_label"] == last_history_row["regime_label"]
 
-    manifest = json.loads(outputs["manifest"].read_text(encoding="utf-8"))
+    manifest_text = outputs["manifest"].read_text(encoding="utf-8")
+    assert "a" * 32 not in manifest_text
+    assert "api_key" not in manifest_text
+    manifest = json.loads(manifest_text)
+    assert manifest["schema_version"] == 2
+    assert manifest["provider_policy"] == (
+        "fred_api_preferred_when_FRED_API_KEY_is_present"
+    )
+    assert manifest["provider_requested"] == "fred"
+    assert manifest["provider_selected"] == "fred_api"
+    assert manifest["providers_used"] == ["fred_api"]
     assert manifest["reference_months"] == 12
     assert manifest["history_months"] == 12
     assert manifest["classified_months"] == 12
@@ -322,3 +340,7 @@ def test_build_dataset_end_to_end_without_network(
     assert manifest["first_classified_month"] == "2000-01-01"
     assert manifest["latest_classified_month"] == "2000-12-01"
     assert len(manifest["raw_files"]) == len(SERIES_IDS)
+    assert {item["provider"] for item in manifest["raw_files"]} == {"fred_api"}
+    assert {item["cache_origin"] for item in manifest["raw_files"]} == {
+        "downloaded"
+    }

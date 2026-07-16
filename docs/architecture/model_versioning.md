@@ -29,3 +29,9 @@ Model IDs are stable. A change to a threshold, data series, transformation,
 warm-up, or likelihood is recorded in configuration and provenance. A change
 to the state representation or inference graph receives a new model ID.
 
+The fixed first-order transition matrix is part of
+`m01_deterministic_composite`: it propagates uncertainty over the existing four
+states without changing their definition or adding a new latent state. A
+duration-dependent, semi-Markov, covariate-dependent, or time-varying transition
+law changes the inference graph and therefore belongs under a distinct model ID
+rather than behind a Model 01 configuration flag.

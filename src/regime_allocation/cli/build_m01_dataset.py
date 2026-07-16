@@ -3,18 +3,20 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
 from datetime import date, datetime, timezone
 import hashlib
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 import pandas as pd
 import yaml
 
 from regime_allocation.data.first_release import extract_first_release_features
-from regime_allocation.data.providers.alfred_web import (
-    AlfredWebDownloadClient,
+from regime_allocation.data.providers import select_vintage_provider
+from regime_allocation.data.providers.vintage_matrix import (
+    VintageMatrixProvider,
     load_vintage_matrix,
 )
 from regime_allocation.features.composites import (
@@ -91,18 +93,60 @@ def _load_config(path: Path) -> tuple[dict[str, Any], bytes]:
     return config, raw
 
 
+@dataclass(frozen=True)
+class _MatrixAcquisition:
+    path: Path
+    content: bytes
+    provider_id: str
+    cache_origin: str
+    source_url: str
+
+
+def _provider_raw_dir(legacy_raw_dir: Path, cache_namespace: str) -> Path:
+    """Keep the historical ALFRED directory while isolating new providers."""
+
+    if cache_namespace == "alfred":
+        return legacy_raw_dir
+    if legacy_raw_dir.parent.name == "alfred":
+        return (
+            legacy_raw_dir.parent.parent
+            / cache_namespace
+            / legacy_raw_dir.name
+        )
+    return legacy_raw_dir.parent / cache_namespace / legacy_raw_dir.name
+
+
+def _metadata_path(raw_path: Path) -> Path:
+    return raw_path.with_name(raw_path.name + ".metadata.json")
+
+
+def _cached_provider_id(raw_path: Path, fallback: str) -> str:
+    metadata_path = _metadata_path(raw_path)
+    if not metadata_path.exists():
+        return fallback
+    try:
+        payload = json.loads(metadata_path.read_text(encoding="utf-8"))
+        provider_id = str(payload["provider_id"])
+    except (KeyError, TypeError, ValueError, json.JSONDecodeError):
+        raise ValueError(f"invalid acquisition metadata: {metadata_path}") from None
+    if not provider_id or provider_id == "None":
+        raise ValueError(f"invalid acquisition metadata: {metadata_path}")
+    return provider_id
+
+
 def _download_or_load(
     *,
-    client: AlfredWebDownloadClient,
+    client: VintageMatrixProvider,
     series_id: str,
     release_id: int,
     raw_dir: Path,
+    compatible_cache_dirs: tuple[tuple[Path, str], ...] = (),
     observation_start: date,
     observation_end: date,
     vintage_start: date,
     vintage_end: date,
     refresh: bool,
-) -> tuple[Path, bytes]:
+) -> _MatrixAcquisition:
     query = {
         "series_id": series_id,
         "release_id": release_id,
@@ -115,12 +159,32 @@ def _download_or_load(
     query_hash = _sha256(
         json.dumps(query, sort_keys=True, separators=(",", ":")).encode("utf-8")
     )[:12]
-    raw_path = raw_dir / f"{series_id}_{query_hash}_levels_by_vintage.zip"
-    if raw_path.exists() and not refresh:
-        return raw_path, raw_path.read_bytes()
+    cache_locations = ((raw_dir, client.provider_id),) + compatible_cache_dirs
+    seen_cache_dirs: set[Path] = set()
+    if not refresh:
+        for cache_dir, fallback_provider_id in cache_locations:
+            resolved_cache_dir = cache_dir.resolve()
+            if resolved_cache_dir in seen_cache_dirs:
+                continue
+            seen_cache_dirs.add(resolved_cache_dir)
+            candidate = cache_dir / (
+                f"{series_id}_{query_hash}_levels_by_vintage.zip"
+            )
+            if candidate.exists():
+                return _MatrixAcquisition(
+                    path=candidate,
+                    content=candidate.read_bytes(),
+                    provider_id=_cached_provider_id(
+                        candidate, fallback_provider_id
+                    ),
+                    cache_origin="existing_normalized_cache",
+                    source_url=client.series_page_url(series_id),
+                )
 
-    # Migrate normalized matrices produced by the earlier Download Data form
-    # transport. Their downstream contract is identical to the graph transport.
+    raw_path = raw_dir / f"{series_id}_{query_hash}_levels_by_vintage.zip"
+
+    # Reuse normalized matrices produced by the earlier Download Data form
+    # transport. Their downstream contract is identical to the current one.
     legacy_query = dict(query)
     legacy_query.pop("normalized_contract")
     legacy_query.update({"units": "lin", "output_type": 2})
@@ -129,16 +193,21 @@ def _download_or_load(
             legacy_query, sort_keys=True, separators=(",", ":")
         ).encode("utf-8")
     )[:12]
-    legacy_path = raw_dir / (
-        f"{series_id}_{legacy_hash}_levels_by_vintage.zip"
-    )
-    if legacy_path.exists() and not refresh:
-        payload = legacy_path.read_bytes()
-        raw_path.parent.mkdir(parents=True, exist_ok=True)
-        temporary = raw_path.with_suffix(".zip.tmp")
-        temporary.write_bytes(payload)
-        temporary.replace(raw_path)
-        return raw_path, payload
+    if not refresh:
+        for cache_dir, fallback_provider_id in cache_locations:
+            legacy_path = cache_dir / (
+                f"{series_id}_{legacy_hash}_levels_by_vintage.zip"
+            )
+            if legacy_path.exists():
+                return _MatrixAcquisition(
+                    path=legacy_path,
+                    content=legacy_path.read_bytes(),
+                    provider_id=_cached_provider_id(
+                        legacy_path, fallback_provider_id
+                    ),
+                    cache_origin="legacy_normalized_cache",
+                    source_url=client.series_page_url(series_id),
+                )
 
     artifact = client.download_level_matrix(
         series_id,
@@ -151,8 +220,27 @@ def _download_or_load(
         refresh_cache=refresh,
     )
     raw_path.parent.mkdir(parents=True, exist_ok=True)
-    raw_path.write_bytes(artifact.content)
-    return raw_path, artifact.content
+    temporary = raw_path.with_suffix(raw_path.suffix + ".tmp")
+    temporary.write_bytes(artifact.content)
+    temporary.replace(raw_path)
+    _write_json(
+        {
+            "schema_version": 1,
+            "provider_id": artifact.provider_id,
+            "source_url": artifact.source_url,
+            "query": query,
+            "content_sha256": _sha256(artifact.content),
+            "selected_vintage_dates": len(artifact.selected_vintage_dates),
+        },
+        _metadata_path(raw_path),
+    )
+    return _MatrixAcquisition(
+        path=raw_path,
+        content=artifact.content,
+        provider_id=artifact.provider_id,
+        cache_origin="downloaded",
+        source_url=artifact.source_url,
+    )
 
 
 def build_dataset(
@@ -160,6 +248,8 @@ def build_dataset(
     project_root: Path,
     config_path: Path,
     refresh: bool = False,
+    provider: str = "auto",
+    environ: Mapping[str, str] | None = None,
 ) -> dict[str, Path]:
     config, config_bytes = _load_config(config_path)
     data_config = config["data"]
@@ -173,12 +263,17 @@ def build_dataset(
     vintage_end = _as_date(data_config["vintage_end"])
     max_release_lag_days = int(data_config["max_release_lag_days"])
 
-    raw_dir = project_root / output_config["raw_dir"]
+    legacy_raw_dir = project_root / output_config["raw_dir"]
     processed_dir = project_root / output_config["processed_dir"]
     manifest_path = project_root / output_config["manifest"]
     published_dir = project_root / output_config["published_dir"]
 
-    client = AlfredWebDownloadClient()
+    selection = select_vintage_provider(provider, environ=environ)
+    client = selection.client
+    raw_dir = _provider_raw_dir(legacy_raw_dir, client.cache_namespace)
+    compatible_cache_dirs: tuple[tuple[Path, str], ...] = ()
+    if raw_dir != legacy_raw_dir:
+        compatible_cache_dirs = ((legacy_raw_dir, "alfred_web"),)
     all_records: list[pd.DataFrame] = []
     raw_files: list[dict[str, object]] = []
 
@@ -200,17 +295,20 @@ def build_dataset(
                     f"invalid vintage window for {series_id}: "
                     f"{source_vintage_start} > {source_vintage_end}"
                 )
-            raw_path, raw_payload = _download_or_load(
+            acquisition = _download_or_load(
                 client=client,
                 series_id=series_id,
                 release_id=release_id,
                 raw_dir=raw_dir,
+                compatible_cache_dirs=compatible_cache_dirs,
                 observation_start=observation_start,
                 observation_end=reference_end,
                 vintage_start=source_vintage_start,
                 vintage_end=source_vintage_end,
                 refresh=refresh,
             )
+            raw_path = acquisition.path
+            raw_payload = acquisition.content
             matrix = load_vintage_matrix(raw_payload, series_id)
             records = extract_first_release_features(
                 matrix,
@@ -231,14 +329,14 @@ def build_dataset(
                     records["reference_month"] <= pd.Timestamp(source["active_end"])
                 ]
             records = records.copy()
-            records["source_url"] = (
-                f"https://alfred.stlouisfed.org/series?seid={series_id}"
-            )
+            records["source_url"] = acquisition.source_url
             all_records.append(records)
             raw_files.append(
                 {
                     "series_id": series_id,
                     "release_id": release_id,
+                    "provider": acquisition.provider_id,
+                    "cache_origin": acquisition.cache_origin,
                     "vintage_start": source_vintage_start.isoformat(),
                     "vintage_end": source_vintage_end.isoformat(),
                     "path": raw_path.relative_to(project_root).as_posix(),
@@ -391,10 +489,16 @@ def build_dataset(
     for item in sorted(raw_files, key=lambda value: str(value["series_id"])):
         combined_hash.update(str(item["sha256"]).encode("ascii"))
     manifest = {
-        "schema_version": 1,
+        "schema_version": 2,
         "model_id": config["model_id"],
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-        "provider": "ALFRED public release calendars and historical graph CSV",
+        "provider": "provider-neutral point-in-time vintage matrices",
+        "provider_policy": "fred_api_preferred_when_FRED_API_KEY_is_present",
+        "provider_requested": selection.requested,
+        "provider_selected": selection.selected,
+        "providers_used": sorted(
+            {str(item["provider"]) for item in raw_files}
+        ),
         "provider_output": "batched as-of level snapshots by vintage date",
         "cache_format": "deterministically merged and normalized ZIP matrices",
         "configuration": config_path.relative_to(project_root).as_posix(),
@@ -456,7 +560,19 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--refresh",
         action="store_true",
-        help="Redownload raw ALFRED ZIPs instead of using the local cache.",
+        help=(
+            "Reacquire the selected provider's raw matrices instead of using "
+            "compatible caches; other providers' artifacts remain untouched."
+        ),
+    )
+    parser.add_argument(
+        "--provider",
+        choices=("auto", "fred", "alfred"),
+        default="auto",
+        help=(
+            "Acquisition provider. 'auto' prefers FRED when FRED_API_KEY is "
+            "set and otherwise uses the keyless ALFRED fallback."
+        ),
     )
     return parser.parse_args()
 
@@ -471,6 +587,7 @@ def main() -> None:
         project_root=project_root,
         config_path=config_path.resolve(),
         refresh=args.refresh,
+        provider=args.provider,
     )
     for label, path in outputs.items():
         print(f"{label}: {path}")

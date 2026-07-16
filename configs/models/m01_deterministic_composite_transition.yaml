@@ -1,0 +1,26 @@
+schema_version: 1
+model_id: m01_deterministic_composite
+stage_id: fixed_first_order_transition
+description: >-
+  Causal expanding-count estimate of a time-homogeneous first-order transition
+  matrix for Model 01's deterministic monthly regimes.
+
+source:
+  regime_history: results/published/m01_deterministic_composite/regime_history.csv
+
+transition:
+  markov_order: 1
+  path_months: 4
+  time_homogeneous: true
+  estimation_window: expanding
+  dirichlet_alpha: 0.5
+  credible_interval_level: 0.95
+  knowledge_cutoff_policy: latest_label_available_at
+  require_consecutive_reference_months: true
+  availability_field: label_available_at
+
+outputs:
+  processed_pairs: data/processed/m01_deterministic_composite/transition_pairs.csv
+  published_model: results/published/m01_deterministic_composite/transition_model.json
+  published_matrix: results/published/m01_deterministic_composite/transition_matrix.csv
+  published_prior: results/published/m01_deterministic_composite/latest_transition_prior.json

@@ -1,0 +1,35 @@
+{
+  "conditioning_regime_id": "growth_up_inflation_up",
+  "conditioning_regime_label": "Growth composite up / inflation composite up",
+  "interpretation": "One-step transition prior conditioned on the latest confirmed deterministic regime; no event likelihood has been applied.",
+  "knowledge_cutoff": "2026-06-25",
+  "model_id": "m01_deterministic_composite",
+  "probabilities": [
+    {
+      "probability": 0.6904761904761905,
+      "regime_id": "growth_up_inflation_up",
+      "regime_label": "Growth composite up / inflation composite up"
+    },
+    {
+      "probability": 0.15714285714285714,
+      "regime_id": "growth_down_inflation_up",
+      "regime_label": "Growth composite down / inflation composite up"
+    },
+    {
+      "probability": 0.12857142857142856,
+      "regime_id": "growth_up_inflation_down",
+      "regime_label": "Growth composite up / inflation composite down"
+    },
+    {
+      "probability": 0.023809523809523808,
+      "regime_id": "growth_down_inflation_down",
+      "regime_label": "Growth composite down / inflation composite down"
+    }
+  ],
+  "probability_sum": 1.0,
+  "schema_version": 1,
+  "source_reference_month": "2026-05-01",
+  "stage_id": "fixed_first_order_transition",
+  "status": "transition_only_prior",
+  "target_reference_month": "2026-06-01"
+}

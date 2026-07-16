@@ -1,0 +1,218 @@
+{
+  "configuration": {
+    "path": "configs/models/m01_deterministic_composite_transition.yaml",
+    "sha256": "9b2bff7f5470dce9a1c9eec23dde588128612ffbe6b125641b2c23568b76af2f"
+  },
+  "counts": {
+    "growth_down_inflation_down": {
+      "growth_down_inflation_down": 17,
+      "growth_down_inflation_up": 4,
+      "growth_up_inflation_down": 5,
+      "growth_up_inflation_up": 3
+    },
+    "growth_down_inflation_up": {
+      "growth_down_inflation_down": 4,
+      "growth_down_inflation_up": 19,
+      "growth_up_inflation_down": 4,
+      "growth_up_inflation_up": 13
+    },
+    "growth_up_inflation_down": {
+      "growth_down_inflation_down": 6,
+      "growth_down_inflation_up": 2,
+      "growth_up_inflation_down": 50,
+      "growth_up_inflation_up": 15
+    },
+    "growth_up_inflation_up": {
+      "growth_down_inflation_down": 2,
+      "growth_down_inflation_up": 16,
+      "growth_up_inflation_down": 13,
+      "growth_up_inflation_up": 72
+    }
+  },
+  "diagnostics": {
+    "adjacent_row_pairs": 250,
+    "excluded_missing_regime_pairs": 5,
+    "excluded_nonconsecutive_pairs": 0,
+    "excluded_not_available_by_cutoff_pairs": 0,
+    "history_rows": 251,
+    "included_transitions": 245,
+    "latest_destination_month": "2026-05-01"
+  },
+  "generated_at_utc": "2026-07-16T14:42:09.145141+00:00",
+  "knowledge_cutoff": "2026-06-25",
+  "marginal_credible_intervals": {
+    "interpretation": "Marginal credible intervals for individual transition-matrix parameters under each row's Dirichlet posterior.",
+    "level": 0.95,
+    "lower": {
+      "growth_down_inflation_down": {
+        "growth_down_inflation_down": 0.39006027193560655,
+        "growth_down_inflation_up": 0.04672750218482591,
+        "growth_up_inflation_down": 0.06657395356745255,
+        "growth_up_inflation_up": 0.028980619032726196
+      },
+      "growth_down_inflation_up": {
+        "growth_down_inflation_down": 0.03383649713937231,
+        "growth_down_inflation_up": 0.3176261042387232,
+        "growth_up_inflation_down": 0.03383649713937231,
+        "growth_up_inflation_up": 0.19078920755419304
+      },
+      "growth_up_inflation_down": {
+        "growth_down_inflation_down": 0.034553909495887325,
+        "growth_down_inflation_up": 0.005657991148897423,
+        "growth_up_inflation_down": 0.5638843395732742,
+        "growth_up_inflation_up": 0.12350954044825713
+      },
+      "growth_up_inflation_up": {
+        "growth_down_inflation_down": 0.004017239463227185,
+        "growth_down_inflation_up": 0.0943757292910341,
+        "growth_up_inflation_down": 0.07191586358394275,
+        "growth_up_inflation_up": 0.5992619905117387
+      }
+    },
+    "upper": {
+      "growth_down_inflation_down": {
+        "growth_down_inflation_down": 0.7310808335552714,
+        "growth_down_inflation_up": 0.28652892684825915,
+        "growth_up_inflation_down": 0.3274277516634605,
+        "growth_up_inflation_up": 0.24340160898492869
+      },
+      "growth_down_inflation_up": {
+        "growth_down_inflation_down": 0.2154722314635542,
+        "growth_down_inflation_up": 0.6141697386537253,
+        "growth_up_inflation_down": 0.2154722314635542,
+        "growth_up_inflation_up": 0.4681730574878067
+      },
+      "growth_up_inflation_down": {
+        "growth_down_inflation_down": 0.1594838326781094,
+        "growth_down_inflation_up": 0.08387640034750277,
+        "growth_up_inflation_down": 0.7740257121331275,
+        "growth_up_inflation_up": 0.30461930788379377
+      },
+      "growth_up_inflation_up": {
+        "growth_down_inflation_down": 0.06025477696131887,
+        "growth_down_inflation_up": 0.23225548224310089,
+        "growth_up_inflation_down": 0.1985878693461025,
+        "growth_up_inflation_up": 0.7748176222332397
+      }
+    }
+  },
+  "mle_probabilities": {
+    "growth_down_inflation_down": {
+      "growth_down_inflation_down": 0.5862068965517241,
+      "growth_down_inflation_up": 0.13793103448275862,
+      "growth_up_inflation_down": 0.1724137931034483,
+      "growth_up_inflation_up": 0.10344827586206896
+    },
+    "growth_down_inflation_up": {
+      "growth_down_inflation_down": 0.1,
+      "growth_down_inflation_up": 0.475,
+      "growth_up_inflation_down": 0.1,
+      "growth_up_inflation_up": 0.325
+    },
+    "growth_up_inflation_down": {
+      "growth_down_inflation_down": 0.0821917808219178,
+      "growth_down_inflation_up": 0.0273972602739726,
+      "growth_up_inflation_down": 0.684931506849315,
+      "growth_up_inflation_up": 0.2054794520547945
+    },
+    "growth_up_inflation_up": {
+      "growth_down_inflation_down": 0.019417475728155338,
+      "growth_down_inflation_up": 0.1553398058252427,
+      "growth_up_inflation_down": 0.1262135922330097,
+      "growth_up_inflation_up": 0.6990291262135923
+    }
+  },
+  "model_id": "m01_deterministic_composite",
+  "posterior_parameters": {
+    "growth_down_inflation_down": {
+      "growth_down_inflation_down": 17.5,
+      "growth_down_inflation_up": 4.5,
+      "growth_up_inflation_down": 5.5,
+      "growth_up_inflation_up": 3.5
+    },
+    "growth_down_inflation_up": {
+      "growth_down_inflation_down": 4.5,
+      "growth_down_inflation_up": 19.5,
+      "growth_up_inflation_down": 4.5,
+      "growth_up_inflation_up": 13.5
+    },
+    "growth_up_inflation_down": {
+      "growth_down_inflation_down": 6.5,
+      "growth_down_inflation_up": 2.5,
+      "growth_up_inflation_down": 50.5,
+      "growth_up_inflation_up": 15.5
+    },
+    "growth_up_inflation_up": {
+      "growth_down_inflation_down": 2.5,
+      "growth_down_inflation_up": 16.5,
+      "growth_up_inflation_down": 13.5,
+      "growth_up_inflation_up": 72.5
+    }
+  },
+  "posterior_predictive": {
+    "growth_down_inflation_down": {
+      "growth_down_inflation_down": 0.5645161290322581,
+      "growth_down_inflation_up": 0.14516129032258066,
+      "growth_up_inflation_down": 0.1774193548387097,
+      "growth_up_inflation_up": 0.11290322580645161
+    },
+    "growth_down_inflation_up": {
+      "growth_down_inflation_down": 0.10714285714285714,
+      "growth_down_inflation_up": 0.4642857142857143,
+      "growth_up_inflation_down": 0.10714285714285714,
+      "growth_up_inflation_up": 0.32142857142857145
+    },
+    "growth_up_inflation_down": {
+      "growth_down_inflation_down": 0.08666666666666667,
+      "growth_down_inflation_up": 0.03333333333333333,
+      "growth_up_inflation_down": 0.6733333333333333,
+      "growth_up_inflation_up": 0.20666666666666667
+    },
+    "growth_up_inflation_up": {
+      "growth_down_inflation_down": 0.023809523809523808,
+      "growth_down_inflation_up": 0.15714285714285714,
+      "growth_up_inflation_down": 0.12857142857142856,
+      "growth_up_inflation_up": 0.6904761904761905
+    }
+  },
+  "published_files": {
+    "latest_transition_prior": "results/published/m01_deterministic_composite/latest_transition_prior.json",
+    "transition_matrix": "results/published/m01_deterministic_composite/transition_matrix.csv"
+  },
+  "schema_version": 1,
+  "source": {
+    "history_rows": 251,
+    "regime_history": "results/published/m01_deterministic_composite/regime_history.csv",
+    "regime_history_sha256": "2f83dbe910b7ddfc814837025f16298e4435a9ba2f0d8af32587b9173826ce2e"
+  },
+  "stage_id": "fixed_first_order_transition",
+  "state_order": [
+    {
+      "regime_id": "growth_up_inflation_up",
+      "regime_label": "Growth composite up / inflation composite up"
+    },
+    {
+      "regime_id": "growth_down_inflation_up",
+      "regime_label": "Growth composite down / inflation composite up"
+    },
+    {
+      "regime_id": "growth_up_inflation_down",
+      "regime_label": "Growth composite up / inflation composite down"
+    },
+    {
+      "regime_id": "growth_down_inflation_down",
+      "regime_label": "Growth composite down / inflation composite down"
+    }
+  ],
+  "transition_specification": {
+    "availability_field": "label_available_at",
+    "credible_interval_level": 0.95,
+    "dirichlet_alpha": 0.5,
+    "estimation_window": "expanding",
+    "knowledge_cutoff_policy": "latest_label_available_at",
+    "markov_order": 1,
+    "path_months": 4,
+    "require_consecutive_reference_months": true,
+    "time_homogeneous": true
+  }
+}

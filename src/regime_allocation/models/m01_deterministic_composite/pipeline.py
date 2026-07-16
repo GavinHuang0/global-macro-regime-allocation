@@ -17,6 +17,14 @@ class Regime(StrEnum):
     GROWTH_DOWN_INFLATION_DOWN = "growth_down_inflation_down"
 
 
+REGIME_ORDER = (
+    Regime.GROWTH_UP_INFLATION_UP,
+    Regime.GROWTH_DOWN_INFLATION_UP,
+    Regime.GROWTH_UP_INFLATION_DOWN,
+    Regime.GROWTH_DOWN_INFLATION_DOWN,
+)
+
+
 REGIME_LABELS = {
     Regime.GROWTH_UP_INFLATION_UP: "Growth composite up / inflation composite up",
     Regime.GROWTH_DOWN_INFLATION_UP: "Growth composite down / inflation composite up",

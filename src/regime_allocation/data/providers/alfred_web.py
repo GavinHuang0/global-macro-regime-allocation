@@ -14,7 +14,6 @@ import re
 import shutil
 import subprocess
 import time
-from dataclasses import dataclass
 from datetime import date
 from html.parser import HTMLParser
 from io import BytesIO
@@ -22,15 +21,20 @@ from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
-from zipfile import BadZipFile, ZIP_DEFLATED, ZipFile, ZipInfo
 
 import pandas as pd
+
+from regime_allocation.data.providers.vintage_matrix import (
+    DownloadedVintageMatrix,
+    encode_vintage_matrix,
+    load_vintage_matrix as _load_vintage_matrix,
+    vintage_date_from_column,
+)
 
 
 BASE_URL = "https://alfred.stlouisfed.org/series/downloaddata"
 RELEASE_DATES_URL = "https://alfred.stlouisfed.org/release/downloaddates"
 ALFRED_GRAPH_URL = "https://alfred.stlouisfed.org/graph/alfredgraph.csv"
-_VINTAGE_SUFFIX = re.compile(r"(\d{8})$")
 _ISO_DATE_LINE = re.compile(r"(?m)^(\d{4}-\d{2}-\d{2})\s*$")
 
 
@@ -66,16 +70,12 @@ class _VintageDateParser(HTMLParser):
             self._inside_vintage_select = False
 
 
-@dataclass(frozen=True)
-class DownloadedVintageMatrix:
-    series_id: str
-    selected_vintage_dates: tuple[date, ...]
-    content: bytes
-    source_url: str
-
-
 class AlfredWebDownloadClient:
     """Download observation-by-vintage matrices without storing credentials."""
+
+    provider_id = "alfred_web"
+    provider_description = "ALFRED public web endpoints (keyless fallback)"
+    cache_namespace = "alfred"
 
     def __init__(
         self,
@@ -107,6 +107,12 @@ class AlfredWebDownloadClient:
         if not re.fullmatch(r"[A-Za-z0-9_]+", series_id):
             raise ValueError(f"invalid FRED series id: {series_id!r}")
         return f"{BASE_URL}?seid={series_id}"
+
+    @staticmethod
+    def series_page_url(series_id: str) -> str:
+        if not re.fullmatch(r"[A-Za-z0-9_]+", series_id):
+            raise ValueError(f"invalid FRED series id: {series_id!r}")
+        return f"https://fred.stlouisfed.org/series/{series_id}"
 
     def _open_once(self, request: Request) -> bytes:
         if self.curl_path is None:
@@ -309,22 +315,13 @@ class AlfredWebDownloadClient:
         merged = merged.reindex(
             sorted(merged.columns, key=vintage_date_from_column), axis=1
         )
-        merged.index.name = "observation_date"
-        csv_payload = merged.to_csv(na_rep=".").encode("utf-8")
-        buffer = BytesIO()
-        with ZipFile(buffer, mode="w") as archive:
-            info = ZipInfo(
-                filename=f"{series_id}_levels_by_vintage.csv",
-                date_time=(1980, 1, 1, 0, 0, 0),
-            )
-            info.compress_type = ZIP_DEFLATED
-            archive.writestr(info, csv_payload)
-        content = buffer.getvalue()
+        content = encode_vintage_matrix(merged, series_id)
         return DownloadedVintageMatrix(
             series_id=series_id,
             selected_vintage_dates=selected,
             content=content,
-            source_url=self.series_url(series_id),
+            source_url=self.series_page_url(series_id),
+            provider_id=self.provider_id,
         )
 
 
@@ -371,64 +368,9 @@ def load_graph_matrix(
 
 
 def load_vintage_matrix(source: bytes | Path, series_id: str) -> pd.DataFrame:
-    """Read an ALFRED zipped CSV into a monthly observation-by-vintage matrix."""
+    """Backward-compatible ALFRED import for the shared matrix loader."""
 
-    payload = source if isinstance(source, bytes) else source.read_bytes()
     try:
-        with ZipFile(BytesIO(payload)) as archive:
-            candidates = [
-                name
-                for name in archive.namelist()
-                if name.lower().endswith(".csv")
-                and "readme" not in name.lower()
-            ]
-            if len(candidates) != 1:
-                raise AlfredDownloadError(
-                    f"expected one data CSV for {series_id}; found {len(candidates)}"
-                )
-            with archive.open(candidates[0]) as handle:
-                frame = pd.read_csv(handle)
-    except BadZipFile as exc:
-        raise AlfredDownloadError(f"invalid ZIP for {series_id}") from exc
-
-    if frame.empty or frame.columns[0] not in {
-        "observation_date",
-        "period_start_date",
-    }:
-        raise AlfredDownloadError(
-            f"unexpected vintage-matrix schema for {series_id}"
-        )
-
-    observation_column = frame.columns[0]
-    frame[observation_column] = pd.to_datetime(frame[observation_column])
-    frame = frame.set_index(observation_column).sort_index()
-    vintage_columns: list[tuple[date, str]] = []
-    expected_column = re.compile(rf"^{re.escape(series_id)}_(\d{{8}})$")
-    for column in frame.columns:
-        match = expected_column.fullmatch(str(column))
-        if match:
-            raw_date = match.group(1)
-            vintage = date.fromisoformat(
-                f"{raw_date[:4]}-{raw_date[4:6]}-{raw_date[6:]}"
-            )
-            vintage_columns.append(
-                (vintage, column)
-            )
-    if not vintage_columns:
-        raise AlfredDownloadError(f"no vintage columns found for {series_id}")
-    dates = [vintage for vintage, _ in vintage_columns]
-    if len(dates) != len(set(dates)):
-        raise AlfredDownloadError(f"duplicate vintage dates found for {series_id}")
-
-    ordered_columns = [column for _, column in sorted(vintage_columns)]
-    numeric = frame[ordered_columns].apply(pd.to_numeric, errors="coerce")
-    numeric.index.name = "reference_month"
-    return numeric
-
-
-def vintage_date_from_column(column: str) -> date:
-    match = _VINTAGE_SUFFIX.search(column)
-    if match is None:
-        raise ValueError(f"column does not end in a vintage date: {column}")
-    raw = match.group(1)
-    return date.fromisoformat(f"{raw[:4]}-{raw[4:6]}-{raw[6:]}")
+        return _load_vintage_matrix(source, series_id)
+    except ValueError as exc:
+        raise AlfredDownloadError(str(exc)) from exc

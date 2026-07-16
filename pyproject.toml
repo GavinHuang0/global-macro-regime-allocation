@@ -20,6 +20,7 @@ dependencies = [
 
 [project.scripts]
 build-m01-dataset = "regime_allocation.cli.build_m01_dataset:main"
+build-m01-transition = "regime_allocation.cli.build_m01_transition:main"
 
 [project.optional-dependencies]
 data = [

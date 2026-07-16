@@ -20,6 +20,29 @@ results do not require secrets.
 6. Before publishing, run a secret scanner and inspect Git history—not merely
    the working tree.
 
+## FRED API key
+
+Authenticated data refreshes use the GitHub Actions secret named
+`FRED_API_KEY`. The workflow exposes it only to the retrieval step. The Python
+provider reads the key from the process environment, validates its documented
+format, and does not put it in:
+
+- command-line arguments or subprocesses;
+- logs, exception messages, or complete request URLs;
+- cache identities, cache metadata, filenames, manifests, or public outputs;
+- client representations or source links.
+
+The official FRED API contract places the key in an HTTPS query parameter.
+Consequently, the authenticated provider uses an in-process HTTP client and
+does not invoke `curl`, whose command line could be visible to other processes.
+Transport exceptions are replaced with sanitized project exceptions because a
+standard HTTP exception may retain its full request URL.
+
+Automatic provider selection uses FRED when a nonempty key exists and ALFRED
+when it does not. An invalid key or failed authenticated request is surfaced;
+the process does not silently fail over and obscure acquisition provenance.
+The explicit `--provider alfred` mode remains available without credentials.
+
 ## Local path example
 
 A reasonable Windows location is:
@@ -36,4 +59,3 @@ available to Codex. This document intentionally does not define a repository
 
 If a credential is ever committed, revoke and rotate it immediately. Removing
 the file in a later commit does not remove it from Git history.
-

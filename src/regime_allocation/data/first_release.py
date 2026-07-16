@@ -1,4 +1,4 @@
-"""Extract release-coherent first-release features from ALFRED matrices."""
+"""Extract release-coherent features from provider-neutral vintage matrices."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ import math
 
 import pandas as pd
 
-from regime_allocation.data.providers.alfred_web import vintage_date_from_column
+from regime_allocation.data.providers.vintage_matrix import vintage_date_from_column
 
 
 VALID_TRANSFORMS = {"difference", "negative_difference", "log_difference"}

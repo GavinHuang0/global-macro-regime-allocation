@@ -3,8 +3,10 @@
 ## Scope
 
 Model 01 defines a deterministic monthly target regime from point-in-time macro
-releases. It does not yet estimate a daily Bayesian posterior. The target will
-later anchor transition, nowcasting, and allocation experiments.
+releases. It does not yet estimate a daily Bayesian posterior. The target feeds
+the fixed first-order transition layer specified in
+[`transition_model.md`](transition_model.md) and will later anchor event-level
+nowcasting and allocation experiments.
 
 The research panel contains 312 reference months from June 2000 through May
 2026. Because the standardization rule requires 60 prior observations and the
@@ -14,13 +16,14 @@ later than the raw 26-year component panel.
 ## 1. First-release vintage rule
 
 Let $x_{s,m}^{v}$ be the published level of series $s$ for reference month
-$m$ as it appeared in vintage $v$. Let $j(s)$ be the configured ALFRED
-release family for series $s$, and let $V_{j(s)}$ be that release family's
-calendar dates inside the frozen acquisition window. Define the admissible
-candidate set
+$m$ as it appeared in vintage $v$. Let $V_s$ be the available candidate dates
+inside the frozen acquisition window. Under the primary FRED API provider,
+$V_s$ contains the series-specific initial-release dates returned by output
+type 4. Under the keyless fallback, it contains the configured ALFRED release
+family's calendar dates. Define the admissible candidate set
 
 $$
-A_{s,m}=\left\{v\in V_{j(s)}:
+A_{s,m}=\left\{v\in V_s:
 x_{s,m}^{v}\text{ is available and }
 0\leq v-\operatorname{end}(m)\leq92\text{ days}\right\}.
 $$
@@ -229,6 +232,6 @@ reference month.
 - Although PPI index levels are never joined, monthly changes from the legacy
   and successor definitions share one expanding z-score history. An overlap
   diagnostic and separate-series sensitivity test are required.
-- ALFRED provides release dates but not universally reliable intraday
-  timestamps; daily trading simulations must use a conservative availability
-  convention.
+- The current providers identify release dates but do not supply a universally
+  reliable intraday timestamp contract; daily trading simulations must use a
+  conservative availability convention.
