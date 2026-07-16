@@ -212,6 +212,7 @@ def _compare_series(
         "fred_selected_vintages": len(fred_artifact.selected_vintage_dates),
         "alfred_selected_vintages": len(alfred_artifact.selected_vintage_dates),
         "comparison_months": int(len(merged)),
+        "matched_months": int(len(matched)),
         "unmatched_months": int((merged["_merge"] != "both").sum()),
         "release_date_mismatches": int((release_delta != 0).sum()),
         "maximum_release_date_difference_days": (
@@ -221,10 +222,13 @@ def _compare_series(
         "matrix": matrix_values,
     }
     result["passed"] = bool(
-        result["unmatched_months"] == 0
+        result["comparison_months"] > 0
+        and result["matched_months"] == result["comparison_months"]
+        and result["unmatched_months"] == 0
         and result["release_date_mismatches"] == 0
         and all(item["mismatches"] == 0 for item in feature_values.values())
         and matrix_values["fred_vintages_missing_from_alfred"] == 0
+        and matrix_values["cells_compared"] > 0
         and matrix_values["cell_mismatches"] == 0
     )
     return result
