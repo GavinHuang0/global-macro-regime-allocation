@@ -1,6 +1,3 @@
-Exit code: 0
-Wall time: 1.6 seconds
-Output:
 """Compare authenticated FRED and keyless ALFRED first-release data.
 
 The comparison downloads into a temporary directory and writes only a compact
