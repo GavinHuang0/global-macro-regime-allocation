@@ -1,13 +1,6 @@
 name: Check FRED and ALFRED parity
 
 on:
-  push:
-    branches:
-      - codex/fred-api-parity-check
-  pull_request:
-    types:
-      - opened
-      - synchronize
   workflow_dispatch:
 
 permissions:
