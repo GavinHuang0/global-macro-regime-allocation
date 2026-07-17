@@ -1,0 +1,109 @@
+schema_version: 1
+model_id: m01_deterministic_composite
+evidence_set_id: m01_non_defining_release_evidence_v1
+description: >-
+  Point-in-time first-release data for the five non-defining evidence blocks
+  used by Model 01. This configuration builds causal features and a canonical
+  event table only; it does not estimate likelihoods or regime posteriors.
+
+data:
+  # Extra history is acquired so causal expanding transformations are usable
+  # at (or soon after) the 26-year Model 01 publication window begins.
+  feature_start: 2000-06-01
+  observation_start: 1994-01-01
+  observation_end: 2026-07-16
+  vintage_start: 1994-01-01
+  vintage_end: 2026-07-16
+  monthly_max_release_lag_days: 92
+  # Genuine weekly claims can be published in delayed catch-up batches after
+  # government shutdowns. Keep those within the general lag ceiling.
+  weekly_max_release_lag_days: 92
+  # The first selected archive snapshot can expose a long history at once.
+  # At that one date, only its latest reference period is a real-time event.
+  archive_start_latest_only: true
+
+features:
+  monthly_min_standardization_history: 60
+  claims_min_ar_history: 52
+  claims_min_standardization_history: 26
+  standard_deviation_ddof: 1
+
+blocks:
+  weekly_claims:
+    release_id: 180
+    frequency: weekly
+    sources:
+      - series_id: ICSA
+        feature_name: initial_claims_innovation
+        transform: expanding_log_ar1_innovation
+        # The keyless ALFRED claims archive begins here. Authenticated FRED
+        # output-type-4 retrieval is not truncated by this transport floor.
+        alfred_vintage_start: 2013-08-15
+      - series_id: CCSA
+        feature_name: continued_claims_innovation
+        transform: expanding_log_ar1_innovation
+        alfred_vintage_start: 2013-08-15
+
+  jolts:
+    release_id: 192
+    frequency: monthly
+    sources:
+      - series_id: JTSJOR
+        feature_name: job_openings_rate_change
+        transform: difference
+      - series_id: JTSHIR
+        feature_name: hires_rate_change
+        transform: difference
+      - series_id: JTSQUR
+        feature_name: quits_rate_change
+        transform: difference
+      - series_id: JTSLDR
+        feature_name: layoffs_discharges_rate_change
+        transform: difference
+
+  retail_sales:
+    release_id: 9
+    frequency: monthly
+    sources:
+      - series_id: RSAFS
+        feature_name: retail_sales_log_change
+        transform: log_difference
+        alfred_vintage_start: 2001-06-13
+      - series_id: RSFSXMV
+        feature_name: retail_sales_ex_motor_vehicles_log_change
+        transform: log_difference
+        alfred_vintage_start: 2001-06-13
+
+  housing:
+    release_id: 27
+    frequency: monthly
+    sources:
+      - series_id: HOUST
+        feature_name: housing_starts_log_change
+        transform: log_difference
+        alfred_vintage_start: 1996-12-01
+      - series_id: PERMIT
+        feature_name: building_permits_log_change
+        transform: log_difference
+        alfred_vintage_start: 2000-01-01
+
+  durable_goods:
+    release_id: 95
+    frequency: monthly
+    sources:
+      - series_id: DGORDER
+        feature_name: durable_goods_orders_log_change
+        transform: log_difference
+        alfred_vintage_start: 2000-01-01
+      - series_id: NEWORDER
+        feature_name: core_capital_goods_orders_log_change
+        transform: log_difference
+        alfred_vintage_start: 2000-01-01
+
+outputs:
+  raw_dir: data/raw/alfred/m01_non_defining_release_evidence
+  processed_dir: data/processed/m01_non_defining_release_evidence
+  events_file: non_defining_release_events.csv
+  features_file: non_defining_release_features.csv
+  first_release_observations_file: first_release_observations.csv
+  manifest: data/manifests/m01_non_defining_release_evidence.json

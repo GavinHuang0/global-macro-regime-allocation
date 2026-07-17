@@ -1,0 +1,202 @@
+schema_version: 1
+model_id: m01_deterministic_composite
+stage_id: event_driven_bayesian_filter
+description: >-
+  Causal four-month joint-path Bayesian filter for Model 01. Leading release
+  blocks receive regime-conditioned Student-t likelihoods, while deterministic
+  target labels enter later as hard end-of-day confirmations.
+
+state:
+  regime_order:
+    - growth_up_inflation_up
+    - growth_down_inflation_up
+    - growth_up_inflation_down
+    - growth_down_inflation_down
+  path_months: 4
+  path_cardinality: 256
+  initial_oldest_state_prior: uniform
+  clamp_labels_available_strictly_before_initial_cutoff: true
+
+sources:
+  regime_history: results/published/m01_deterministic_composite/regime_history.csv
+  leading_event_table: >-
+    data/processed/m01_non_defining_release_evidence/non_defining_release_events.csv
+  transition_configuration: >-
+    configs/models/m01_deterministic_composite_transition.yaml
+  evidence_configuration: >-
+    configs/models/m01_non_defining_release_evidence.yaml
+
+blocks:
+  weekly_claims:
+    feature_names:
+      - initial_claims_innovation
+    source_series:
+      - ICSA
+    vector_policy: univariate_available_observation
+    state_reference_month: calendar_month_of_reference_date
+  jolts:
+    feature_names:
+      - job_openings_rate_change
+      - hires_rate_change
+      - quits_rate_change
+      - layoffs_discharges_rate_change
+    source_series:
+      - JTSJOR
+      - JTSHIR
+      - JTSQUR
+      - JTSLDR
+    vector_policy: complete_same_event_vector
+    state_reference_month: calendar_month_of_reference_date
+  retail_sales:
+    feature_names:
+      - retail_sales_log_change
+      - retail_sales_ex_motor_vehicles_log_change
+    source_series:
+      - RSAFS
+      - RSFSXMV
+    vector_policy: complete_same_event_vector
+    state_reference_month: calendar_month_of_reference_date
+  housing:
+    feature_names:
+      - housing_starts_log_change
+      - building_permits_log_change
+    source_series:
+      - HOUST
+      - PERMIT
+    vector_policy: complete_same_event_vector
+    state_reference_month: calendar_month_of_reference_date
+  durable_goods:
+    feature_names:
+      - durable_goods_orders_log_change
+      - core_capital_goods_orders_log_change
+    source_series:
+      - DGORDER
+      - NEWORDER
+    vector_policy: complete_same_event_vector
+    state_reference_month: calendar_month_of_reference_date
+
+likelihood:
+  family: multivariate_student_t
+  degrees_of_freedom: 7
+  parameterization: shape_matrix
+  training_window: expanding
+  event_date_rule: strictly_before_scored_release_date
+  label_date_rule: label_available_strictly_before_scored_release_date
+  minimum_complete_vectors: 24
+  regime_means:
+    type: global_mean_pseudo_count_shrinkage
+    kappa: 5.0
+  covariance:
+    estimator: ledoit_wolf
+    pooling: one_shared_matrix_per_block
+    input: residuals_from_shrunk_regime_means
+    t_shape_multiplier: 0.7142857142857143
+    t_shape_multiplier_formula: (degrees_of_freedom - 2) / degrees_of_freedom
+  missing_vector_policy: skip_event_without_partial_marginalization
+  unusable_fit_policy: skip_event_and_record_reason
+
+filter:
+  replay_start_reference_month: 2005-07-01
+  replay_end_policy: latest_available_information_date
+  transition:
+    order: 1
+    estimation_window: expanding
+    refit_at: every_month_roll
+    training_cutoff: strictly_before_roll_date
+    dirichlet_alpha: 0.5
+  calendar_day_order:
+    - month_roll
+    - atomic_leading_release_group
+    - atomic_end_of_day_confirmation_group
+  same_day_leading_policy: multiply_all_eligible_block_likelihoods_then_normalize_once
+  confirmation_policy: hard_indicator_clamp
+  confirmation_time: end_of_day
+  already_confirmed_reference_event_policy: record_and_skip_as_no_op
+  out_of_path_event_policy: record_and_skip
+  save_joint_path: true
+  save_marginals: true
+  checkpoints:
+    - initial
+    - pre_month_roll
+    - post_month_roll
+    - pre_release_group
+    - post_release_group
+    - pre_confirmation_group
+    - post_confirmation_group
+    - month_end
+    - latest
+
+evaluation:
+  start_reference_month: 2018-01-01
+  realized_target: deterministic_first_release_regime
+  exclude_unclassified_targets: true
+  score_only_before_target_confirmation: true
+  score_post_confirmation: false
+  probability_floor_for_log_score: null
+  zero_probability_log_score_policy: infinite
+  calibration_bins: 10
+  calibration_bin_policy: equal_width
+  metrics:
+    - negative_log_likelihood
+    - multiclass_brier_unscaled
+    - map_accuracy
+    - balanced_accuracy_macro_recall
+    - macro_f1
+    - classwise_expected_calibration_error
+    - classwise_reliability_bins
+    - growth_axis_binary_brier
+    - inflation_axis_binary_brier
+    - posterior_entropy
+    - brier_skill_vs_transition_only
+    - negative_log_likelihood_difference_vs_transition_only
+  baseline:
+    id: transition_only
+    preserve_month_rolls_and_confirmations: true
+    suppress_all_leading_likelihoods: true
+
+sensitivity:
+  design: one_parameter_at_a_time
+  reset_other_parameters_to_baseline: true
+  evaluate_on_same_forecast_rows_as_baseline: true
+  parameters:
+    degrees_of_freedom:
+      - 3
+      - 5
+      - 7
+      - 10
+      - 30
+      - gaussian
+    regime_mean_kappa:
+      - 0
+      - 2
+      - 5
+      - 10
+      - 20
+    covariance_estimator:
+      - empirical
+      - ledoit_wolf
+      - fixed_spherical_0.25
+      - fixed_spherical_0.50
+      - fixed_spherical_0.75
+    scale_standard_deviation_multiplier:
+      - 0.75
+      - 1.0
+      - 1.25
+
+outputs:
+  processed_dir: data/processed/m01_bayesian_filter
+  checkpoint_index: checkpoint_index.csv
+  joint_path_checkpoints: joint_path_checkpoints.csv.gz
+  marginal_checkpoints: marginal_checkpoints.csv
+  event_update_audit: event_update_audit.csv
+  likelihood_fit_audit: likelihood_fit_audit.csv
+  forecast_predictions: forecast_predictions.csv
+  evaluation_metrics: evaluation_metrics.csv
+  calibration_bins: calibration_bins.csv
+  sensitivity_specifications: sensitivity_specifications.csv
+  sensitivity_metrics: sensitivity_metrics.csv
+  manifest: data/manifests/m01_event_driven_bayesian_filter.json
+  published_dir: results/published/m01_bayesian_filter
+  latest_posterior: latest_posterior.json
+  evaluation_summary: evaluation_summary.json
+  published_sensitivity_metrics: sensitivity_metrics.csv

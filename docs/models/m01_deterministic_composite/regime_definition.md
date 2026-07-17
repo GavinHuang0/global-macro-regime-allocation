@@ -3,10 +3,11 @@
 ## Scope
 
 Model 01 defines a deterministic monthly target regime from point-in-time macro
-releases. It does not yet estimate a daily Bayesian posterior. The target feeds
-the fixed first-order transition layer specified in
-[`transition_model.md`](transition_model.md) and will later anchor event-level
-nowcasting and allocation experiments.
+releases. The target feeds the fixed first-order transition layer specified in
+[`transition_model.md`](transition_model.md) and anchors the event-driven
+nowcast specified in [`bayesian_filter.md`](bayesian_filter.md). The
+point-in-time inputs for the non-defining release blocks are specified
+separately in [`leading_evidence_data.md`](leading_evidence_data.md).
 
 The research panel contains 312 reference months from June 2000 through May
 2026. Because the standardization rule requires 60 prior observations and the

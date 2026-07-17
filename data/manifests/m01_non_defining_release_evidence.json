@@ -1,0 +1,420 @@
+{
+  "archive_start_policy": "latest_reference_period_only",
+  "available_feature_rows": 3275,
+  "configuration": "configs/models/m01_non_defining_release_evidence.yaml",
+  "configuration_sha256": "4bc2b73e2859925c7dfa64c071b17643f46f1a2cb99f14e448cad472327d3cd8",
+  "credential_policy": "FRED_API_KEY is read from the runtime environment only and is never serialized into outputs, cache identities, or logs",
+  "eligible_first_release_observation_rows": 4031,
+  "event_block_counts": {
+    "durable_goods": 624,
+    "housing": 622,
+    "jolts": 768,
+    "retail_sales": 604,
+    "weekly_claims": 1350
+  },
+  "event_rows": 3968,
+  "event_status_counts": {
+    "ar_warmup": 104,
+    "available": 3275,
+    "standardization_warmup": 589
+  },
+  "evidence_set_id": "m01_non_defining_release_evidence_v1",
+  "feature_start": "2000-06-01",
+  "first_event_release_date": "2000-07-20",
+  "first_release_observation_counts_by_series": {
+    "CCSA": {
+      "eligibility_status_counts": {
+        "archive_bootstrap_history": 11,
+        "eligible": 675,
+        "release_lag_exceeds_max": 1011
+      },
+      "eligible_for_feature": 675,
+      "ineligible_for_feature": 1022,
+      "total": 1697
+    },
+    "DGORDER": {
+      "eligibility_status_counts": {
+        "archive_bootstrap_history": 1,
+        "eligible": 319,
+        "release_lag_exceeds_max": 69
+      },
+      "eligible_for_feature": 319,
+      "ineligible_for_feature": 70,
+      "total": 389
+    },
+    "HOUST": {
+      "eligibility_status_counts": {
+        "archive_bootstrap_history": 2,
+        "eligible": 354,
+        "release_lag_exceeds_max": 33
+      },
+      "eligible_for_feature": 354,
+      "ineligible_for_feature": 35,
+      "total": 389
+    },
+    "ICSA": {
+      "eligibility_status_counts": {
+        "archive_bootstrap_history": 12,
+        "eligible": 675,
+        "release_lag_exceeds_max": 1011
+      },
+      "eligible_for_feature": 675,
+      "ineligible_for_feature": 1023,
+      "total": 1698
+    },
+    "JTSHIR": {
+      "eligibility_status_counts": {
+        "archive_bootstrap_history": 1,
+        "eligible": 192,
+        "release_lag_exceeds_max": 113
+      },
+      "eligible_for_feature": 192,
+      "ineligible_for_feature": 114,
+      "total": 306
+    },
+    "JTSJOR": {
+      "eligibility_status_counts": {
+        "archive_bootstrap_history": 1,
+        "eligible": 192,
+        "release_lag_exceeds_max": 113
+      },
+      "eligible_for_feature": 192,
+      "ineligible_for_feature": 114,
+      "total": 306
+    },
+    "JTSLDR": {
+      "eligibility_status_counts": {
+        "archive_bootstrap_history": 1,
+        "eligible": 192,
+        "release_lag_exceeds_max": 113
+      },
+      "eligible_for_feature": 192,
+      "ineligible_for_feature": 114,
+      "total": 306
+    },
+    "JTSQUR": {
+      "eligibility_status_counts": {
+        "archive_bootstrap_history": 1,
+        "eligible": 192,
+        "release_lag_exceeds_max": 113
+      },
+      "eligible_for_feature": 192,
+      "ineligible_for_feature": 114,
+      "total": 306
+    },
+    "NEWORDER": {
+      "eligibility_status_counts": {
+        "archive_bootstrap_history": 1,
+        "eligible": 319,
+        "release_lag_exceeds_max": 69
+      },
+      "eligible_for_feature": 319,
+      "ineligible_for_feature": 70,
+      "total": 389
+    },
+    "PERMIT": {
+      "eligibility_status_counts": {
+        "archive_bootstrap_history": 2,
+        "eligible": 317,
+        "release_lag_exceeds_max": 70
+      },
+      "eligible_for_feature": 317,
+      "ineligible_for_feature": 72,
+      "total": 389
+    },
+    "RSAFS": {
+      "eligibility_status_counts": {
+        "archive_bootstrap_history": 2,
+        "eligible": 302,
+        "release_lag_exceeds_max": 86
+      },
+      "eligible_for_feature": 302,
+      "ineligible_for_feature": 88,
+      "total": 390
+    },
+    "RSFSXMV": {
+      "eligibility_status_counts": {
+        "archive_bootstrap_history": 2,
+        "eligible": 302,
+        "release_lag_exceeds_max": 86
+      },
+      "eligible_for_feature": 302,
+      "ineligible_for_feature": 88,
+      "total": 390
+    }
+  },
+  "first_release_observation_eligibility_status_counts": {
+    "archive_bootstrap_history": 37,
+    "eligible": 4031,
+    "release_lag_exceeds_max": 2887
+  },
+  "first_release_observation_rows": 6955,
+  "generated_at_utc": "2026-07-17T08:20:54.467932+00:00",
+  "ineligible_first_release_observation_rows": 2924,
+  "last_event_release_date": "2026-07-16",
+  "model_id": "m01_deterministic_composite",
+  "observation_end": "2026-07-16",
+  "observation_start": "1994-01-01",
+  "processed_files": [
+    {
+      "path": "data/processed/m01_non_defining_release_evidence/first_release_observations.csv",
+      "rows": 6955,
+      "sha256": "97cc3d13292f435498edbd89179e2f4a32a9ccac9fcf5e9baafb72820a988c52"
+    },
+    {
+      "path": "data/processed/m01_non_defining_release_evidence/non_defining_release_events.csv",
+      "rows": 3968,
+      "sha256": "b9d1cd8d395a60d965a6851791c41368acc9c153c6dd23d1054d3cbb7c29ff05"
+    },
+    {
+      "path": "data/processed/m01_non_defining_release_evidence/non_defining_release_features.csv",
+      "rows": 3275,
+      "sha256": "5d9d004667b1537b113948243341a355ebfc72f7a1bcee9d67ab6b0acbede2cf"
+    }
+  ],
+  "provider_description": "ALFRED public web endpoints (keyless fallback)",
+  "provider_requested": "alfred",
+  "provider_selected": "alfred_web",
+  "raw_acquisitions": [
+    {
+      "cache_directory": "data/raw/alfred/m01_non_defining_release_evidence/provider_chunks/ICSA",
+      "cache_origin": "provider_managed_chunk_cache",
+      "first_release_observations": 1698,
+      "normalized_observations_sha256": "a60124b07596209c4fdc010b8c8d089d5f8a82944c766fc363f60a84a4d1de28",
+      "provider": "alfred_web",
+      "release_id": 180,
+      "series_id": "ICSA",
+      "source_url": "https://fred.stlouisfed.org/series/ICSA",
+      "vintage_start": "2013-08-15"
+    },
+    {
+      "cache_directory": "data/raw/alfred/m01_non_defining_release_evidence/provider_chunks/CCSA",
+      "cache_origin": "provider_managed_chunk_cache",
+      "first_release_observations": 1697,
+      "normalized_observations_sha256": "148e3d407f028304ee8b5d5bebe04cb38b4a8f9f3929b4f0c1d6d34d0fdc0a26",
+      "provider": "alfred_web",
+      "release_id": 180,
+      "series_id": "CCSA",
+      "source_url": "https://fred.stlouisfed.org/series/CCSA",
+      "vintage_start": "2013-08-15"
+    },
+    {
+      "bytes": 5328,
+      "cache_origin": "existing_normalized_cache",
+      "extraction_diagnostics": {
+        "matrix_rows": 306,
+        "rows_excluded_archive_bootstrap": 1,
+        "rows_excluded_backfill_lag": 113,
+        "rows_excluded_missing_prior": 0,
+        "rows_excluded_negative_lag": 0,
+        "rows_retained": 193,
+        "rows_without_any_vintage": 0
+      },
+      "first_release_observations": 306,
+      "path": "data/raw/alfred/m01_non_defining_release_evidence/JTSJOR_943a256eb227_levels_by_vintage.zip",
+      "provider": "alfred_web",
+      "release_id": 192,
+      "series_id": "JTSJOR",
+      "sha256": "5fb6c0db44a2b6c562a3ca9c53c06534130abd202cf2444da3e10555abe4500b",
+      "source_url": "https://fred.stlouisfed.org/series/JTSJOR",
+      "vintage_start": "1994-01-01"
+    },
+    {
+      "bytes": 4770,
+      "cache_origin": "existing_normalized_cache",
+      "extraction_diagnostics": {
+        "matrix_rows": 306,
+        "rows_excluded_archive_bootstrap": 1,
+        "rows_excluded_backfill_lag": 113,
+        "rows_excluded_missing_prior": 0,
+        "rows_excluded_negative_lag": 0,
+        "rows_retained": 193,
+        "rows_without_any_vintage": 0
+      },
+      "first_release_observations": 306,
+      "path": "data/raw/alfred/m01_non_defining_release_evidence/JTSHIR_c18dcb6a3f55_levels_by_vintage.zip",
+      "provider": "alfred_web",
+      "release_id": 192,
+      "series_id": "JTSHIR",
+      "sha256": "9dd14220c05528a02208cc4ef7cd9511390fc716db90dda2df3e200c930e7fc9",
+      "source_url": "https://fred.stlouisfed.org/series/JTSHIR",
+      "vintage_start": "1994-01-01"
+    },
+    {
+      "bytes": 4383,
+      "cache_origin": "existing_normalized_cache",
+      "extraction_diagnostics": {
+        "matrix_rows": 306,
+        "rows_excluded_archive_bootstrap": 1,
+        "rows_excluded_backfill_lag": 113,
+        "rows_excluded_missing_prior": 0,
+        "rows_excluded_negative_lag": 0,
+        "rows_retained": 193,
+        "rows_without_any_vintage": 0
+      },
+      "first_release_observations": 306,
+      "path": "data/raw/alfred/m01_non_defining_release_evidence/JTSQUR_90b746acbb01_levels_by_vintage.zip",
+      "provider": "alfred_web",
+      "release_id": 192,
+      "series_id": "JTSQUR",
+      "sha256": "e8178368741718629d788dd9029f50dfd322e504dacf0e83f3f8c9b46543915e",
+      "source_url": "https://fred.stlouisfed.org/series/JTSQUR",
+      "vintage_start": "1994-01-01"
+    },
+    {
+      "bytes": 4502,
+      "cache_origin": "existing_normalized_cache",
+      "extraction_diagnostics": {
+        "matrix_rows": 306,
+        "rows_excluded_archive_bootstrap": 1,
+        "rows_excluded_backfill_lag": 113,
+        "rows_excluded_missing_prior": 0,
+        "rows_excluded_negative_lag": 0,
+        "rows_retained": 193,
+        "rows_without_any_vintage": 0
+      },
+      "first_release_observations": 306,
+      "path": "data/raw/alfred/m01_non_defining_release_evidence/JTSLDR_682c1525a4d6_levels_by_vintage.zip",
+      "provider": "alfred_web",
+      "release_id": 192,
+      "series_id": "JTSLDR",
+      "sha256": "34a59374fc64ceefa2c75e8d525e05c1d59b89ad16bf4e5a44a55e18a35ee151",
+      "source_url": "https://fred.stlouisfed.org/series/JTSLDR",
+      "vintage_start": "1994-01-01"
+    },
+    {
+      "bytes": 26955,
+      "cache_origin": "downloaded",
+      "extraction_diagnostics": {
+        "matrix_rows": 390,
+        "rows_excluded_archive_bootstrap": 2,
+        "rows_excluded_backfill_lag": 86,
+        "rows_excluded_missing_prior": 0,
+        "rows_excluded_negative_lag": 0,
+        "rows_retained": 304,
+        "rows_without_any_vintage": 0
+      },
+      "first_release_observations": 390,
+      "path": "data/raw/alfred/m01_non_defining_release_evidence/RSAFS_4758b1629f1d_levels_by_vintage.zip",
+      "provider": "alfred_web",
+      "release_id": 9,
+      "series_id": "RSAFS",
+      "sha256": "29d804b831843cce00a9c3865821ef4f114b75998a6b87b4805ee29c2623fa7c",
+      "source_url": "https://fred.stlouisfed.org/series/RSAFS",
+      "vintage_start": "2001-06-13"
+    },
+    {
+      "bytes": 26601,
+      "cache_origin": "downloaded",
+      "extraction_diagnostics": {
+        "matrix_rows": 390,
+        "rows_excluded_archive_bootstrap": 2,
+        "rows_excluded_backfill_lag": 86,
+        "rows_excluded_missing_prior": 0,
+        "rows_excluded_negative_lag": 0,
+        "rows_retained": 304,
+        "rows_without_any_vintage": 0
+      },
+      "first_release_observations": 390,
+      "path": "data/raw/alfred/m01_non_defining_release_evidence/RSFSXMV_51ec969b4d3a_levels_by_vintage.zip",
+      "provider": "alfred_web",
+      "release_id": 9,
+      "series_id": "RSFSXMV",
+      "sha256": "7026d1f23f5bd1c438d0079bc49330c1ee4d2ac1407f3d123f0292d028408a04",
+      "source_url": "https://fred.stlouisfed.org/series/RSFSXMV",
+      "vintage_start": "2001-06-13"
+    },
+    {
+      "bytes": 14873,
+      "cache_origin": "downloaded",
+      "extraction_diagnostics": {
+        "matrix_rows": 389,
+        "rows_excluded_archive_bootstrap": 2,
+        "rows_excluded_backfill_lag": 33,
+        "rows_excluded_missing_prior": 0,
+        "rows_excluded_negative_lag": 0,
+        "rows_retained": 356,
+        "rows_without_any_vintage": 0
+      },
+      "first_release_observations": 389,
+      "path": "data/raw/alfred/m01_non_defining_release_evidence/HOUST_7cebf047d9eb_levels_by_vintage.zip",
+      "provider": "alfred_web",
+      "release_id": 27,
+      "series_id": "HOUST",
+      "sha256": "a6111f92c34c20cd455a00f38098397a3885864bbc2a1f13fe9c7311221a9e16",
+      "source_url": "https://fred.stlouisfed.org/series/HOUST",
+      "vintage_start": "1996-12-01"
+    },
+    {
+      "bytes": 14106,
+      "cache_origin": "downloaded",
+      "extraction_diagnostics": {
+        "matrix_rows": 389,
+        "rows_excluded_archive_bootstrap": 2,
+        "rows_excluded_backfill_lag": 70,
+        "rows_excluded_missing_prior": 0,
+        "rows_excluded_negative_lag": 0,
+        "rows_retained": 319,
+        "rows_without_any_vintage": 0
+      },
+      "first_release_observations": 389,
+      "path": "data/raw/alfred/m01_non_defining_release_evidence/PERMIT_e87af3386fe5_levels_by_vintage.zip",
+      "provider": "alfred_web",
+      "release_id": 27,
+      "series_id": "PERMIT",
+      "sha256": "f99aba511a4039eff948d5aed9f3777002537ed324c2c986a9273ec1d780a345",
+      "source_url": "https://fred.stlouisfed.org/series/PERMIT",
+      "vintage_start": "2000-01-01"
+    },
+    {
+      "bytes": 31405,
+      "cache_origin": "downloaded",
+      "extraction_diagnostics": {
+        "matrix_rows": 389,
+        "rows_excluded_archive_bootstrap": 1,
+        "rows_excluded_backfill_lag": 69,
+        "rows_excluded_missing_prior": 0,
+        "rows_excluded_negative_lag": 0,
+        "rows_retained": 320,
+        "rows_without_any_vintage": 0
+      },
+      "first_release_observations": 389,
+      "path": "data/raw/alfred/m01_non_defining_release_evidence/DGORDER_012061447295_levels_by_vintage.zip",
+      "provider": "alfred_web",
+      "release_id": 95,
+      "series_id": "DGORDER",
+      "sha256": "cc051082b63faa1dc2dc17ace96be4e92874703bd66b6aeeebadb65e96485804",
+      "source_url": "https://fred.stlouisfed.org/series/DGORDER",
+      "vintage_start": "2000-01-01"
+    },
+    {
+      "bytes": 28664,
+      "cache_origin": "downloaded",
+      "extraction_diagnostics": {
+        "matrix_rows": 389,
+        "rows_excluded_archive_bootstrap": 1,
+        "rows_excluded_backfill_lag": 69,
+        "rows_excluded_missing_prior": 0,
+        "rows_excluded_negative_lag": 0,
+        "rows_retained": 320,
+        "rows_without_any_vintage": 0
+      },
+      "first_release_observations": 389,
+      "path": "data/raw/alfred/m01_non_defining_release_evidence/NEWORDER_6c4dfaf961e9_levels_by_vintage.zip",
+      "provider": "alfred_web",
+      "release_id": 95,
+      "series_id": "NEWORDER",
+      "sha256": "f9be0e8cfff39eba506773f60e016d3becd8507f1a1bbb3dcc5f7855e43dc14a",
+      "source_url": "https://fred.stlouisfed.org/series/NEWORDER",
+      "vintage_start": "2000-01-01"
+    }
+  ],
+  "release_lag_policy_days": {
+    "monthly_general_max": 92,
+    "weekly_general_max": 92
+  },
+  "schema_version": 1,
+  "scope": "point-in-time first-release acquisition and causal feature construction only; no likelihood or Bayesian update",
+  "vintage_end": "2026-07-16",
+  "vintage_start": "1994-01-01"
+}

@@ -11,7 +11,12 @@ from regime_allocation.data.providers.fred_api import (
     FredApiConfigurationError,
     FredApiDownloadClient,
 )
-from regime_allocation.data.providers.vintage_matrix import VintageMatrixProvider
+from regime_allocation.data.providers.vintage_matrix import (
+    DownloadedFirstReleaseObservations,
+    FirstReleaseObservation,
+    VintageMatrixProvider,
+    first_release_observations_from_matrix,
+)
 
 
 @dataclass(frozen=True)
@@ -68,7 +73,10 @@ __all__ = [
     "AlfredWebDownloadClient",
     "FredApiConfigurationError",
     "FredApiDownloadClient",
+    "DownloadedFirstReleaseObservations",
+    "FirstReleaseObservation",
     "ProviderSelection",
     "VintageMatrixProvider",
+    "first_release_observations_from_matrix",
     "select_vintage_provider",
 ]

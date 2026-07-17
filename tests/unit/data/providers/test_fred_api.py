@@ -117,8 +117,16 @@ def test_output_type_four_initial_release_dates_are_paginated_and_cached(
             "file_type": "json",
             "units": "lin",
             "observations": [
-                {"realtime_start": "2024-03-08", "date": "2024-02-01"},
-                {"realtime_start": "2024-02-02", "date": "2024-01-01"},
+                {
+                    "realtime_start": "2024-03-08",
+                    "date": "2024-02-01",
+                    "value": "157800",
+                },
+                {
+                    "realtime_start": "2024-02-02",
+                    "date": "2024-01-01",
+                    "value": "157700",
+                },
             ],
         },
         2: {
@@ -128,7 +136,11 @@ def test_output_type_four_initial_release_dates_are_paginated_and_cached(
             "file_type": "json",
             "units": "lin",
             "observations": [
-                {"realtime_start": "2024-04-05", "date": "2024-03-01"},
+                {
+                    "realtime_start": "2024-04-05",
+                    "date": "2024-03-01",
+                    "value": "157900",
+                },
             ],
         },
     }
@@ -160,6 +172,128 @@ def test_output_type_four_initial_release_dates_are_paginated_and_cached(
     assert client.list_initial_release_dates("PAYEMS", **arguments) == expected
     assert [call["offset"] for call in calls] == [0, 2]
     assert all(call["limit"] == 100000 for call in calls)
+
+
+def test_first_release_observations_preserve_reference_release_and_value_and_cache(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client = FredApiDownloadClient(VALID_KEY)
+    calls = 0
+
+    def fake_request_json(
+        endpoint: str, params: dict[str, object]
+    ) -> dict[str, object]:
+        nonlocal calls
+        calls += 1
+        assert endpoint == "series/observations"
+        assert params["output_type"] == 4
+        assert "api_key" not in params
+        return {
+            "count": 3,
+            "offset": 0,
+            "output_type": 4,
+            "file_type": "json",
+            "units": "lin",
+            "observations": [
+                {
+                    "date": "2024-01-06",
+                    "realtime_start": "2024-01-11",
+                    "value": "202.5",
+                },
+                {
+                    "date": "2024-01-13",
+                    "realtime_start": "2024-01-18",
+                    "value": ".",
+                },
+                {
+                    "date": "2024-01-20",
+                    "realtime_start": "2024-01-25",
+                    "value": "214",
+                },
+            ],
+        }
+
+    monkeypatch.setattr(client, "_request_json", fake_request_json)
+    arguments = {
+        "release_id": 180,
+        "observation_start": date(2024, 1, 1),
+        "observation_end": date(2024, 1, 31),
+        "vintage_start": date(2024, 1, 1),
+        "vintage_end": date(2024, 1, 31),
+        "chunk_cache_dir": tmp_path,
+    }
+
+    first = client.list_first_release_observations("ICSA", **arguments)
+    second = client.list_first_release_observations("ICSA", **arguments)
+    refreshed = client.list_first_release_observations(
+        "ICSA", **arguments, refresh_cache=True
+    )
+
+    assert first == second == refreshed
+    assert first.series_id == "ICSA"
+    assert first.provider_id == "fred_api"
+    assert first.source_url == "https://fred.stlouisfed.org/series/ICSA"
+    assert [item.reference_date for item in first.observations] == [
+        date(2024, 1, 6),
+        date(2024, 1, 20),
+    ]
+    assert [item.release_date for item in first.observations] == [
+        date(2024, 1, 11),
+        date(2024, 1, 25),
+    ]
+    assert [item.value for item in first.observations] == [202.5, 214.0]
+    assert calls == 2
+    cache = next(tmp_path.glob("first_release_observations_*.json"))
+    payload = cache.read_bytes()
+    assert VALID_KEY.encode("utf-8") not in payload
+    assert b"api_key" not in payload
+
+
+def test_release_calendar_is_paginated_cached_and_locally_filtered(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client = FredApiDownloadClient(VALID_KEY)
+    calls: list[int] = []
+    pages = {
+        0: {
+            "count": 3,
+            "offset": 0,
+            "release_dates": [
+                {"release_id": 180, "date": "2024-01-04"},
+                {"release_id": 180, "date": "2024-01-11"},
+            ],
+        },
+        2: {
+            "count": 3,
+            "offset": 2,
+            "release_dates": [
+                {"release_id": 180, "date": "2024-01-18"},
+            ],
+        },
+    }
+
+    def fake_request_json(
+        endpoint: str, params: dict[str, object]
+    ) -> dict[str, object]:
+        assert endpoint == "release/dates"
+        assert "api_key" not in params
+        calls.append(int(params["offset"]))
+        return pages[int(params["offset"])]
+
+    monkeypatch.setattr(client, "_request_json", fake_request_json)
+
+    assert client.list_release_dates(
+        180,
+        release_start=date(2024, 1, 10),
+        release_end=date(2024, 1, 15),
+    ) == (date(2024, 1, 11),)
+    assert client.list_release_dates(180) == (
+        date(2024, 1, 4),
+        date(2024, 1, 11),
+        date(2024, 1, 18),
+    )
+    assert calls == [0, 2]
 
 
 def test_output_type_two_zip_is_normalized_and_chunk_cache_is_reused_and_refreshed(

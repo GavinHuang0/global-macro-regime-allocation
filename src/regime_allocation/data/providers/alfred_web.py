@@ -25,8 +25,10 @@ from urllib.request import Request, urlopen
 import pandas as pd
 
 from regime_allocation.data.providers.vintage_matrix import (
+    DownloadedFirstReleaseObservations,
     DownloadedVintageMatrix,
     encode_vintage_matrix,
+    first_release_observations_from_matrix,
     load_vintage_matrix as _load_vintage_matrix,
     vintage_date_from_column,
 )
@@ -191,31 +193,47 @@ class AlfredWebDownloadClient:
             )
         return dates
 
-    def list_release_dates(self, release_id: int) -> tuple[date, ...]:
+    def list_release_dates(
+        self,
+        release_id: int,
+        *,
+        release_start: date | None = None,
+        release_end: date | None = None,
+    ) -> tuple[date, ...]:
         """Return all official ALFRED dates for one named data release."""
 
         if release_id < 1:
             raise ValueError("release_id must be positive")
+        if (
+            release_start is not None
+            and release_end is not None
+            and release_start > release_end
+        ):
+            raise ValueError("release_start cannot follow release_end")
         cached = self._release_date_cache.get(release_id)
-        if cached is not None:
-            return cached
-        url = f"{RELEASE_DATES_URL}?ff=txt&rid={release_id}"
-        request = Request(url, headers={"User-Agent": self.user_agent})
-        payload = self._open(request).decode("utf-8", errors="replace")
-        dates = tuple(
-            sorted(
-                {
-                    date.fromisoformat(raw)
-                    for raw in _ISO_DATE_LINE.findall(payload)
-                }
+        if cached is None:
+            url = f"{RELEASE_DATES_URL}?ff=txt&rid={release_id}"
+            request = Request(url, headers={"User-Agent": self.user_agent})
+            payload = self._open(request).decode("utf-8", errors="replace")
+            cached = tuple(
+                sorted(
+                    {
+                        date.fromisoformat(raw)
+                        for raw in _ISO_DATE_LINE.findall(payload)
+                    }
+                )
             )
+            if not cached:
+                raise AlfredDownloadError(
+                    f"ALFRED returned no dates for release {release_id}"
+                )
+            self._release_date_cache[release_id] = cached
+        return tuple(
+            item
+            for item in cached
+            if (release_start is None or item >= release_start)
+            and (release_end is None or item <= release_end)
         )
-        if not dates:
-            raise AlfredDownloadError(
-                f"ALFRED returned no dates for release {release_id}"
-            )
-        self._release_date_cache[release_id] = dates
-        return dates
 
     def download_level_matrix(
         self,
@@ -244,21 +262,44 @@ class AlfredWebDownloadClient:
         for start in range(0, len(selected), self.max_vintages_per_request):
             chunk = selected[start : start + self.max_vintages_per_request]
             count = len(chunk)
+            # A vintage cannot contain observations from after its as-of date.
+            # Bounding each historical request prevents ALFRED from scanning a
+            # needlessly long future observation window (especially costly for
+            # weekly series) while preserving the exact returned matrix.
+            chunk_observation_end = min(observation_end, chunk[-1])
             query = {
                 "id": ",".join([series_id] * count),
                 "vintage_date": ",".join(item.isoformat() for item in chunk),
                 "cosd": ",".join([observation_start.isoformat()] * count),
-                "coed": ",".join([observation_end.isoformat()] * count),
+                "coed": ",".join([chunk_observation_end.isoformat()] * count),
             }
             query_string = urlencode(query, safe=",")
             request_url = f"{ALFRED_GRAPH_URL}?{query_string}"
             cache_path: Path | None = None
+            compatible_cache_path: Path | None = None
             if chunk_cache_dir is not None:
                 cache_key = hashlib.sha256(
                     request_url.encode("ascii")
                 ).hexdigest()[:16]
                 cache_path = chunk_cache_dir / (
                     f"{chunk[0].isoformat()}_{chunk[-1].isoformat()}_{cache_key}.csv"
+                )
+                # Reuse chunks created before requests were bounded by their
+                # final vintage. Both responses encode the same as-of values.
+                legacy_query = dict(query)
+                legacy_query["coed"] = ",".join(
+                    [observation_end.isoformat()] * count
+                )
+                legacy_url = (
+                    f"{ALFRED_GRAPH_URL}?"
+                    f"{urlencode(legacy_query, safe=',')}"
+                )
+                legacy_key = hashlib.sha256(
+                    legacy_url.encode("ascii")
+                ).hexdigest()[:16]
+                compatible_cache_path = chunk_cache_dir / (
+                    f"{chunk[0].isoformat()}_{chunk[-1].isoformat()}_"
+                    f"{legacy_key}.csv"
                 )
 
             fetched_remotely = False
@@ -268,6 +309,12 @@ class AlfredWebDownloadClient:
                 and not refresh_cache
             ):
                 chunk_content = cache_path.read_bytes()
+            elif (
+                compatible_cache_path is not None
+                and compatible_cache_path.exists()
+                and not refresh_cache
+            ):
+                chunk_content = compatible_cache_path.read_bytes()
             else:
                 fetched_remotely = True
                 request = Request(
@@ -322,6 +369,43 @@ class AlfredWebDownloadClient:
             content=content,
             source_url=self.series_page_url(series_id),
             provider_id=self.provider_id,
+        )
+
+    def list_first_release_observations(
+        self,
+        series_id: str,
+        *,
+        release_id: int,
+        observation_start: date,
+        observation_end: date,
+        vintage_start: date,
+        vintage_end: date,
+        chunk_cache_dir: Path | None = None,
+        refresh_cache: bool = False,
+    ) -> DownloadedFirstReleaseObservations:
+        """Reconstruct first releases from keyless release-date snapshots."""
+
+        artifact = self.download_level_matrix(
+            series_id,
+            release_id=release_id,
+            observation_start=observation_start,
+            observation_end=observation_end,
+            vintage_start=vintage_start,
+            vintage_end=vintage_end,
+            chunk_cache_dir=chunk_cache_dir,
+            refresh_cache=refresh_cache,
+        )
+        matrix = _load_vintage_matrix(artifact.content, series_id)
+        observations = first_release_observations_from_matrix(matrix)
+        if not observations:
+            raise AlfredDownloadError(
+                f"ALFRED returned no first-release observations for {series_id}"
+            )
+        return DownloadedFirstReleaseObservations(
+            series_id=series_id,
+            observations=observations,
+            source_url=artifact.source_url,
+            provider_id=artifact.provider_id,
         )
 
 

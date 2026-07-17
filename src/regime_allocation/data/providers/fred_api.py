@@ -22,7 +22,9 @@ from urllib.request import Request, urlopen
 import pandas as pd
 
 from regime_allocation.data.providers.vintage_matrix import (
+    DownloadedFirstReleaseObservations,
     DownloadedVintageMatrix,
+    FirstReleaseObservation,
     encode_vintage_matrix,
     load_vintage_matrix,
     vintage_date_from_column,
@@ -82,6 +84,11 @@ class FredApiDownloadClient:
         self._initial_release_cache: dict[
             tuple[str, date, date, date, date], tuple[date, ...]
         ] = {}
+        self._initial_observation_cache: dict[
+            tuple[str, date, date, date, date],
+            tuple[FirstReleaseObservation, ...],
+        ] = {}
+        self._release_date_cache: dict[int, tuple[date, ...]] = {}
 
     def __repr__(self) -> str:
         return (
@@ -167,7 +174,7 @@ class FredApiDownloadClient:
             )
         return decoded
 
-    def list_initial_release_dates(
+    def _fetch_initial_release_observations(
         self,
         series_id: str,
         *,
@@ -175,8 +182,8 @@ class FredApiDownloadClient:
         observation_end: date,
         vintage_start: date,
         vintage_end: date,
-    ) -> tuple[date, ...]:
-        """Return dates attached to FRED output type 4 initial observations."""
+    ) -> tuple[FirstReleaseObservation, ...]:
+        """Return numeric FRED output-type-4 observations with exact vintages."""
 
         self._validate_series_id(series_id)
         cache_key = (
@@ -186,11 +193,11 @@ class FredApiDownloadClient:
             vintage_start,
             vintage_end,
         )
-        cached = self._initial_release_cache.get(cache_key)
+        cached = self._initial_observation_cache.get(cache_key)
         if cached is not None:
             return cached
 
-        dates: set[date] = set()
+        records: list[FirstReleaseObservation] = []
         offset = 0
         while True:
             params: dict[str, object] = {
@@ -243,16 +250,35 @@ class FredApiDownloadClient:
                     release_date = date.fromisoformat(
                         str(observation["realtime_start"])
                     )
+                    raw_value = str(observation["value"])
                 except (KeyError, ValueError):
                     raise FredApiError(
-                        f"FRED API returned an invalid release date for {series_id}"
+                        f"FRED API returned an invalid initial observation for "
+                        f"{series_id}"
                     ) from None
                 if not observation_start <= reference_date <= observation_end:
                     raise FredApiError(
                         f"FRED API returned an out-of-range observation for {series_id}"
                     )
-                if vintage_start <= release_date <= vintage_end:
-                    dates.add(release_date)
+                if not vintage_start <= release_date <= vintage_end:
+                    raise FredApiError(
+                        f"FRED API returned an out-of-range vintage for {series_id}"
+                    )
+                if raw_value == ".":
+                    continue
+                try:
+                    value = float(raw_value)
+                except ValueError:
+                    raise FredApiError(
+                        f"FRED API returned a nonnumeric initial value for {series_id}"
+                    ) from None
+                records.append(
+                    FirstReleaseObservation(
+                        reference_date=reference_date,
+                        release_date=release_date,
+                        value=value,
+                    )
+                )
 
             offset += len(observations)
             if offset >= total:
@@ -262,13 +288,255 @@ class FredApiDownloadClient:
                     f"FRED API pagination stalled for {series_id}"
                 )
 
-        selected = tuple(sorted(dates))
+        selected = tuple(sorted(records))
         if not selected:
             raise FredApiError(
-                f"FRED API returned no initial-release dates for {series_id}"
+                f"FRED API returned no initial observations for {series_id}"
             )
+        reference_dates = [item.reference_date for item in selected]
+        if len(reference_dates) != len(set(reference_dates)):
+            raise FredApiError(
+                f"FRED API returned duplicate initial observations for {series_id}"
+            )
+        self._initial_observation_cache[cache_key] = selected
+        return selected
+
+    def list_initial_release_dates(
+        self,
+        series_id: str,
+        *,
+        observation_start: date,
+        observation_end: date,
+        vintage_start: date,
+        vintage_end: date,
+    ) -> tuple[date, ...]:
+        """Return dates attached to FRED output type 4 initial observations."""
+
+        cache_key = (
+            series_id,
+            observation_start,
+            observation_end,
+            vintage_start,
+            vintage_end,
+        )
+        cached = self._initial_release_cache.get(cache_key)
+        if cached is not None:
+            return cached
+        observations = self._fetch_initial_release_observations(
+            series_id,
+            observation_start=observation_start,
+            observation_end=observation_end,
+            vintage_start=vintage_start,
+            vintage_end=vintage_end,
+        )
+        selected = tuple(sorted({item.release_date for item in observations}))
         self._initial_release_cache[cache_key] = selected
         return selected
+
+    def list_release_dates(
+        self,
+        release_id: int,
+        *,
+        release_start: date | None = None,
+        release_end: date | None = None,
+    ) -> tuple[date, ...]:
+        """Return the official release calendar exposed by the FRED API."""
+
+        if release_id < 1:
+            raise ValueError("release_id must be positive")
+        if (
+            release_start is not None
+            and release_end is not None
+            and release_start > release_end
+        ):
+            raise ValueError("release_start cannot follow release_end")
+
+        available = self._release_date_cache.get(release_id)
+        if available is None:
+            records: list[date] = []
+            offset = 0
+            while True:
+                response = self._request_json(
+                    "release/dates",
+                    {
+                        "release_id": release_id,
+                        "file_type": "json",
+                        "include_release_dates_with_no_data": "true",
+                        "sort_order": "asc",
+                        "limit": 1000,
+                        "offset": offset,
+                    },
+                )
+                release_dates = response.get("release_dates")
+                if not isinstance(release_dates, list):
+                    raise FredApiError(
+                        f"FRED API omitted dates for release {release_id}"
+                    )
+                try:
+                    total = int(response["count"])
+                    response_offset = int(response["offset"])
+                except (KeyError, TypeError, ValueError):
+                    raise FredApiError(
+                        f"FRED API returned invalid release-date pagination for "
+                        f"release {release_id}"
+                    ) from None
+                if response_offset != offset:
+                    raise FredApiError(
+                        f"FRED API returned an unexpected release-date offset for "
+                        f"release {release_id}"
+                    )
+                for item in release_dates:
+                    if not isinstance(item, dict):
+                        raise FredApiError(
+                            f"FRED API returned an invalid date for release "
+                            f"{release_id}"
+                        )
+                    try:
+                        records.append(date.fromisoformat(str(item["date"])))
+                    except (KeyError, ValueError):
+                        raise FredApiError(
+                            f"FRED API returned an invalid date for release "
+                            f"{release_id}"
+                        ) from None
+                offset += len(release_dates)
+                if offset >= total:
+                    break
+                if not release_dates:
+                    raise FredApiError(
+                        f"FRED API release-date pagination stalled for release "
+                        f"{release_id}"
+                    )
+            available = tuple(sorted(set(records)))
+            if not available:
+                raise FredApiError(
+                    f"FRED API returned no dates for release {release_id}"
+                )
+            self._release_date_cache[release_id] = available
+
+        return tuple(
+            item
+            for item in available
+            if (release_start is None or item >= release_start)
+            and (release_end is None or item <= release_end)
+        )
+
+    def list_first_release_observations(
+        self,
+        series_id: str,
+        *,
+        release_id: int,
+        observation_start: date,
+        observation_end: date,
+        vintage_start: date,
+        vintage_end: date,
+        chunk_cache_dir: Path | None = None,
+        refresh_cache: bool = False,
+    ) -> DownloadedFirstReleaseObservations:
+        """Return exact first-release values using FRED output type 4."""
+
+        self._validate_series_id(series_id)
+        if release_id < 1:
+            raise ValueError("release_id must be positive")
+        if observation_start > observation_end:
+            raise ValueError("observation_start cannot follow observation_end")
+        if vintage_start > vintage_end:
+            raise ValueError("vintage_start cannot follow vintage_end")
+
+        query: dict[str, object] = {
+            "series_id": series_id,
+            "release_id": release_id,
+            "observation_start": observation_start.isoformat(),
+            "observation_end": observation_end.isoformat(),
+            "vintage_start": vintage_start.isoformat(),
+            "vintage_end": vintage_end.isoformat(),
+            "output_type": 4,
+        }
+        cache_path: Path | None = None
+        if chunk_cache_dir is not None:
+            cache_hash = self._safe_query_identity(
+                "series/observations/first-release-values", query
+            )
+            cache_path = chunk_cache_dir / (
+                f"first_release_observations_{cache_hash}.json"
+            )
+
+        observations: tuple[FirstReleaseObservation, ...]
+        if cache_path is not None and cache_path.exists() and not refresh_cache:
+            try:
+                stored = json.loads(cache_path.read_text(encoding="utf-8"))
+                if stored.get("query") != query:
+                    raise ValueError("query mismatch")
+                observations = tuple(
+                    FirstReleaseObservation(
+                        reference_date=date.fromisoformat(str(item["reference_date"])),
+                        release_date=date.fromisoformat(str(item["release_date"])),
+                        value=float(item["value"]),
+                    )
+                    for item in stored["observations"]
+                )
+            except (
+                AttributeError,
+                KeyError,
+                TypeError,
+                ValueError,
+                json.JSONDecodeError,
+            ):
+                raise FredApiError(
+                    f"invalid cached first-release observations for {series_id}"
+                ) from None
+            if not observations:
+                raise FredApiError(
+                    f"cached first-release observations are empty for {series_id}"
+                )
+        else:
+            if refresh_cache:
+                observation_cache_key = (
+                    series_id,
+                    observation_start,
+                    observation_end,
+                    vintage_start,
+                    vintage_end,
+                )
+                self._initial_observation_cache.pop(
+                    observation_cache_key, None
+                )
+                self._initial_release_cache.pop(observation_cache_key, None)
+            observations = self._fetch_initial_release_observations(
+                series_id,
+                observation_start=observation_start,
+                observation_end=observation_end,
+                vintage_start=vintage_start,
+                vintage_end=vintage_end,
+            )
+            if cache_path is not None:
+                content = (
+                    json.dumps(
+                        {
+                            "schema_version": 1,
+                            "provider_id": self.provider_id,
+                            "query": query,
+                            "observations": [
+                                {
+                                    "reference_date": item.reference_date.isoformat(),
+                                    "release_date": item.release_date.isoformat(),
+                                    "value": item.value,
+                                }
+                                for item in observations
+                            ],
+                        },
+                        indent=2,
+                        sort_keys=True,
+                    )
+                    + "\n"
+                ).encode("utf-8")
+                self._write_atomic(cache_path, content)
+
+        return DownloadedFirstReleaseObservations(
+            series_id=series_id,
+            observations=observations,
+            source_url=self.series_page_url(series_id),
+            provider_id=self.provider_id,
+        )
 
     @staticmethod
     def _write_atomic(path: Path, payload: bytes) -> None:

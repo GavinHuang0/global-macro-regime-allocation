@@ -5,8 +5,8 @@ detection and regime-conditioned asset allocation.
 
 ## Current status
 
-Model 01 now implements the deterministic regime-definition and transition
-layers:
+Model 01 now implements the deterministic regime definition, transition,
+leading-evidence, likelihood, and Bayesian-filter layers:
 
 - release-coherent first-release monthly macro features;
 - four equal-weight growth and inflation components;
@@ -14,8 +14,21 @@ layers:
 - trailing three-month smoothing;
 - deterministic four-quadrant regime labels;
 - an expanding, first-order transition matrix with Jeffreys-prior smoothing;
+- five non-defining release blocks with 12 point-in-time evidence features;
+- expanding log-AR(1) innovations for initial and continued claims;
+- a canonical publication-date/reference-period event table;
+- regime-specific shrunken means and one Ledoit-Wolf covariance per block;
+- 7-df Student-t release likelihoods, using only strictly earlier labeled data;
+- a four-month joint-path posterior with causal monthly transitions;
+- atomic daily release updates and end-of-day deterministic confirmations;
+- transition-only comparisons, calibration diagnostics, and frozen sensitivity checks;
 - a 26-year point-in-time component panel from June 2000 through May 2026;
 - local processed research files plus publication-safe regime outputs.
+
+The evidence build contains 6,955 normalized first-release observations, 3,968
+event rows, and 3,275 causally available feature rows through July 16, 2026.
+It preserves delayed release batches and archive backfills explicitly rather
+than treating either as ordinary weekly or monthly observations.
 
 The acquired source panel spans 312 reference months from June 2000 through
 May 2026. After the 60-observation warm-up, the public history spans July 2005
@@ -25,16 +38,16 @@ October core-CPI and unemployment observations during the federal shutdown and
 then propagates through the frozen one-month-change and three-month-smoothing
 rules. Model 01 does not impute those observations or redistribute their weights.
 
-The event-level Bayesian posterior, portfolio construction, and backtest remain
-later milestones. Published Model 01 outputs include confirmed historical
-regime labels and a transition-only next-month prior; they are not yet a
-release-conditioned current-month nowcast.
+The portfolio-construction and backtesting layers remain later milestones.
+Published Model 01 outputs now include confirmed historical labels, a
+transition-only prior, a release-conditioned current-month posterior, causal
+forecast metrics, and sensitivity results.
 
 ## Model versions
 
 | ID | Architecture | Status |
 |---|---|---|
-| `m01_deterministic_composite` | Deterministic first-release macro composites | Regime definition and fixed transition layer implemented |
+| `m01_deterministic_composite` | Deterministic targets plus event-driven Bayesian nowcast | Regime, transition, likelihood, filter, and evaluation implemented |
 | `m02_continuous_state` | Continuous latent growth/inflation state with quadrant probabilities | Planned |
 | `m03_switching_state_space` | Regime-switching continuous state-space model | Planned |
 
@@ -54,9 +67,12 @@ smoothed scores identify one of four regimes.
 
 The complete mathematics, vintage rule, source substitutions, and limitations
 are in the Model 01
-[`regime definition`](docs/models/m01_deterministic_composite/regime_definition.md)
-and [`transition model`](docs/models/m01_deterministic_composite/transition_model.md)
-specifications.
+[`regime definition`](docs/models/m01_deterministic_composite/regime_definition.md),
+[`transition model`](docs/models/m01_deterministic_composite/transition_model.md),
+[`leading-evidence data`](docs/models/m01_deterministic_composite/leading_evidence_data.md),
+and [`event-driven Bayesian filter`](docs/models/m01_deterministic_composite/bayesian_filter.md)
+specifications. Actual historical findings are in
+[`bayesian_filter_results.md`](docs/models/m01_deterministic_composite/bayesian_filter_results.md).
 
 ## Current published result
 
@@ -98,6 +114,24 @@ These probabilities are the Jeffreys-smoothed row conditioned on May's
 confirmed `growth_up_inflation_up` regime. They are a baseline prior, not a
 June posterior or a trading recommendation.
 
+The event-driven filter publishes
+[`latest_posterior.json`](results/published/m01_bayesian_filter/latest_posterior.json).
+At the July 16, 2026 cutoff, its July 2026 marginal is:
+
+| Regime ID | Probability |
+|---|---:|
+| `growth_up_inflation_up` | 59.26% |
+| `growth_down_inflation_up` | 20.23% |
+| `growth_up_inflation_down` | 20.25% |
+| `growth_down_inflation_down` | 0.26% |
+
+On the 97-month evaluation sample beginning in January 2018, the month-end
+posterior achieves NLL 0.9224 and Brier score 0.5193, versus 0.9819 and 0.5330
+for the paired transition-only model. The improvement is modest and the model
+does not outperform at every checkpoint or metric; see the results document
+and published
+[`sensitivity metrics`](results/published/m01_bayesian_filter/sensitivity_metrics.csv).
+
 ## Repository layout
 
 ```text
@@ -128,7 +162,9 @@ python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -e ".[dev]"
 python -m regime_allocation.cli.build_m01_dataset --provider auto
+python -m regime_allocation.cli.build_m01_evidence --provider auto
 python -m regime_allocation.cli.build_m01_transition
+python -m regime_allocation.cli.build_m01_inference
 pytest
 ```
 

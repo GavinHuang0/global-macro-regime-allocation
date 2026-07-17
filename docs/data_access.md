@@ -16,6 +16,9 @@ The normal local command uses automatic selection:
 
 ```powershell
 python -m regime_allocation.cli.build_m01_dataset --provider auto
+python -m regime_allocation.cli.build_m01_evidence --provider auto
+python -m regime_allocation.cli.build_m01_transition
+python -m regime_allocation.cli.build_m01_inference
 ```
 
 The two providers can be selected explicitly for diagnostics and reproducibility:
@@ -23,6 +26,8 @@ The two providers can be selected explicitly for diagnostics and reproducibility
 ```powershell
 python -m regime_allocation.cli.build_m01_dataset --provider fred
 python -m regime_allocation.cli.build_m01_dataset --provider alfred
+python -m regime_allocation.cli.build_m01_evidence --provider fred
+python -m regime_allocation.cli.build_m01_evidence --provider alfred
 ```
 
 Provider selection changes how missing data are acquired. It does not change the mathematical feature or regime definition, the normalized vintage-matrix contract, or downstream output schemas.
@@ -70,7 +75,8 @@ The manual workflow at `.github/workflows/refresh-model-01.yml` passes that secr
 - never prints or interpolates the key into a shell command;
 - never supplies the key as a command-line argument;
 - performs no commit, tag, release, pull-request, or push operation;
-- uploads only the generated manifest and public result files;
+- uploads only generated manifests, public result files, and derived processed
+  audit/reproducibility tables;
 - excludes raw downloads and provider caches from the artifact.
 
 The workflow invokes `--provider fred --refresh` explicitly. A missing or invalid secret therefore stops the refresh instead of silently producing an Actions artifact through a different provider.
@@ -126,7 +132,12 @@ The artifact contains only:
 
 ```text
 data/manifests/m01_deterministic_composite.json
+data/manifests/m01_non_defining_release_evidence.json
+data/manifests/m01_event_driven_bayesian_filter.json
+data/processed/m01_non_defining_release_evidence/*.csv
+data/processed/m01_bayesian_filter/*
 results/published/m01_deterministic_composite/
+results/published/m01_bayesian_filter/
 ```
 
 Artifact creation is a validation and handoff mechanism, not a publication step. Publishing refreshed results to the repository should be handled later through an intentionally reviewed commit or pull request.

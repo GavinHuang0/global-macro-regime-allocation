@@ -286,7 +286,7 @@ The latest prior conditions on one confirmed deterministic source regime and is
 the corresponding row of the posterior-predictive transition matrix. It states
 the source month, target month, and information cutoff explicitly. It is not a
 joint-path prior and does not condition on any current-month release evidence.
-It must not be interpreted as a current-month posterior. The later event layer
+It must not be interpreted as a current-month posterior. The event layer
 will publish separately named posterior snapshots.
 
 ## 8. Evaluation plan

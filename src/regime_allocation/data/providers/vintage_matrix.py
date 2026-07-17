@@ -27,6 +27,32 @@ class DownloadedVintageMatrix:
     provider_id: str = "unknown"
 
 
+@dataclass(frozen=True, order=True)
+class FirstReleaseObservation:
+    """One observation frozen at the first selected vintage containing it.
+
+    ``reference_date`` is the economic observation period supplied by FRED.
+    It is deliberately not called ``reference_month`` because the same
+    contract also represents weekly series such as unemployment claims.
+    ``release_date`` is the FRED/ALFRED vintage date on which ``value`` first
+    appears in the selected point-in-time archive.
+    """
+
+    reference_date: date
+    release_date: date
+    value: float
+
+
+@dataclass(frozen=True)
+class DownloadedFirstReleaseObservations:
+    """Provider response with credential-free provenance for event records."""
+
+    series_id: str
+    observations: tuple[FirstReleaseObservation, ...]
+    source_url: str
+    provider_id: str = "unknown"
+
+
 class VintageMatrixProvider(Protocol):
     """Small interface required by the Model 01 acquisition pipeline."""
 
@@ -53,6 +79,33 @@ class VintageMatrixProvider(Protocol):
         refresh_cache: bool = False,
     ) -> DownloadedVintageMatrix:
         """Return level snapshots for the requested point-in-time vintages."""
+
+        ...
+
+    def list_release_dates(
+        self,
+        release_id: int,
+        *,
+        release_start: date | None = None,
+        release_end: date | None = None,
+    ) -> tuple[date, ...]:
+        """Return official publication dates for a named data release."""
+
+        ...
+
+    def list_first_release_observations(
+        self,
+        series_id: str,
+        *,
+        release_id: int,
+        observation_start: date,
+        observation_end: date,
+        vintage_start: date,
+        vintage_end: date,
+        chunk_cache_dir: Path | None = None,
+        refresh_cache: bool = False,
+    ) -> DownloadedFirstReleaseObservations:
+        """Return first-release values for monthly or higher-frequency data."""
 
         ...
 
@@ -96,7 +149,7 @@ def load_vintage_matrix(
                     f"expected one data CSV for {series_id}; found {len(candidates)}"
                 )
             with archive.open(candidates[0]) as handle:
-                frame = pd.read_csv(handle)
+                frame = pd.read_csv(handle, low_memory=False)
     except BadZipFile as exc:
         raise ValueError(f"invalid ZIP for {series_id}") from exc
 
@@ -142,6 +195,40 @@ def load_vintage_matrix(
     numeric = frame[ordered_columns].apply(pd.to_numeric, errors="coerce")
     numeric.index.name = "reference_month"
     return numeric
+
+
+def first_release_observations_from_matrix(
+    frame: pd.DataFrame,
+) -> tuple[FirstReleaseObservation, ...]:
+    """Select each row's earliest numeric observation from a vintage matrix.
+
+    The caller is responsible for ensuring the matrix contains the intended
+    release-calendar vintages. Rows that never contain a numeric value are
+    omitted. The implementation is independent of observation frequency.
+    """
+
+    if frame.index.has_duplicates:
+        raise ValueError("vintage matrix contains duplicate reference dates")
+
+    ordered = frame.reindex(
+        sorted(frame.columns, key=lambda column: vintage_date_from_column(str(column))),
+        axis=1,
+    ).sort_index()
+    observations: list[FirstReleaseObservation] = []
+    for raw_reference_date, row in ordered.iterrows():
+        numeric = pd.to_numeric(row, errors="coerce")
+        available = numeric[numeric.notna()]
+        if available.empty:
+            continue
+        first_column = str(available.index[0])
+        observations.append(
+            FirstReleaseObservation(
+                reference_date=pd.Timestamp(raw_reference_date).date(),
+                release_date=vintage_date_from_column(first_column),
+                value=float(available.iloc[0]),
+            )
+        )
+    return tuple(observations)
 
 
 def vintage_date_from_column(column: str) -> date:

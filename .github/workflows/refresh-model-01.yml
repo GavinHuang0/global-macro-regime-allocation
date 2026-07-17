@@ -14,7 +14,7 @@ jobs:
   refresh:
     name: Build, test, and package Model 01 outputs
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 90
     env:
       PYTHONUNBUFFERED: "1"
 
@@ -45,8 +45,19 @@ jobs:
           --provider fred
           --refresh
 
+      - name: Refresh non-defining first-release evidence through FRED
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: >-
+          python -m regime_allocation.cli.build_m01_evidence
+          --provider fred
+          --refresh
+
       - name: Fit Model 01 transition layer
         run: python -m regime_allocation.cli.build_m01_transition
+
+      - name: Fit release likelihoods and replay Bayesian filter
+        run: python -m regime_allocation.cli.build_m01_inference
 
       - name: Run test suite
         run: python -m pytest
@@ -57,7 +68,12 @@ jobs:
           name: model-01-refresh-${{ github.run_id }}
           path: |
             data/manifests/m01_deterministic_composite.json
+            data/manifests/m01_non_defining_release_evidence.json
+            data/manifests/m01_event_driven_bayesian_filter.json
+            data/processed/m01_non_defining_release_evidence/*.csv
+            data/processed/m01_bayesian_filter/*
             results/published/m01_deterministic_composite/
+            results/published/m01_bayesian_filter/
           if-no-files-found: error
           include-hidden-files: false
           retention-days: 30

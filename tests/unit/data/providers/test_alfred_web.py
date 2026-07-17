@@ -3,19 +3,26 @@
 from __future__ import annotations
 
 from datetime import date
+import hashlib
 from io import BytesIO
 from pathlib import Path
+from urllib.parse import parse_qs, urlencode, urlparse
 from zipfile import ZipFile
 
 import pandas as pd
 import pytest
 
 from regime_allocation.data.providers.alfred_web import (
+    ALFRED_GRAPH_URL,
     AlfredDownloadError,
     AlfredWebDownloadClient,
     load_graph_matrix,
     load_vintage_matrix,
     vintage_date_from_column,
+)
+from regime_allocation.data.providers.vintage_matrix import (
+    DownloadedVintageMatrix,
+    encode_vintage_matrix,
 )
 
 
@@ -81,6 +88,11 @@ def test_list_release_dates_parses_text_lines_and_sorts_unique_values(
     )
     assert client.list_release_dates(50) == expected
     assert client.list_release_dates(50) == expected
+    assert client.list_release_dates(
+        50,
+        release_start=date(2020, 2, 1),
+        release_end=date(2020, 3, 31),
+    ) == (date(2020, 3, 6),)
     assert opened_urls == [
         "https://alfred.stlouisfed.org/release/downloaddates?ff=txt&rid=50"
     ]
@@ -199,6 +211,132 @@ def test_download_level_matrix_reuses_and_refreshes_chunk_cache(
     assert calls == 2
     assert first.content == second.content == refreshed.content
     assert len(list(tmp_path.glob("*.csv"))) == 1
+
+
+def test_historical_chunk_ends_observations_at_its_last_vintage(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    vintages = (date(2009, 5, 28), date(2009, 6, 4))
+    client = AlfredWebDownloadClient(
+        max_vintages_per_request=2,
+        request_pause_seconds=0,
+    )
+    monkeypatch.setattr(client, "list_release_dates", lambda _: vintages)
+
+    def fake_open(request: object) -> bytes:
+        query = parse_qs(urlparse(request.full_url).query)  # type: ignore[attr-defined]
+        assert query["coed"] == ["2009-06-04,2009-06-04"]
+        return (
+            b"observation_date,PAYEMS_20090528,PAYEMS_20090604\n"
+            b"2009-05-01,100,101\n"
+        )
+
+    monkeypatch.setattr(client, "_open", fake_open)
+    actual = client.download_level_matrix(
+        "PAYEMS",
+        release_id=50,
+        observation_start=date(2000, 1, 1),
+        observation_end=date(2026, 7, 16),
+        vintage_start=vintages[0],
+        vintage_end=vintages[-1],
+    )
+
+    assert actual.selected_vintage_dates == vintages
+
+
+def test_bounded_request_reuses_compatible_unbounded_chunk_cache(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    vintage = date(2024, 2, 2)
+    observation_start = date(2024, 1, 1)
+    observation_end = date(2026, 7, 16)
+    client = AlfredWebDownloadClient(
+        max_vintages_per_request=1,
+        request_pause_seconds=0,
+    )
+    monkeypatch.setattr(client, "list_release_dates", lambda _: (vintage,))
+    legacy_query = {
+        "id": "PAYEMS",
+        "vintage_date": vintage.isoformat(),
+        "cosd": observation_start.isoformat(),
+        "coed": observation_end.isoformat(),
+    }
+    legacy_url = f"{ALFRED_GRAPH_URL}?{urlencode(legacy_query, safe=',')}"
+    legacy_key = hashlib.sha256(legacy_url.encode("ascii")).hexdigest()[:16]
+    legacy_path = tmp_path / (
+        f"{vintage.isoformat()}_{vintage.isoformat()}_{legacy_key}.csv"
+    )
+    legacy_path.write_bytes(
+        b"observation_date,PAYEMS\n2024-01-01,157700\n"
+    )
+
+    def fail_open(_: object) -> bytes:
+        raise AssertionError("compatible cache should avoid a network request")
+
+    monkeypatch.setattr(client, "_open", fail_open)
+    artifact = client.download_level_matrix(
+        "PAYEMS",
+        release_id=50,
+        observation_start=observation_start,
+        observation_end=observation_end,
+        vintage_start=vintage,
+        vintage_end=vintage,
+        chunk_cache_dir=tmp_path,
+    )
+
+    assert artifact.selected_vintage_dates == (vintage,)
+
+
+def test_first_release_observations_are_reconstructed_from_earliest_vintage(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    frame = pd.DataFrame(
+        {
+            "ICSA_20240111": [202.0, float("nan")],
+            "ICSA_20240118": [204.0, 211.0],
+        },
+        index=pd.to_datetime(["2024-01-06", "2024-01-13"]),
+    )
+    artifact = DownloadedVintageMatrix(
+        series_id="ICSA",
+        selected_vintage_dates=(date(2024, 1, 11), date(2024, 1, 18)),
+        content=encode_vintage_matrix(frame, "ICSA"),
+        source_url="https://fred.stlouisfed.org/series/ICSA",
+        provider_id="alfred_web",
+    )
+    client = AlfredWebDownloadClient()
+    calls: list[dict[str, object]] = []
+
+    def fake_download(
+        series_id: str, **kwargs: object
+    ) -> DownloadedVintageMatrix:
+        assert series_id == "ICSA"
+        calls.append(kwargs)
+        return artifact
+
+    monkeypatch.setattr(client, "download_level_matrix", fake_download)
+    actual = client.list_first_release_observations(
+        "ICSA",
+        release_id=180,
+        observation_start=date(2024, 1, 1),
+        observation_end=date(2024, 1, 31),
+        vintage_start=date(2024, 1, 1),
+        vintage_end=date(2024, 1, 31),
+    )
+
+    assert actual.provider_id == "alfred_web"
+    assert actual.source_url == "https://fred.stlouisfed.org/series/ICSA"
+    rows = [
+        (item.reference_date, item.release_date, item.value)
+        for item in actual.observations
+    ]
+    assert rows == [
+        (date(2024, 1, 6), date(2024, 1, 11), 202.0),
+        (date(2024, 1, 13), date(2024, 1, 18), 211.0),
+    ]
+    assert len(calls) == 1
+    assert calls[0]["release_id"] == 180
 
 
 @pytest.mark.parametrize(

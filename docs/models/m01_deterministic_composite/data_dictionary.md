@@ -1,5 +1,12 @@
 # Model 01 data dictionary
 
+The event-driven filter adds checkpoint, likelihood-fit, forecast, evaluation,
+and sensitivity artifacts under `data/processed/m01_bayesian_filter/`, plus
+small public summaries under `results/published/m01_bayesian_filter/`. Their
+stage-specific contracts are defined in
+[`bayesian_filter.md`](bayesian_filter.md#13-output-and-audit-contract); the
+source, regime, and transition tables remain defined below.
+
 ## Source components
 
 | Component | FRED/ALFRED series | Release | Earliest vintage used | Axis | Frozen transformation |
@@ -180,6 +187,68 @@ The transition build publishes `transition_model.json`,
 regime outputs. The first is the authoritative specification and fit summary,
 the second is a reviewable cell-level representation, and the third is an
 explicitly transition-only next-month prior.
+
+## Bayesian-filter artifacts
+
+The likelihood and filter stage is defined in
+[`bayesian_filter.md`](bayesian_filter.md) and writes local audit tables under
+`data/processed/m01_bayesian_filter/`.
+
+### `checkpoint_index.csv`
+
+Each row identifies one baseline state snapshot. Important fields include the
+checkpoint and parent IDs, information date, within-day phase, checkpoint type,
+four-month anchor and coordinates, associated event or confirmation IDs,
+transition-training cutoff, included transition-pair count, joint probability
+sum, normalization error, and whether leading evidence was enabled.
+
+### `joint_path_checkpoints.csv.gz`
+
+Every checkpoint has exactly 256 rows. The four `month_*` columns identify the
+path coordinates, the four `regime_*` columns identify one candidate state
+path in canonical order, and `probability` stores its normalized mass.
+
+### `marginal_checkpoints.csv`
+
+This long table contains the four-state marginal for each retained path month
+and an additional one-month transition forecast. `relative_month` is -3 through
+0 for path coordinates and 1 for the transition forecast. Entropy, MAP regime,
+and MAP probability are repeated as explicit diagnostics.
+
+### `event_update_audit.csv`
+
+One row represents one release vector. It records block, event IDs, release and
+reference dates, target path axis, causal training count, fit or skip status,
+four regime log likelihoods when applied, prior and posterior marginals, the
+atomic day's predictive normalizer, entropy change, and KL divergence.
+
+### `likelihood_fit_audit.csv`
+
+Each distinct causal block fit records its cutoff, complete-vector and regime
+counts, pooled and shrunken means, shared covariance, Student-t shape matrix,
+Ledoit-Wolf or sensitivity shrinkage, residual-scale multiplier, and minimum
+covariance eigenvalue. Nested numeric objects are deterministic JSON strings.
+
+### Forecast and evaluation tables
+
+`forecast_predictions.csv` stores fixed checkpoint and ICSA-release forecasts
+for the baseline, transition-only model, and every sensitivity specification.
+It includes eventual truth, target availability, and an explicit evaluation
+eligibility reason. `evaluation_metrics.csv` and `calibration_bins.csv` contain
+paired proper scores, hard-label diagnostics, axis scores, entropy, transition-
+only skill, and both top-label and classwise reliability tables.
+
+`sensitivity_specifications.csv` freezes every one-at-a-time alternative;
+`sensitivity_metrics.csv` records the corresponding matched-sample results.
+The tracked manifest hashes every local artifact.
+
+Small public outputs live under `results/published/m01_bayesian_filter/`:
+
+- `latest_posterior.json` contains four path marginals and a next-month
+  transition forecast with confirmation status;
+- `evaluation_summary.json` contains metric definitions and fixed-checkpoint
+  baseline comparisons;
+- `sensitivity_metrics.csv` contains the full published sensitivity summary.
 
 `data/manifests/m01_deterministic_composite.json` records the configuration
 hash, raw ZIP hashes, coverage, generated-file paths, requested and selected

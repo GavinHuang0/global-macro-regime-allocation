@@ -1,0 +1,93 @@
+{
+  "baseline_specification": {
+    "covariance_method": "ledoit_wolf",
+    "degrees_of_freedom": 7.0,
+    "distribution": "student_t",
+    "fixed_shrinkage": null,
+    "kappa": 5.0,
+    "minimum_complete_vectors": 24,
+    "scale_standard_deviation_multiplier": 1.0,
+    "specification_id": "baseline"
+  },
+  "checkpoint_count": 3916,
+  "configuration": "configs/models/m01_event_driven_bayesian_filter.yaml",
+  "configuration_sha256": "c58c97cb4c89ae611948a257747ac591bacc90817beb1d4d16749092f7db7ee2",
+  "credential_policy": "Inference consumes processed, credential-free inputs and never reads or serializes FRED_API_KEY.",
+  "evaluation_metric_rows": 136,
+  "event_audit_rows": 1476,
+  "filter_end": "2026-07-16",
+  "filter_start": "2005-07-01",
+  "forecast_rows_all_specifications": 22831,
+  "generated_at_utc": "2026-07-17T12:27:37.682492+00:00",
+  "inputs": {
+    "leading_event_table": "data/processed/m01_non_defining_release_evidence/non_defining_release_events.csv",
+    "leading_event_table_sha256": "b9d1cd8d395a60d965a6851791c41368acc9c153c6dd23d1054d3cbb7c29ff05",
+    "regime_history": "results/published/m01_deterministic_composite/regime_history.csv",
+    "regime_history_sha256": "2f83dbe910b7ddfc814837025f16298e4435a9ba2f0d8af32587b9173826ce2e"
+  },
+  "joint_path_rows": 1002496,
+  "likelihood_fit_rows": 883,
+  "marginal_rows": 78320,
+  "model_id": "m01_deterministic_composite",
+  "processed_files": [
+    {
+      "bytes": 784629,
+      "path": "data/processed/m01_bayesian_filter/checkpoint_index.csv",
+      "sha256": "a4717169f93b609dac3884cede7a053b5459c18f80e7d79535e9bd121eb0b065"
+    },
+    {
+      "bytes": 4292761,
+      "path": "data/processed/m01_bayesian_filter/joint_path_checkpoints.csv.gz",
+      "sha256": "3f8e3d99d8bac27795f75b1a343d5abc9b5dda18b56b406b379a013ea27272f4"
+    },
+    {
+      "bytes": 13991027,
+      "path": "data/processed/m01_bayesian_filter/marginal_checkpoints.csv",
+      "sha256": "9af5fb33ecd87f805f20b632c0b649d71e007e2ca61eeef306949ad20a658cd5"
+    },
+    {
+      "bytes": 601160,
+      "path": "data/processed/m01_bayesian_filter/event_update_audit.csv",
+      "sha256": "b5ab4a4e6f5e35542a2542e9f1e7d3466feb94e194bb153ba7ab1910dc0568ac"
+    },
+    {
+      "bytes": 1643770,
+      "path": "data/processed/m01_bayesian_filter/likelihood_fit_audit.csv",
+      "sha256": "6a7098e15338730ea34a8f357955329df2711d52f8a85377872aa073562c6435"
+    },
+    {
+      "bytes": 5648360,
+      "path": "data/processed/m01_bayesian_filter/forecast_predictions.csv",
+      "sha256": "7ecebaeea9b6d498a08e8b5e0fd03aedc1ff827fb1cf9dbf6799cf8aa04742a6"
+    },
+    {
+      "bytes": 49116,
+      "path": "data/processed/m01_bayesian_filter/evaluation_metrics.csv",
+      "sha256": "da4afe57451805753f3946882ebcac830ac68403b48c02514aae596610d73ec9"
+    },
+    {
+      "bytes": 893469,
+      "path": "data/processed/m01_bayesian_filter/calibration_bins.csv",
+      "sha256": "97f7b3453b1f0f2274c8eef719489f0b702c038ff60edd9d6f1484f4d6c77130"
+    },
+    {
+      "bytes": 1248,
+      "path": "data/processed/m01_bayesian_filter/sensitivity_specifications.csv",
+      "sha256": "f141bc3925572f82ace879a8d45c5610d5c14115b764d8c649f79493e9040c11"
+    },
+    {
+      "bytes": 46360,
+      "path": "data/processed/m01_bayesian_filter/sensitivity_metrics.csv",
+      "sha256": "5fc49f71b54924044a4f069962899b2bf494a314d9200bff6725ac8b01d8bda8"
+    }
+  ],
+  "published_files": [
+    "results/published/m01_bayesian_filter/latest_posterior.json",
+    "results/published/m01_bayesian_filter/evaluation_summary.json",
+    "results/published/m01_bayesian_filter/sensitivity_metrics.csv"
+  ],
+  "schema_version": 1,
+  "sensitivity_specification_count": 15,
+  "stage_id": "event_driven_bayesian_filter",
+  "transition_only_baseline_included": true
+}
