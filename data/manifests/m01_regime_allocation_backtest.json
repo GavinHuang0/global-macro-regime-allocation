@@ -1,0 +1,166 @@
+{
+  "allocation_specification_count": 11,
+  "benchmark_count": 4,
+  "configuration": "configs/models/m01_regime_allocation_backtest.yaml",
+  "configuration_sha256": "108023494eeb657e2ea341f77d6af3f9415f9f839b2661d22613a8fdf4348a13",
+  "credential_policy": "This stage consumes credential-free processed files and never reads, logs, or serializes FRED_API_KEY or brokerage credentials.",
+  "formal_backtest_end": "2026-06-01T00:00:00",
+  "formal_backtest_start": "2018-01-01T00:00:00",
+  "generated_at_utc": "2026-07-17T19:28:26.895108+00:00",
+  "implementation_files": [
+    {
+      "bytes": 44793,
+      "path": "src/regime_allocation/portfolio/pipeline.py",
+      "sha256": "40701568917e490327757a011ea0daef20491818a3bae56acb56bd1275a43ce3"
+    },
+    {
+      "bytes": 24333,
+      "path": "src/regime_allocation/portfolio/estimation.py",
+      "sha256": "8d3b777b17428b4cf35f9d057d3fb8b0fc52e714a0a63d15e4e83d921729095b"
+    },
+    {
+      "bytes": 26932,
+      "path": "src/regime_allocation/portfolio/optimization.py",
+      "sha256": "94cfbc386e61438cada8f3a7f90d7783a133f1d5c83437b9119d5d38a314507e"
+    },
+    {
+      "bytes": 12771,
+      "path": "src/regime_allocation/portfolio/baselines.py",
+      "sha256": "5594b480eaac20880b71ed4061b737969686961d0d8bcfb15168d12dd9f1940d"
+    },
+    {
+      "bytes": 15272,
+      "path": "src/regime_allocation/backtest/engine.py",
+      "sha256": "0ac9b8d3be1585862f685c15cd0f5f4520244a0a5867df5ba16b422ec560e924"
+    },
+    {
+      "bytes": 13730,
+      "path": "src/regime_allocation/backtest/metrics.py",
+      "sha256": "168d19b54697d51e1c702285e392a5c1b82667f1889a3e68299b652a39a46110"
+    },
+    {
+      "bytes": 1208,
+      "path": "src/regime_allocation/cli/build_m01_backtest.py",
+      "sha256": "976dddc8727621be67528e1f352ab20c68036df65145999a2755996ca674b28c"
+    }
+  ],
+  "inputs": {
+    "checkpoint_index": {
+      "bytes": 784629,
+      "path": "data/processed/m01_bayesian_filter/checkpoint_index.csv",
+      "sha256": "a4717169f93b609dac3884cede7a053b5459c18f80e7d79535e9bd121eb0b065"
+    },
+    "etf_daily_prices": {
+      "bytes": 10573889,
+      "path": "data/processed/us_cross_asset_etf_universe_v1/etf_daily_prices_long.csv",
+      "sha256": "7cbd321c5af2662065edfc3a5c3c1cdb6101bda10de7862bc09c09041bdcb7f1"
+    },
+    "marginal_checkpoints": {
+      "bytes": 13991027,
+      "path": "data/processed/m01_bayesian_filter/marginal_checkpoints.csv",
+      "sha256": "9af5fb33ecd87f805f20b632c0b649d71e007e2ca61eeef306949ad20a658cd5"
+    },
+    "regime_history": {
+      "bytes": 45938,
+      "path": "results/published/m01_deterministic_composite/regime_history.csv",
+      "sha256": "2f83dbe910b7ddfc814837025f16298e4435a9ba2f0d8af32587b9173826ce2e"
+    }
+  },
+  "latest_live_target_month": "2026-07-01T00:00:00",
+  "model_id": "m01_deterministic_composite",
+  "output_files": [
+    {
+      "bytes": 13156,
+      "path": "data/processed/m01_regime_allocation_backtest/signal_table.csv",
+      "sha256": "04f8f452b69dfacc6a4daa572bc0fa2b7f6a4e79912f1c7df53b203f19f32caa"
+    },
+    {
+      "bytes": 21185,
+      "path": "data/processed/m01_regime_allocation_backtest/holding_period_returns.csv",
+      "sha256": "dec0594bd052946f706d8de815d5cb25577bd10e8d5bebe6c2eebe055fdc0767"
+    },
+    {
+      "bytes": 7970738,
+      "path": "data/processed/m01_regime_allocation_backtest/regime_estimate_audit.csv",
+      "sha256": "c3384562f6f0065e5df1581d77d0b052dc96e56be5c442183a30eaeff7d46a4e"
+    },
+    {
+      "bytes": 711878,
+      "path": "data/processed/m01_regime_allocation_backtest/optimizer_audit.csv",
+      "sha256": "b25e70df610c5140ce17632967d83bbaabc6c0e4581d59ab2d79bcecfeab8f28"
+    },
+    {
+      "bytes": 1380161,
+      "path": "data/processed/m01_regime_allocation_backtest/monthly_weights.csv",
+      "sha256": "dd3fad62fb89001c6f2336de7a6302f89c9f47cd11d6980fd26f32a27b9da1c7"
+    },
+    {
+      "bytes": 307094,
+      "path": "data/processed/m01_regime_allocation_backtest/monthly_strategy_returns.csv",
+      "sha256": "7fc6bfa3d82641d46f995847f3241692649d5d856fd9c39b258a6439588716ef"
+    },
+    {
+      "bytes": 443339,
+      "path": "data/processed/m01_regime_allocation_backtest/daily_nav.csv.gz",
+      "sha256": "1cd2a3e412ee7440c76ee9185828e5712e97519c0cdd5e72160409502a64646b"
+    },
+    {
+      "bytes": 5962,
+      "path": "data/processed/m01_regime_allocation_backtest/performance_metrics.csv",
+      "sha256": "ec2a477cdf4daeec5e5f9421dfca0813400b729785a365dd976c68db1b832802"
+    },
+    {
+      "bytes": 1367,
+      "path": "data/processed/m01_regime_allocation_backtest/comparison_uncertainty.csv",
+      "sha256": "ff6c5f2b2a8f8dcbba36e9e7354fe794b0eadacc8c3e01e7dda002e25029b9bb"
+    },
+    {
+      "bytes": 4880,
+      "path": "data/processed/m01_regime_allocation_backtest/sensitivity_metrics.csv",
+      "sha256": "ef783eaa13457269553389477a1a822a31c7646615af175f04655e9bb7c53f18"
+    },
+    {
+      "bytes": 85871,
+      "path": "data/processed/m01_regime_allocation_backtest/legacy_sharpe_audit.csv",
+      "sha256": "d968e8372c877975ddcd80856cffce5593c4e98738555c52860417220dfe5725"
+    },
+    {
+      "bytes": 1849,
+      "path": "results/published/m01_regime_allocation_backtest/latest_allocation.json",
+      "sha256": "53649d25651ea462175202cd9ff8ac521fc23eb80cf05c313324deccf88452f1"
+    },
+    {
+      "bytes": 9633,
+      "path": "results/published/m01_regime_allocation_backtest/backtest_summary.json",
+      "sha256": "45cbb80ffffedbe3a8eb7ac3a4d3b116493132580528e71a44f9ad95fe3958f6"
+    },
+    {
+      "bytes": 2217,
+      "path": "results/published/m01_regime_allocation_backtest/performance_summary.csv",
+      "sha256": "4171141ae92cf9cf531deb11e713e0f94518a570cae981cd41a189a2e7714009"
+    },
+    {
+      "bytes": 1367,
+      "path": "results/published/m01_regime_allocation_backtest/comparison_uncertainty.csv",
+      "sha256": "ff6c5f2b2a8f8dcbba36e9e7354fe794b0eadacc8c3e01e7dda002e25029b9bb"
+    },
+    {
+      "bytes": 99964,
+      "path": "results/published/m01_regime_allocation_backtest/monthly_returns.csv",
+      "sha256": "5c613f8e6c69e47b81029ebe374a0eed02395b289531d333bcf72096e1088db0"
+    },
+    {
+      "bytes": 416293,
+      "path": "results/published/m01_regime_allocation_backtest/monthly_weights.csv",
+      "sha256": "5f30ed370daea3fa51d7f8dc495a9e319e1a97684101ec20028ceb42121a9d8c"
+    },
+    {
+      "bytes": 4880,
+      "path": "results/published/m01_regime_allocation_backtest/sensitivity_metrics.csv",
+      "sha256": "ef783eaa13457269553389477a1a822a31c7646615af175f04655e9bb7c53f18"
+    }
+  ],
+  "pooled_mean_ablation_included": true,
+  "schema_version": 1,
+  "stage_id": "posterior_regime_allocation_backtest"
+}

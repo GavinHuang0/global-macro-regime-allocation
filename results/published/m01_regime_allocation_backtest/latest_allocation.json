@@ -1,0 +1,59 @@
+{
+  "baseline_parameters": {
+    "annualized_volatility_cap": 0.1,
+    "minimum_labeled_months": 60,
+    "per_asset_transaction_cost": 0.0005,
+    "regime_mean_pseudo_months": 24.0
+  },
+  "binding_constraints": "group:equity_and_high_yield|cap:SPY|lower:IEF|lower:TIP|lower:BIL|cap:GLD",
+  "estimated_annualized_volatility": 0.0965448886049697,
+  "estimated_monthly_return": 0.006937432430465417,
+  "estimated_rebalance_cost": 1.90949088054138e-05,
+  "execution_assumption": "first_common_us_session_adjusted_open",
+  "latest_price_date": "2026-07-17T00:00:00",
+  "model_id": "m01_deterministic_composite",
+  "optimization_outcome": "optimal",
+  "posterior": [
+    {
+      "probability": 0.5678399940624385,
+      "regime_id": "growth_up_inflation_up"
+    },
+    {
+      "probability": 0.191084979177449,
+      "regime_id": "growth_down_inflation_up"
+    },
+    {
+      "probability": 0.1954205813617339,
+      "regime_id": "growth_up_inflation_down"
+    },
+    {
+      "probability": 0.0456544453983786,
+      "regime_id": "growth_down_inflation_down"
+    }
+  ],
+  "reference_month": "2026-07-01T00:00:00",
+  "schema_version": 1,
+  "signal_checkpoint_id": "baseline:003909",
+  "signal_date": "2026-07-01T00:00:00",
+  "stage_id": "posterior_regime_allocation_backtest",
+  "status": "research_output_not_investment_advice",
+  "target_weights": [
+    {
+      "ticker": "SPY",
+      "weight": 0.34999999999999926
+    },
+    {
+      "ticker": "HYG",
+      "weight": 0.15000000000000158
+    },
+    {
+      "ticker": "GLD",
+      "weight": 0.24999999999999992
+    },
+    {
+      "ticker": "LQD",
+      "weight": 0.2499999999999992
+    }
+  ],
+  "universe_note": "Compact US cross-asset ETF universe; not a complete global FICC universe. AGG is benchmark-only and receives zero strategy weight."
+}

@@ -6,7 +6,8 @@ detection and regime-conditioned asset allocation.
 ## Current status
 
 Model 01 now implements the deterministic regime definition, transition,
-leading-evidence, likelihood, and Bayesian-filter layers:
+leading-evidence, likelihood, Bayesian-filter, portfolio-allocation, and
+backtest layers:
 
 - release-coherent first-release monthly macro features;
 - four equal-weight growth and inflation components;
@@ -22,6 +23,14 @@ leading-evidence, likelihood, and Bayesian-filter layers:
 - a four-month joint-path posterior with causal monthly transitions;
 - atomic daily release updates and end-of-day deterministic confirmations;
 - transition-only comparisons, calibration diagnostics, and frozen sensitivity checks;
+- posterior-weighted, shrunk monthly ETF return estimates with total-covariance risk;
+- a cost-aware long-only optimizer with asset, group, and ex-ante volatility caps;
+- causal first-adjusted-open execution and drift-aware transaction-cost accounting;
+- a causal pooled-mean optimizer ablation plus equal-weight, legacy Sharpe-MAP,
+  and static `SPY`/`AGG` 60/40 comparisons;
+- frozen allocation sensitivities for mean shrinkage, volatility caps,
+  position/group caps, and joint optimizer-policy/realized-cost assumptions;
+- paired six-month circular block-bootstrap comparison intervals;
 - a 26-year point-in-time component panel from June 2000 through May 2026;
 - local processed research files plus publication-safe regime outputs.
 
@@ -38,16 +47,17 @@ October core-CPI and unemployment observations during the federal shutdown and
 then propagates through the frozen one-month-change and three-month-smoothing
 rules. Model 01 does not impute those observations or redistribute their weights.
 
-The portfolio-construction and backtesting layers remain later milestones.
-Published Model 01 outputs now include confirmed historical labels, a
-transition-only prior, a release-conditioned current-month posterior, causal
-forecast metrics, and sensitivity results.
+The portfolio backtest contains 102 complete monthly holding periods from
+January 2018 through June 2026. Published Model 01 outputs now include confirmed
+historical labels, a transition-only prior, a release-conditioned posterior,
+causal forecast metrics, posterior-weighted allocations, benchmark comparisons,
+and frozen sensitivity results.
 
 ## Model versions
 
 | ID | Architecture | Status |
 |---|---|---|
-| `m01_deterministic_composite` | Deterministic targets plus event-driven Bayesian nowcast | Regime, transition, likelihood, filter, and evaluation implemented |
+| `m01_deterministic_composite` | Deterministic targets plus event-driven Bayesian nowcast | Complete through allocation, backtest, and public reporting |
 | `m02_continuous_state` | Continuous latent growth/inflation state with quadrant probabilities | Planned |
 | `m03_switching_state_space` | Regime-switching continuous state-space model | Planned |
 
@@ -73,6 +83,15 @@ are in the Model 01
 and [`event-driven Bayesian filter`](docs/models/m01_deterministic_composite/bayesian_filter.md)
 specifications. Actual historical findings are in
 [`bayesian_filter_results.md`](docs/models/m01_deterministic_composite/bayesian_filter_results.md).
+
+The allocation layer combines the causal current-month posterior with
+24-pseudo-month-shrunk regime return means and a Ledoit-Wolf risk model. It then
+solves a fully invested long-only problem net of estimated turnover cost,
+subject to individual, group, and 10% ex-ante annualized volatility caps. See
+the frozen
+[`portfolio methodology`](docs/models/m01_deterministic_composite/portfolio_allocation.md)
+and the actual
+[`portfolio backtest results`](docs/models/m01_deterministic_composite/portfolio_backtest_results.md).
 
 ## Current published result
 
@@ -132,6 +151,72 @@ does not outperform at every checkpoint or metric; see the results document
 and published
 [`sensitivity metrics`](results/published/m01_bayesian_filter/sensitivity_metrics.csv).
 
+### Current allocation and backtest
+
+The July 1, 2026 `post_month_roll` allocation signal produced this research
+target:
+
+| ETF | Target weight |
+|---|---:|
+| `SPY` | 35% |
+| `HYG` | 15% |
+| `GLD` | 25% |
+| `LQD` | 25% |
+| `IEF`, `TIP`, `BIL` | 0% |
+
+The allocation input assigned 56.78% probability to growth up / inflation up,
+19.11% to growth down / inflation up, 19.54% to growth up / inflation down, and
+4.57% to growth down / inflation down. This is the month-start signal used for
+execution, not the later July 16 event-updated posterior above. The model
+estimated 0.694% one-month return and 9.65% annualized volatility. These are
+research estimates, not promised outcomes or investment advice.
+
+Historical net performance from January 2018 through June 2026 was:
+
+| Method | Total return | CAGR | Ann. vol. | Zero-rate Sharpe | Max drawdown |
+|---|---:|---:|---:|---:|---:|
+| Posterior optimized | 124.27% | 9.97% | 10.14% | 0.991 | -21.16% |
+| Pooled-mean optimizer | 120.69% | 9.76% | 10.17% | 0.970 | -21.92% |
+| Static 60% `SPY` / 40% `AGG` | 117.41% | 9.57% | 11.21% | 0.874 | -21.60% |
+| Equal weight | 65.13% | 6.08% | 6.37% | 0.960 | -14.77% |
+| Legacy Sharpe-MAP | 50.11% | 4.89% | 4.72% | 1.037 | -11.07% |
+
+The optimized method had the highest historical absolute return, while the
+legacy method had the highest zero-rate Sharpe and shallowest drawdown. The
+pooled-mean optimizer is the cleaner causal ablation: it removes the current
+posterior while retaining the same return sample, risk estimator, constraints,
+costs, and execution. The posterior method's annualized arithmetic mean
+advantage over it was only 0.187%, with a paired block-bootstrap 95% interval
+of [-0.413%, 0.814%] and \(\Pr(\Delta>0)=0.737\). Versus static 60/40, the
+corresponding estimate was 0.255%, interval [-2.616%, 3.085%], and
+\(\Pr(\Delta>0)=0.572\). Both intervals span zero, so these results do not
+support a claim of statistically reliable superiority. The reported
+probabilities are bootstrap fractions, not p-values.
+
+The optimized weights were concentrated: `SPY` remained at its 35% cap
+throughout the completed sample and `BIL` remained at zero. Scaling non-`BIL`
+asset and group caps to 0.8 or 1.2 materially changed return, volatility, and
+turnover: the 0.8 multiplier produced 97.70% total return, 8.35% CAGR, 8.91%
+annualized volatility, and 31.10% annualized one-way turnover, while 1.2
+produced 146.02%, 11.17%, 10.94%, and 53.56%, respectively. These are
+diagnostics, not evidence that the looser cap is superior. The outcome depends
+on the declared constraint policy. Cost
+variants jointly change optimizer regularization and realized charges; they
+are not pure execution-cost stresses. Reported turnover uses half-\(L^1\), so
+initial formation is shown as 50% one-way turnover even though 100% of NAV is
+purchased. Daily drawdown starts from post-formation-cost NAV, while that cost
+remains included in return and terminal wealth.
+
+Machine-readable public outputs include the
+[`latest allocation`](results/published/m01_regime_allocation_backtest/latest_allocation.json),
+[`performance summary`](results/published/m01_regime_allocation_backtest/performance_summary.csv),
+[`monthly returns`](results/published/m01_regime_allocation_backtest/monthly_returns.csv),
+[`monthly weights`](results/published/m01_regime_allocation_backtest/monthly_weights.csv),
+and allocation
+[`sensitivity metrics`](results/published/m01_regime_allocation_backtest/sensitivity_metrics.csv),
+plus the paired
+[`comparison uncertainty`](results/published/m01_regime_allocation_backtest/comparison_uncertainty.csv).
+
 ## Repository layout
 
 ```text
@@ -148,9 +233,11 @@ legacy/                      preserved team paper and surviving script
 results/
   published/                 small, reviewable public outputs
 src/regime_allocation/
+  backtest/                  shared execution, accounting, and performance metrics
   data/                      point-in-time providers and vintage logic
   features/                  shared feature transformations
   models/                    separately versioned architectures
+  portfolio/                 return estimation, baselines, optimization, and pipeline
   cli/                       reproducible commands
 tests/                       unit, leakage, and integration tests
 ```
@@ -165,6 +252,7 @@ python -m regime_allocation.cli.build_m01_dataset --provider auto
 python -m regime_allocation.cli.build_m01_evidence --provider auto
 python -m regime_allocation.cli.build_m01_transition
 python -m regime_allocation.cli.build_m01_inference
+python -m regime_allocation.cli.build_m01_backtest
 pytest
 ```
 

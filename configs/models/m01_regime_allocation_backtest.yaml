@@ -1,0 +1,196 @@
+schema_version: 1
+model_id: m01_deterministic_composite
+stage_id: posterior_regime_allocation_backtest
+description: >-
+  Causal monthly portfolio allocation using Model 01 post-month-roll regime
+  probabilities, shrunk regime means, pooled Ledoit-Wolf within-regime risk,
+  posterior regime uncertainty, long-only caps, and explicit trading costs.
+
+sources:
+  checkpoint_index: data/processed/m01_bayesian_filter/checkpoint_index.csv
+  marginal_checkpoints: data/processed/m01_bayesian_filter/marginal_checkpoints.csv
+  regime_history: results/published/m01_deterministic_composite/regime_history.csv
+  etf_daily_prices: >-
+    data/processed/us_cross_asset_etf_universe_v1/etf_daily_prices_long.csv
+
+universe:
+  strategy_assets:
+    - SPY
+    - IEF
+    - TIP
+    - HYG
+    - BIL
+    - GLD
+    - LQD
+  benchmark_only_assets:
+    - AGG
+  currency: USD
+
+signal:
+  specification_id: baseline
+  checkpoint_type: post_month_roll
+  marginal_type: path
+  relative_month: 0
+  probability_sum_tolerance: 1.0e-10
+  regime_order:
+    - growth_up_inflation_up
+    - growth_down_inflation_up
+    - growth_up_inflation_down
+    - growth_down_inflation_down
+
+timing:
+  target_period: calendar_month
+  execution: first_common_us_session_adjusted_open
+  holding_period: first_session_open_to_next_first_session_open
+  estimation_return_cutoff: holding_period_end_strictly_before_execution_open
+  regime_label_cutoff: label_available_strictly_before_signal_date
+  formal_backtest_start: 2018-01-01
+  formal_backtest_end: latest_complete_open_to_open_month
+  incomplete_latest_month_policy: publish_target_but_exclude_from_performance
+
+estimation:
+  return_frequency: monthly_open_to_open
+  minimum_labeled_months: 60
+  regime_means:
+    estimator: pooled_mean_pseudo_month_shrinkage
+    pseudo_months: 24.0
+    formula: (n_r * regime_mean + kappa * pooled_mean) / (n_r + kappa)
+    empty_regime_policy: pooled_mean
+  covariance:
+    estimator: ledoit_wolf
+    input: residuals_from_unshrunk_regime_sample_means
+    assume_centered: true
+    pooling: one_shared_within_regime_matrix
+  posterior_mixture:
+    expected_mean: probability_weighted_shrunk_regime_means
+    covariance: shared_within_regime_plus_between_regime_mean_covariance
+
+optimization:
+  objective: maximize_one_month_expected_return_net_of_estimated_trading_cost
+  long_only: true
+  fully_invested: true
+  annualized_volatility_cap: 0.10
+  covariance_annualization_factor: 12.0
+  per_asset_transaction_cost:
+    SPY: 0.0005
+    IEF: 0.0005
+    TIP: 0.0005
+    HYG: 0.0005
+    BIL: 0.0005
+    GLD: 0.0005
+    LQD: 0.0005
+  asset_caps:
+    SPY: 0.35
+    IEF: 0.50
+    TIP: 0.40
+    HYG: 0.25
+    BIL: 1.00
+    GLD: 0.25
+    LQD: 0.40
+  group_caps:
+    equity_and_high_yield:
+      assets: [SPY, HYG]
+      maximum: 0.50
+    corporate_credit:
+      assets: [HYG, LQD]
+      maximum: 0.50
+    rate_sensitive:
+      assets: [IEF, TIP, LQD]
+      maximum: 0.75
+  solver:
+    method: SLSQP
+    tolerance: 1.0e-12
+    maximum_iterations: 2000
+    feasibility_tolerance: 1.0e-7
+  fallback_order:
+    - hold_pretrade_if_feasible
+    - constrained_minimum_variance
+    - all_BIL
+
+benchmarks:
+  pooled_mean_optimizer:
+    method_id: pooled_mean_optimizer
+    current_regime_posterior_used: false
+    expected_return: expanding_causal_pooled_mean
+    covariance: >-
+      shared_within_regime_plus_historical_frequency_between_regime_covariance
+    constraints_and_costs: same_as_baseline
+  equal_weight:
+    method_id: equal_weight
+    assets: [SPY, IEF, TIP, HYG, BIL, GLD, LQD]
+    rebalance: monthly_first_session_open
+  legacy_sharpe_map:
+    method_id: legacy_sharpe_map
+    map_regime_from_posterior: true
+    use_causally_known_historical_month_labels: true
+    return_frequency: daily
+    minimum_same_regime_daily_observations: 60
+    annualization_factor: 252
+    shift_constant: 0.1
+    insufficient_history_fallback: equal_weight
+  static_60_40:
+    method_id: static_60_spy_40_agg
+    equity_asset: SPY
+    equity_weight: 0.60
+    bond_asset: AGG
+    bond_weight: 0.40
+    rebalance: monthly_first_session_open
+  apply_same_realized_transaction_costs: true
+
+sensitivity:
+  design: one_parameter_at_a_time
+  same_backtest_dates: true
+  select_baseline_after_results: false
+  parameters:
+    regime_mean_pseudo_months: [0.0, 12.0, 24.0, 48.0, 96.0]
+    annualized_volatility_cap: [0.08, 0.10, 0.12]
+    per_asset_transaction_cost: [0.0, 0.0005, 0.0010]
+    concentration_cap_multiplier: [0.8, 1.0, 1.2]
+
+evaluation:
+  periods_per_year: 12
+  zero_rate_sharpe: true
+  bil_excess_sharpe: true
+  daily_nav_drawdown: true
+  metrics:
+    - total_return
+    - cagr
+    - annualized_volatility
+    - sharpe_zero_rate
+    - sharpe_excess_bil
+    - sortino_zero_rate
+    - maximum_drawdown
+    - calmar_ratio
+    - worst_month
+    - positive_month_fraction
+    - annualized_one_way_turnover
+    - annualized_cost_drag
+  uncertainty:
+    method: paired_circular_block_bootstrap_monthly_mean
+    baseline_method: posterior_optimized
+    block_length_months: 6
+    resamples: 10000
+    confidence_level: 0.95
+    random_seed: 20260718
+
+outputs:
+  processed_dir: data/processed/m01_regime_allocation_backtest
+  signal_table: signal_table.csv
+  holding_period_returns: holding_period_returns.csv
+  regime_estimate_audit: regime_estimate_audit.csv
+  optimizer_audit: optimizer_audit.csv
+  monthly_weights: monthly_weights.csv
+  monthly_strategy_returns: monthly_strategy_returns.csv
+  daily_nav: daily_nav.csv.gz
+  performance_metrics: performance_metrics.csv
+  comparison_uncertainty: comparison_uncertainty.csv
+  sensitivity_metrics: sensitivity_metrics.csv
+  manifest: data/manifests/m01_regime_allocation_backtest.json
+  published_dir: results/published/m01_regime_allocation_backtest
+  latest_allocation: latest_allocation.json
+  backtest_summary: backtest_summary.json
+  published_performance: performance_summary.csv
+  published_uncertainty: comparison_uncertainty.csv
+  published_monthly_returns: monthly_returns.csv
+  published_monthly_weights: monthly_weights.csv
+  published_sensitivity: sensitivity_metrics.csv

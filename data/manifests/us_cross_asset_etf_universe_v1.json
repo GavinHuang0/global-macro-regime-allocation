@@ -1,0 +1,242 @@
+{
+  "dataset": "portfolio_market_data",
+  "retrieved_at_utc": "2026-07-17T17:12:09.869729+00:00",
+  "source": "Yahoo Finance chart API",
+  "source_url_template": "https://query1.finance.yahoo.com/v8/finance/chart/{ticker}",
+  "requested_start": "2008-01-01",
+  "requested_as_of": "2026-07-18",
+  "period_end_is_exclusive": "2026-07-19",
+  "tickers": [
+    "SPY",
+    "IEF",
+    "TIP",
+    "LQD",
+    "HYG",
+    "BIL",
+    "GLD",
+    "DBC",
+    "UUP",
+    "TLT",
+    "USO",
+    "AGG"
+  ],
+  "return_definition": "adjusted_close_t / adjusted_close_t-1 - 1",
+  "monthly_returns": "completed calendar months only",
+  "latest_observation": "2026-07-17",
+  "price_rows": 55968,
+  "corporate_action_rows": 1477,
+  "provider_metadata": [
+    {
+      "ticker": "SPY",
+      "currency": "USD",
+      "exchange": "PCX",
+      "full_exchange_name": "NYSEArca",
+      "instrument_type": "ETF",
+      "exchange_timezone": "America/New_York",
+      "data_granularity": "1d"
+    },
+    {
+      "ticker": "IEF",
+      "currency": "USD",
+      "exchange": "NGM",
+      "full_exchange_name": "NasdaqGM",
+      "instrument_type": "ETF",
+      "exchange_timezone": "America/New_York",
+      "data_granularity": "1d"
+    },
+    {
+      "ticker": "TIP",
+      "currency": "USD",
+      "exchange": "PCX",
+      "full_exchange_name": "NYSEArca",
+      "instrument_type": "ETF",
+      "exchange_timezone": "America/New_York",
+      "data_granularity": "1d"
+    },
+    {
+      "ticker": "LQD",
+      "currency": "USD",
+      "exchange": "PCX",
+      "full_exchange_name": "NYSEArca",
+      "instrument_type": "ETF",
+      "exchange_timezone": "America/New_York",
+      "data_granularity": "1d"
+    },
+    {
+      "ticker": "HYG",
+      "currency": "USD",
+      "exchange": "PCX",
+      "full_exchange_name": "NYSEArca",
+      "instrument_type": "ETF",
+      "exchange_timezone": "America/New_York",
+      "data_granularity": "1d"
+    },
+    {
+      "ticker": "BIL",
+      "currency": "USD",
+      "exchange": "PCX",
+      "full_exchange_name": "NYSEArca",
+      "instrument_type": "ETF",
+      "exchange_timezone": "America/New_York",
+      "data_granularity": "1d"
+    },
+    {
+      "ticker": "GLD",
+      "currency": "USD",
+      "exchange": "PCX",
+      "full_exchange_name": "NYSEArca",
+      "instrument_type": "ETF",
+      "exchange_timezone": "America/New_York",
+      "data_granularity": "1d"
+    },
+    {
+      "ticker": "DBC",
+      "currency": "USD",
+      "exchange": "PCX",
+      "full_exchange_name": "NYSEArca",
+      "instrument_type": "ETF",
+      "exchange_timezone": "America/New_York",
+      "data_granularity": "1d"
+    },
+    {
+      "ticker": "UUP",
+      "currency": "USD",
+      "exchange": "PCX",
+      "full_exchange_name": "NYSEArca",
+      "instrument_type": "ETF",
+      "exchange_timezone": "America/New_York",
+      "data_granularity": "1d"
+    },
+    {
+      "ticker": "TLT",
+      "currency": "USD",
+      "exchange": "NGM",
+      "full_exchange_name": "NasdaqGM",
+      "instrument_type": "ETF",
+      "exchange_timezone": "America/New_York",
+      "data_granularity": "1d"
+    },
+    {
+      "ticker": "USO",
+      "currency": "USD",
+      "exchange": "PCX",
+      "full_exchange_name": "NYSEArca",
+      "instrument_type": "ETF",
+      "exchange_timezone": "America/New_York",
+      "data_granularity": "1d"
+    },
+    {
+      "ticker": "AGG",
+      "currency": "USD",
+      "exchange": "PCX",
+      "full_exchange_name": "NYSEArca",
+      "instrument_type": "ETF",
+      "exchange_timezone": "America/New_York",
+      "data_granularity": "1d"
+    }
+  ],
+  "distribution_adjustment_check": {
+    "events_compared": 1475,
+    "max_absolute_return_difference": 0.0004393869325600708,
+    "differences_over_50bp": 0
+  },
+  "raw_files": [
+    {
+      "path": "data\\raw\\yahoo_finance\\us_cross_asset_etf_universe_v1\\SPY.json",
+      "sha256": "67fb84f0c5e7396f5159ab8487e416f18effcf3cef9948db9fe4ea543a3007ea",
+      "bytes": 517075
+    },
+    {
+      "path": "data\\raw\\yahoo_finance\\us_cross_asset_etf_universe_v1\\IEF.json",
+      "sha256": "52b9c5e8778cc4013f13a85f3922aa47a570e70ce98424884d95168b11c9d037",
+      "bytes": 516196
+    },
+    {
+      "path": "data\\raw\\yahoo_finance\\us_cross_asset_etf_universe_v1\\TIP.json",
+      "sha256": "c46ced68c24cec58e44c5d02db7d31b8de842a3a800e76a204e3a4ae63962d1f",
+      "bytes": 518794
+    },
+    {
+      "path": "data\\raw\\yahoo_finance\\us_cross_asset_etf_universe_v1\\LQD.json",
+      "sha256": "dc207522f9d588ee4ee2443ad2cb1a5effef230cfcac453bb393638d12231374",
+      "bytes": 522994
+    },
+    {
+      "path": "data\\raw\\yahoo_finance\\us_cross_asset_etf_universe_v1\\HYG.json",
+      "sha256": "260d073b8b3d7d5055ce1141fac133356540ac124eec17b56664239388b063ae",
+      "bytes": 505245
+    },
+    {
+      "path": "data\\raw\\yahoo_finance\\us_cross_asset_etf_universe_v1\\BIL.json",
+      "sha256": "d193d54a86c500109996502c7c7a6a1d301f313ba8abc29f9ab4f5acab2a6257",
+      "bytes": 499294
+    },
+    {
+      "path": "data\\raw\\yahoo_finance\\us_cross_asset_etf_universe_v1\\GLD.json",
+      "sha256": "486a996804e31ab17869bc71efb1151bdab808198f992efa4cb67823ffb60f4a",
+      "bytes": 512146
+    },
+    {
+      "path": "data\\raw\\yahoo_finance\\us_cross_asset_etf_universe_v1\\DBC.json",
+      "sha256": "f0a705803667827787134b06559796c7e0783a6a8ffb64adaab79fd3075cf658",
+      "bytes": 512840
+    },
+    {
+      "path": "data\\raw\\yahoo_finance\\us_cross_asset_etf_universe_v1\\UUP.json",
+      "sha256": "a50d4ab396f053254cba33cbe8ecc674c2d204408e441e146a2536e27af36d62",
+      "bytes": 512146
+    },
+    {
+      "path": "data\\raw\\yahoo_finance\\us_cross_asset_etf_universe_v1\\TLT.json",
+      "sha256": "bd15933bcc702b9e1dcdbf62d148cc4ecdc21e9e3234cdbcc0430a2ec6cb63c5",
+      "bytes": 521227
+    },
+    {
+      "path": "data\\raw\\yahoo_finance\\us_cross_asset_etf_universe_v1\\USO.json",
+      "sha256": "b42fdea2b923e0e233f546a164831e1138b822f4ceaf9cf006a826c4fc183a45",
+      "bytes": 499693
+    },
+    {
+      "path": "data\\raw\\yahoo_finance\\us_cross_asset_etf_universe_v1\\AGG.json",
+      "sha256": "865a6295c115ffd3bf9749809d537dee1b6a18c28fad2b2a48fc35ab86e23b4a",
+      "bytes": 518791
+    }
+  ],
+  "processed_files": [
+    {
+      "path": "data\\processed\\us_cross_asset_etf_universe_v1\\etf_daily_prices_long.csv",
+      "sha256": "7cbd321c5af2662065edfc3a5c3c1cdb6101bda10de7862bc09c09041bdcb7f1",
+      "bytes": 10573889
+    },
+    {
+      "path": "data\\processed\\us_cross_asset_etf_universe_v1\\etf_corporate_actions.csv",
+      "sha256": "ff21be512931293f4deae2d8b13380dd0a7aaf5cbff37147c3a1d9f413461699",
+      "bytes": 50098
+    },
+    {
+      "path": "data\\processed\\us_cross_asset_etf_universe_v1\\etf_data_quality_summary.csv",
+      "sha256": "0f4b32825dbe99dd8dc47dfa0ce219fefa172cabb0c6f617de2d5f4af43609bc",
+      "bytes": 1788
+    },
+    {
+      "path": "data\\processed\\us_cross_asset_etf_universe_v1\\etf_daily_adjusted_close_wide.csv",
+      "sha256": "18731c86a90b480557ca956a262582b8046975ede2b5a7c775d7b3c904cd18b1",
+      "bytes": 719531
+    },
+    {
+      "path": "data\\processed\\us_cross_asset_etf_universe_v1\\etf_daily_total_returns_wide.csv",
+      "sha256": "bc630219ef4518c69eaee08e077b93223aeeafa7b8cb8677426b60d326c8f0cf",
+      "bytes": 884556
+    },
+    {
+      "path": "data\\processed\\us_cross_asset_etf_universe_v1\\etf_monthly_total_returns_wide.csv",
+      "sha256": "7840015627cc22864e42c4e85b786d418f332384c5df0c5db1db1e7d691bdf7f",
+      "bytes": 40464
+    }
+  ],
+  "caveats": [
+    "Adjusted values are back-adjusted by the provider and may change after future distributions or corrections.",
+    "No missing daily returns were forward-filled; portfolio calendar alignment is deferred to the backtest.",
+    "Monthly returns exclude the current partial calendar month."
+  ]
+}
