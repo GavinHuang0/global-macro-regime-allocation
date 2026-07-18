@@ -1,4 +1,11 @@
-"""Shared portfolio backtesting utilities."""
+"""Public backtest accounting and evaluation interface.
+
+This package re-exports the functions used to turn monthly target weights and
+adjusted ETF prices into causal holding-period returns, transaction-cost-aware
+NAV paths, performance summaries, and paired bootstrap comparisons.  Execution
+timing is defined in :mod:`regime_allocation.backtest.engine`; callers should
+not reinterpret a target as tradable before its recorded decision cutoff.
+"""
 
 from regime_allocation.backtest.engine import (
     build_daily_nav,

@@ -19,80 +19,80 @@
     "growth_up_inflation_down": {
       "growth_down_inflation_down": 6,
       "growth_down_inflation_up": 2,
-      "growth_up_inflation_down": 50,
+      "growth_up_inflation_down": 48,
       "growth_up_inflation_up": 15
     },
     "growth_up_inflation_up": {
       "growth_down_inflation_down": 2,
       "growth_down_inflation_up": 16,
       "growth_up_inflation_down": 13,
-      "growth_up_inflation_up": 72
+      "growth_up_inflation_up": 73
     }
   },
   "diagnostics": {
-    "adjacent_row_pairs": 250,
+    "adjacent_row_pairs": 249,
     "excluded_missing_regime_pairs": 5,
     "excluded_nonconsecutive_pairs": 0,
     "excluded_not_available_by_cutoff_pairs": 0,
-    "history_rows": 251,
-    "included_transitions": 245,
+    "history_rows": 250,
+    "included_transitions": 244,
     "latest_destination_month": "2026-05-01"
   },
-  "generated_at_utc": "2026-07-16T14:42:09.145141+00:00",
+  "generated_at_utc": "2026-07-18T02:53:50.837342+00:00",
   "knowledge_cutoff": "2026-06-25",
   "marginal_credible_intervals": {
     "interpretation": "Marginal credible intervals for individual transition-matrix parameters under each row's Dirichlet posterior.",
     "level": 0.95,
     "lower": {
       "growth_down_inflation_down": {
-        "growth_down_inflation_down": 0.39006027193560655,
-        "growth_down_inflation_up": 0.04672750218482591,
-        "growth_up_inflation_down": 0.06657395356745255,
-        "growth_up_inflation_up": 0.028980619032726196
+        "growth_down_inflation_down": 0.39006027193560905,
+        "growth_down_inflation_up": 0.046727502184824736,
+        "growth_up_inflation_down": 0.06657395356745499,
+        "growth_up_inflation_up": 0.02898061903272649
       },
       "growth_down_inflation_up": {
-        "growth_down_inflation_down": 0.03383649713937231,
-        "growth_down_inflation_up": 0.3176261042387232,
-        "growth_up_inflation_down": 0.03383649713937231,
-        "growth_up_inflation_up": 0.19078920755419304
+        "growth_down_inflation_down": 0.033836497139370425,
+        "growth_down_inflation_up": 0.31762610423871934,
+        "growth_up_inflation_down": 0.033836497139370425,
+        "growth_up_inflation_up": 0.1907892075541912
       },
       "growth_up_inflation_down": {
-        "growth_down_inflation_down": 0.034553909495887325,
-        "growth_down_inflation_up": 0.005657991148897423,
-        "growth_up_inflation_down": 0.5638843395732742,
-        "growth_up_inflation_up": 0.12350954044825713
+        "growth_down_inflation_down": 0.035534839735054946,
+        "growth_down_inflation_up": 0.005816364248676578,
+        "growth_up_inflation_down": 0.5529099197224736,
+        "growth_up_inflation_up": 0.12709707125852981
       },
       "growth_up_inflation_up": {
-        "growth_down_inflation_down": 0.004017239463227185,
-        "growth_down_inflation_up": 0.0943757292910341,
-        "growth_up_inflation_down": 0.07191586358394275,
-        "growth_up_inflation_up": 0.5992619905117387
+        "growth_down_inflation_down": 0.003978779814505395,
+        "growth_down_inflation_up": 0.0934486736489727,
+        "growth_up_inflation_down": 0.07121252718882204,
+        "growth_up_inflation_up": 0.6028024471257636
       }
     },
     "upper": {
       "growth_down_inflation_down": {
-        "growth_down_inflation_down": 0.7310808335552714,
-        "growth_down_inflation_up": 0.28652892684825915,
-        "growth_up_inflation_down": 0.3274277516634605,
-        "growth_up_inflation_up": 0.24340160898492869
+        "growth_down_inflation_down": 0.7310808335552709,
+        "growth_down_inflation_up": 0.28652892684826214,
+        "growth_up_inflation_down": 0.3274277516634612,
+        "growth_up_inflation_up": 0.2434016089849271
       },
       "growth_down_inflation_up": {
-        "growth_down_inflation_down": 0.2154722314635542,
-        "growth_down_inflation_up": 0.6141697386537253,
-        "growth_up_inflation_down": 0.2154722314635542,
-        "growth_up_inflation_up": 0.4681730574878067
+        "growth_down_inflation_down": 0.21547223146355604,
+        "growth_down_inflation_up": 0.6141697386537237,
+        "growth_up_inflation_down": 0.21547223146355604,
+        "growth_up_inflation_up": 0.46817305748780774
       },
       "growth_up_inflation_down": {
-        "growth_down_inflation_down": 0.1594838326781094,
-        "growth_down_inflation_up": 0.08387640034750277,
-        "growth_up_inflation_down": 0.7740257121331275,
-        "growth_up_inflation_up": 0.30461930788379377
+        "growth_down_inflation_down": 0.16369862890688425,
+        "growth_down_inflation_up": 0.08612697632302263,
+        "growth_up_inflation_down": 0.7673246803672578,
+        "growth_up_inflation_up": 0.31246907756511383
       },
       "growth_up_inflation_up": {
-        "growth_down_inflation_down": 0.06025477696131887,
-        "growth_down_inflation_up": 0.23225548224310089,
-        "growth_up_inflation_down": 0.1985878693461025,
-        "growth_up_inflation_up": 0.7748176222332397
+        "growth_down_inflation_down": 0.05969433604004113,
+        "growth_down_inflation_up": 0.23015373275377282,
+        "growth_up_inflation_down": 0.1967822202739594,
+        "growth_up_inflation_up": 0.7770778220037327
       }
     }
   },
@@ -110,16 +110,16 @@
       "growth_up_inflation_up": 0.325
     },
     "growth_up_inflation_down": {
-      "growth_down_inflation_down": 0.0821917808219178,
-      "growth_down_inflation_up": 0.0273972602739726,
-      "growth_up_inflation_down": 0.684931506849315,
-      "growth_up_inflation_up": 0.2054794520547945
+      "growth_down_inflation_down": 0.08450704225352113,
+      "growth_down_inflation_up": 0.028169014084507043,
+      "growth_up_inflation_down": 0.676056338028169,
+      "growth_up_inflation_up": 0.2112676056338028
     },
     "growth_up_inflation_up": {
-      "growth_down_inflation_down": 0.019417475728155338,
-      "growth_down_inflation_up": 0.1553398058252427,
-      "growth_up_inflation_down": 0.1262135922330097,
-      "growth_up_inflation_up": 0.6990291262135923
+      "growth_down_inflation_down": 0.019230769230769232,
+      "growth_down_inflation_up": 0.15384615384615385,
+      "growth_up_inflation_down": 0.125,
+      "growth_up_inflation_up": 0.7019230769230769
     }
   },
   "model_id": "m01_deterministic_composite",
@@ -139,14 +139,14 @@
     "growth_up_inflation_down": {
       "growth_down_inflation_down": 6.5,
       "growth_down_inflation_up": 2.5,
-      "growth_up_inflation_down": 50.5,
+      "growth_up_inflation_down": 48.5,
       "growth_up_inflation_up": 15.5
     },
     "growth_up_inflation_up": {
       "growth_down_inflation_down": 2.5,
       "growth_down_inflation_up": 16.5,
       "growth_up_inflation_down": 13.5,
-      "growth_up_inflation_up": 72.5
+      "growth_up_inflation_up": 73.5
     }
   },
   "posterior_predictive": {
@@ -163,16 +163,16 @@
       "growth_up_inflation_up": 0.32142857142857145
     },
     "growth_up_inflation_down": {
-      "growth_down_inflation_down": 0.08666666666666667,
-      "growth_down_inflation_up": 0.03333333333333333,
-      "growth_up_inflation_down": 0.6733333333333333,
-      "growth_up_inflation_up": 0.20666666666666667
+      "growth_down_inflation_down": 0.08904109589041095,
+      "growth_down_inflation_up": 0.03424657534246575,
+      "growth_up_inflation_down": 0.6643835616438356,
+      "growth_up_inflation_up": 0.21232876712328766
     },
     "growth_up_inflation_up": {
-      "growth_down_inflation_down": 0.023809523809523808,
-      "growth_down_inflation_up": 0.15714285714285714,
-      "growth_up_inflation_down": 0.12857142857142856,
-      "growth_up_inflation_up": 0.6904761904761905
+      "growth_down_inflation_down": 0.02358490566037736,
+      "growth_down_inflation_up": 0.15566037735849056,
+      "growth_up_inflation_down": 0.12735849056603774,
+      "growth_up_inflation_up": 0.6933962264150944
     }
   },
   "published_files": {
@@ -181,9 +181,9 @@
   },
   "schema_version": 1,
   "source": {
-    "history_rows": 251,
+    "history_rows": 250,
     "regime_history": "results/published/m01_deterministic_composite/regime_history.csv",
-    "regime_history_sha256": "2f83dbe910b7ddfc814837025f16298e4435a9ba2f0d8af32587b9173826ce2e"
+    "regime_history_sha256": "c3a948c057fff3eb7f6da53108f0afc814fcde72995ddceb5bb42dba3d6d145a"
   },
   "stage_id": "fixed_first_order_transition",
   "state_order": [

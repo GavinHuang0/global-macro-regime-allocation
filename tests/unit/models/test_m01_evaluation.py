@@ -1,4 +1,12 @@
-"""Tests for Model 01's probabilistic evaluation metrics."""
+"""Test probabilistic forecast metrics under the canonical four-state order.
+
+Constructed probability arrays with analytically known outcomes exercise negative
+log likelihood, the unscaled multiclass and axis Brier scores, MAP and balanced
+accuracy, macro recall/F1, target encoding, calibration bins, and expected
+calibration error. Boundary, empty-bin, zero-probability, and malformed-input
+behavior are explicit. The module performs no I/O and fixes the interpretation
+of every metric reported for Model 01.
+"""
 
 from __future__ import annotations
 
@@ -27,6 +35,7 @@ from regime_allocation.models.m01_deterministic_composite.pipeline import REGIME
 
 
 def _one_hot() -> np.ndarray:
+    """Return four perfectly certain forecasts, one for each canonical state."""
     return np.eye(4)
 
 

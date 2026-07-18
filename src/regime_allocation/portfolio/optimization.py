@@ -414,6 +414,7 @@ def _constraints(inputs: _ValidatedInputs, *, with_trade_variables: bool):
     n_assets = len(inputs.assets)
 
     def weights_of(values: np.ndarray) -> np.ndarray:
+        """Extract portfolio weights from a solver decision vector."""
         return values[:n_assets] if with_trade_variables else values
 
     constraints: list[dict[str, object]] = [
@@ -464,6 +465,7 @@ def _solve_primary(inputs: _ValidatedInputs) -> OptimizeResult:
     ]
 
     def objective(values: np.ndarray) -> float:
+        """Return negative net expected return for SciPy minimization."""
         weights = values[:n_assets]
         trades = values[n_assets:]
         return float(-inputs.expected_returns @ weights + inputs.costs @ trades)
@@ -483,6 +485,7 @@ def _solve_minimum_variance(inputs: _ValidatedInputs) -> OptimizeResult:
     bounds = [(0.0, float(cap)) for cap in inputs.caps]
 
     def objective(weights: np.ndarray) -> float:
+        """Return annualized portfolio variance for fallback minimization."""
         return float(weights @ inputs.covariance @ weights)
 
     return minimize(

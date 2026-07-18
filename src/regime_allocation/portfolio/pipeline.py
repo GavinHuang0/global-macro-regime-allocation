@@ -1,4 +1,18 @@
-"""End-to-end causal portfolio allocation and backtesting for Model 01."""
+"""Orchestrate Model 01 portfolio estimation, optimization, and backtesting.
+
+The pipeline reads archived month-start posterior signals, adjusted ETF prices,
+deterministic regime labels, and allocation configuration. At every decision
+date it constructs only completed open-to-open returns and labels known by that
+date, fits shrunken regime moments with a shared Ledoit-Wolf covariance, forms
+posterior mixture moments, and solves the constrained long-only target. It also
+constructs pooled, legacy Sharpe, equal-weight, and static 60/40 comparators.
+
+Outputs include expanded targets, estimation and solver audits, monthly and
+daily performance, bootstrap comparisons, parameter sensitivities, the current
+allocation payload, and content-hash manifests. Signal timing, training cutoffs,
+first-session-open execution, and costs are retained explicitly so publication
+code cannot silently convert a diagnostic posterior into a tradable forecast.
+"""
 
 from __future__ import annotations
 

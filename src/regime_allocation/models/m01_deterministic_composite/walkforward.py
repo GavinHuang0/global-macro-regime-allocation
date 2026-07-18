@@ -4,7 +4,11 @@ The module joins the already-built point-in-time evidence table to the
 deterministic first-release regime history, estimates likelihoods with a
 strictly earlier information set, and replays a four-month joint-path filter.
 It deliberately contains no file-system or publication logic; the CLI owns
-artifact serialization.
+artifact serialization. Inputs are in-memory histories, release events,
+transition and likelihood specifications, and replay dates; outputs preserve
+every checkpoint, joint path, marginal, fit audit, event audit, and forecast.
+Same-day target confirmation can update diagnostics but cannot be scored as a
+forecast made before the label was known.
 """
 
 from __future__ import annotations
@@ -68,9 +72,11 @@ class LikelihoodSpecification:
 
     @property
     def distribution_name(self) -> str:
+        """Return the configured density family name for audit records."""
         return "gaussian" if self.degrees_of_freedom is None else "student_t"
 
     def to_record(self) -> dict[str, object]:
+        """Return the specification as a JSON-serializable audit record."""
         return {
             "specification_id": self.specification_id,
             "distribution": self.distribution_name,
@@ -434,6 +440,7 @@ def run_walk_forward_filter(
         event_ids: Sequence[str] = (),
         confirmation_months: Sequence[pd.Timestamp] = (),
     ) -> str:
+        """Append one normalized filter checkpoint and its optional audits."""
         nonlocal sequence, previous_checkpoint
         sequence += 1
         checkpoint_id = f"{specification.specification_id}:{sequence:06d}"
@@ -544,6 +551,7 @@ def run_walk_forward_filter(
         *,
         release_number: int | None = None,
     ) -> None:
+        """Record the target-month marginal available at this checkpoint."""
         axis = _month_axis(target_month, anchor_month)
         if axis is None:
             return
@@ -962,9 +970,7 @@ def attach_forecast_targets(
     before_start = (output["target_reference_month"] < start).to_numpy()
     status[(status == "eligible") & before_start] = "before_evaluation_start"
     label_dates = pd.to_datetime(output["target_label_available_at"], errors="coerce")
-    pre_confirmation = output["checkpoint_type"].eq("pre_confirmation")
     date_valid = output["checkpoint_date"] < label_dates
-    date_valid |= pre_confirmation & output["checkpoint_date"].eq(label_dates)
     status[(status == "eligible") & ~date_valid.to_numpy()] = (
         "not_strictly_pre_confirmation"
     )

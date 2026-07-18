@@ -1,6 +1,9 @@
 # Data access and credential handling
 
-This project supports two official St. Louis Fed data-access paths. Authenticated FRED API access is the preferred path for new downloads, while the existing keyless ALFRED web client remains available as a reproducibility and availability fallback.
+This project supports two official St. Louis Fed data-access paths.
+Authenticated FRED API access is the preferred path for new downloads, while
+the existing keyless ALFRED web client remains available as a reproducibility
+and availability fallback.
 
 ## Provider selection
 
@@ -21,7 +24,8 @@ python -m regime_allocation.cli.build_m01_transition
 python -m regime_allocation.cli.build_m01_inference
 ```
 
-The two providers can be selected explicitly for diagnostics and reproducibility:
+The two providers can be selected explicitly for diagnostics and
+reproducibility:
 
 ```powershell
 python -m regime_allocation.cli.build_m01_dataset --provider fred
@@ -30,7 +34,9 @@ python -m regime_allocation.cli.build_m01_evidence --provider fred
 python -m regime_allocation.cli.build_m01_evidence --provider alfred
 ```
 
-Provider selection changes how missing data are acquired. It does not change the mathematical feature or regime definition, the normalized vintage-matrix contract, or downstream output schemas.
+Provider selection changes how missing data are acquired. It does not change
+the mathematical feature or regime definition, the normalized vintage-matrix
+contract, or downstream output schemas.
 
 ## Authenticated retrieval contract
 
@@ -67,7 +73,9 @@ The repository-level Actions secret must be named exactly:
 FRED_API_KEY
 ```
 
-The manual workflow at `.github/workflows/refresh-model-01.yml` passes that secret to the data process as an environment variable. It deliberately:
+The manual workflow at `.github/workflows/reproduce-model-01.yml` passes that
+secret only to the two macro-acquisition steps as an environment variable. It
+deliberately:
 
 - runs only through `workflow_dispatch`;
 - grants only `contents: read` permission;
@@ -79,22 +87,36 @@ The manual workflow at `.github/workflows/refresh-model-01.yml` passes that secr
   audit/reproducibility tables;
 - excludes raw downloads and provider caches from the artifact.
 
-The workflow invokes `--provider fred --refresh` explicitly. A missing or invalid secret therefore stops the refresh instead of silently producing an Actions artifact through a different provider.
+The workflow invokes `--provider fred --refresh` explicitly, then rebuilds the
+transition, posterior, frozen ETF snapshot, allocation, backtest, and tests. A
+missing or invalid secret therefore stops reproduction instead of silently
+producing an artifact through a different macro provider.
 
-GitHub Actions secrets are not files in the checked-out repository. A secret configured on GitHub is consequently unavailable to a normal local process—and to tools operating only on the local workspace—unless it is separately exported into that process's environment.
+GitHub Actions secrets are not files in the checked-out repository. A secret
+configured on GitHub is consequently unavailable to a normal local process—and
+to tools operating only on the local workspace—unless it is separately
+exported into that process's environment.
 
 ## Local credential rules
 
-For local authenticated retrieval, provide `FRED_API_KEY` through a trusted process environment or an operating-system secret manager. Do not place the value in:
+For local authenticated retrieval, provide `FRED_API_KEY` through a trusted
+process environment or an operating-system secret manager. Do not place the
+value in:
 
 - source code, tests, notebooks, configuration YAML, or documentation;
 - `.env` or other files inside the repository;
 - command-line options or shell scripts;
 - request logs, exception messages, cache keys, filenames, or manifests.
 
-The key is authentication material, not part of a dataset's identity. Cache identities and provenance records therefore exclude it. Errors should identify the provider and failed operation without reproducing an authenticated request URL.
+The key is authentication material, not part of a dataset's identity. Cache
+identities and provenance records therefore exclude it. Errors should identify
+the provider and failed operation without reproducing an authenticated request
+URL.
 
-If a key may have entered Git history, an Actions log, an artifact, or another shared location, revoke it at FRED immediately and replace the GitHub Actions secret with a new key. Removing it only from the current working tree is insufficient.
+If a key may have entered Git history, an Actions log, an artifact, or another
+shared location, revoke it at FRED immediately and replace the GitHub Actions
+secret with a new key. Removing it only from the current working tree is
+insufficient.
 
 ## Keyless fallback
 
@@ -105,17 +127,31 @@ The ALFRED provider is intentionally retained. It supports:
 - recovery from an authenticated-provider configuration problem;
 - continued use of the historical keyless acquisition path.
 
-Automatic fallback occurs only when `FRED_API_KEY` is absent. When a key is present but an authenticated request fails, the builder should surface that failure rather than silently switching providers. This avoids concealing authentication, rate-limit, or data-contract problems and ensures provenance remains unambiguous.
+Automatic fallback occurs only when `FRED_API_KEY` is absent. When a key is
+present but an authenticated request fails, the builder should surface that
+failure rather than silently switching providers. This avoids concealing
+authentication, rate-limit, or data-contract problems and ensures provenance
+remains unambiguous.
 
 ## Existing caches and gathered data
 
-Adding the FRED API provider does not delete or invalidate data already gathered through the keyless client. Normal runs continue to reuse compatible normalized cache files before making a network request.
+Adding the FRED API provider does not delete or invalidate data already gathered
+through the keyless client. Normal runs continue to reuse compatible normalized
+cache files before making a network request.
 
-Provider-specific intermediate caches remain separate so authenticated and keyless response formats cannot collide. Downstream code consumes the same normalized vintage matrix regardless of provider.
+Provider-specific intermediate caches remain separate so authenticated and
+keyless response formats cannot collide. Downstream code consumes the same
+normalized vintage matrix regardless of provider.
 
-The `--refresh` flag is an explicit request to reacquire the configured date range. In the manual GitHub Actions workflow this happens in an ephemeral runner: the refreshed files are tested and uploaded as a temporary artifact, but they do not alter the repository because the workflow has no write permission and no commit or push step.
+The `--refresh` flag is an explicit request to reacquire the configured date
+range. In the manual GitHub Actions workflow this happens in an ephemeral
+runner: the refreshed files are tested and uploaded as a temporary artifact,
+but they do not alter the repository because the workflow has no write
+permission and no commit or push step.
 
-The committed historical data and existing normalized caches therefore remain intact unless a maintainer separately reviews and intentionally commits replacements.
+The committed historical data and existing normalized caches therefore remain
+intact unless a maintainer separately reviews and intentionally commits
+replacements.
 
 ## Manual refresh workflow
 
@@ -123,10 +159,10 @@ To run the authenticated refresh:
 
 1. Configure `FRED_API_KEY` under the repository's GitHub Actions secrets.
 2. Open **Actions** on GitHub.
-3. Select **Refresh Model 01 data**.
+3. Select **Reproduce frozen Model 01**.
 4. Choose **Run workflow**.
 5. Review the build and test logs.
-6. Download the `model-01-refresh-<run-id>` artifact if the job succeeds.
+6. Download the `frozen-model-01-<run-id>` artifact if the job succeeds.
 
 The artifact contains only:
 
@@ -134,13 +170,21 @@ The artifact contains only:
 data/manifests/m01_deterministic_composite.json
 data/manifests/m01_non_defining_release_evidence.json
 data/manifests/m01_event_driven_bayesian_filter.json
-data/processed/m01_non_defining_release_evidence/*.csv
+data/manifests/us_cross_asset_etf_universe_v1.json
+data/manifests/m01_regime_allocation_backtest.json
+data/processed/m01_deterministic_composite/*
+data/processed/m01_non_defining_release_evidence/*
 data/processed/m01_bayesian_filter/*
+data/processed/us_cross_asset_etf_universe_v1/*
+data/processed/m01_regime_allocation_backtest/*
 results/published/m01_deterministic_composite/
 results/published/m01_bayesian_filter/
+results/published/m01_regime_allocation_backtest/
 ```
 
-Artifact creation is a validation and handoff mechanism, not a publication step. Publishing refreshed results to the repository should be handled later through an intentionally reviewed commit or pull request.
+Artifact creation is a validation and handoff mechanism, not a publication
+step. Publishing refreshed results to the repository should be handled later
+through an intentionally reviewed commit or pull request.
 
 ## Attribution and data rights
 

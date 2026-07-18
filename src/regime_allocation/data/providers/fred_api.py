@@ -1,8 +1,10 @@
-"""Authenticated FRED API provider for point-in-time vintage matrices.
+"""Retrieve point-in-time vintages through the authenticated FRED API.
 
 The API key is accepted only as an in-memory constructor argument. It is never
 included in cache identities, filenames, metadata, subprocess arguments,
-public source URLs, or raised exception messages.
+public source URLs, or raised exception messages. The adapter returns either a
+normalized observation-by-vintage matrix or first-release observations with
+public, credential-free provenance; it performs no feature or regime logic.
 """
 
 from __future__ import annotations
@@ -99,6 +101,7 @@ class FredApiDownloadClient:
 
     @staticmethod
     def series_page_url(series_id: str) -> str:
+        """Return the public FRED description page for a validated series ID."""
         FredApiDownloadClient._validate_series_id(series_id)
         return f"https://fred.stlouisfed.org/series/{series_id}"
 

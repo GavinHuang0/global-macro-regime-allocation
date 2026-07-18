@@ -6,7 +6,7 @@
   "credential_policy": "This stage consumes credential-free processed files and never reads, logs, or serializes FRED_API_KEY or brokerage credentials.",
   "formal_backtest_end": "2026-06-01T00:00:00",
   "formal_backtest_start": "2018-01-01T00:00:00",
-  "generated_at_utc": "2026-07-17T19:28:26.895108+00:00",
+  "generated_at_utc": "2026-07-18T03:00:21.011907+00:00",
   "implementation_files": [
     {
       "bytes": 44793,
@@ -29,9 +29,9 @@
       "sha256": "5594b480eaac20880b71ed4061b737969686961d0d8bcfb15168d12dd9f1940d"
     },
     {
-      "bytes": 15272,
+      "bytes": 15617,
       "path": "src/regime_allocation/backtest/engine.py",
-      "sha256": "0ac9b8d3be1585862f685c15cd0f5f4520244a0a5867df5ba16b422ec560e924"
+      "sha256": "d6e4fbb82e5e69f7cdab7721c72fb5e169f190d9547ae6520142841b804b5a7d"
     },
     {
       "bytes": 13730,
@@ -46,9 +46,9 @@
   ],
   "inputs": {
     "checkpoint_index": {
-      "bytes": 784629,
+      "bytes": 787087,
       "path": "data/processed/m01_bayesian_filter/checkpoint_index.csv",
-      "sha256": "a4717169f93b609dac3884cede7a053b5459c18f80e7d79535e9bd121eb0b065"
+      "sha256": "a40315a35007fc7a4ef8ed3e15ccadd58af4823622b9f22e347bfce14ff4ab4c"
     },
     "etf_daily_prices": {
       "bytes": 10573889,
@@ -56,23 +56,23 @@
       "sha256": "7cbd321c5af2662065edfc3a5c3c1cdb6101bda10de7862bc09c09041bdcb7f1"
     },
     "marginal_checkpoints": {
-      "bytes": 13991027,
+      "bytes": 14017431,
       "path": "data/processed/m01_bayesian_filter/marginal_checkpoints.csv",
-      "sha256": "9af5fb33ecd87f805f20b632c0b649d71e007e2ca61eeef306949ad20a658cd5"
+      "sha256": "0b1a33a476e9230e2d5e034c13f4bc9b30fe20bb26adbd73dd71b778deedf30a"
     },
     "regime_history": {
-      "bytes": 45938,
+      "bytes": 45747,
       "path": "results/published/m01_deterministic_composite/regime_history.csv",
-      "sha256": "2f83dbe910b7ddfc814837025f16298e4435a9ba2f0d8af32587b9173826ce2e"
+      "sha256": "c3a948c057fff3eb7f6da53108f0afc814fcde72995ddceb5bb42dba3d6d145a"
     }
   },
   "latest_live_target_month": "2026-07-01T00:00:00",
   "model_id": "m01_deterministic_composite",
   "output_files": [
     {
-      "bytes": 13156,
+      "bytes": 13149,
       "path": "data/processed/m01_regime_allocation_backtest/signal_table.csv",
-      "sha256": "04f8f452b69dfacc6a4daa572bc0fa2b7f6a4e79912f1c7df53b203f19f32caa"
+      "sha256": "b9bf07f00e233d34b679af7777c641a137f046fe40bcfde2b471bbc7ff78ffcb"
     },
     {
       "bytes": 21185,
@@ -80,84 +80,84 @@
       "sha256": "dec0594bd052946f706d8de815d5cb25577bd10e8d5bebe6c2eebe055fdc0767"
     },
     {
-      "bytes": 7970738,
+      "bytes": 7962502,
       "path": "data/processed/m01_regime_allocation_backtest/regime_estimate_audit.csv",
-      "sha256": "c3384562f6f0065e5df1581d77d0b052dc96e56be5c442183a30eaeff7d46a4e"
+      "sha256": "03f4a37354d4a4d1d2ba8603eb42f38d9fc627476114f2a9360d4ff699ed4276"
     },
     {
-      "bytes": 711878,
+      "bytes": 713765,
       "path": "data/processed/m01_regime_allocation_backtest/optimizer_audit.csv",
-      "sha256": "b25e70df610c5140ce17632967d83bbaabc6c0e4581d59ab2d79bcecfeab8f28"
+      "sha256": "9cb868e11bec472c76ea543e95fc7f328d8d3a8871095cae7a932431d9c3c037"
     },
     {
-      "bytes": 1380161,
+      "bytes": 1378406,
       "path": "data/processed/m01_regime_allocation_backtest/monthly_weights.csv",
-      "sha256": "dd3fad62fb89001c6f2336de7a6302f89c9f47cd11d6980fd26f32a27b9da1c7"
+      "sha256": "4f62410c5a9b6276e753741df09d74b3430c229e4222b3e64e283b28060aa54b"
     },
     {
-      "bytes": 307094,
+      "bytes": 307215,
       "path": "data/processed/m01_regime_allocation_backtest/monthly_strategy_returns.csv",
-      "sha256": "7fc6bfa3d82641d46f995847f3241692649d5d856fd9c39b258a6439588716ef"
+      "sha256": "448eb9d89ed0607bfca29eed7c60b020dec31af72866f08245433df2d15eae81"
     },
     {
-      "bytes": 443339,
+      "bytes": 463029,
       "path": "data/processed/m01_regime_allocation_backtest/daily_nav.csv.gz",
-      "sha256": "1cd2a3e412ee7440c76ee9185828e5712e97519c0cdd5e72160409502a64646b"
+      "sha256": "13a8ce0c6046b9d2b7c5d9d6560988dbfe5fc40612f906d2dba76392658f2ae8"
     },
     {
-      "bytes": 5962,
+      "bytes": 5984,
       "path": "data/processed/m01_regime_allocation_backtest/performance_metrics.csv",
-      "sha256": "ec2a477cdf4daeec5e5f9421dfca0813400b729785a365dd976c68db1b832802"
+      "sha256": "6774f285116f82b25ba9318f81e2dbbc3f61041d98811f312d9398b7a38160e9"
     },
     {
-      "bytes": 1367,
+      "bytes": 1370,
       "path": "data/processed/m01_regime_allocation_backtest/comparison_uncertainty.csv",
-      "sha256": "ff6c5f2b2a8f8dcbba36e9e7354fe794b0eadacc8c3e01e7dda002e25029b9bb"
+      "sha256": "b304f2edebf2a9201a2cc5036f283937992828ad5fc1488931d8a1db1247b22f"
     },
     {
-      "bytes": 4880,
+      "bytes": 4897,
       "path": "data/processed/m01_regime_allocation_backtest/sensitivity_metrics.csv",
-      "sha256": "ef783eaa13457269553389477a1a822a31c7646615af175f04655e9bb7c53f18"
+      "sha256": "8f872fb21cb45c67d754d965a7d844a08f9d5ef31542cae08ac051d60a191d3c"
     },
     {
-      "bytes": 85871,
+      "bytes": 85801,
       "path": "data/processed/m01_regime_allocation_backtest/legacy_sharpe_audit.csv",
-      "sha256": "d968e8372c877975ddcd80856cffce5593c4e98738555c52860417220dfe5725"
+      "sha256": "b796773ae736c4bf6e1e93b0350fe0c70e4198890e7b8e252351fcd77a99e639"
     },
     {
-      "bytes": 1849,
+      "bytes": 1850,
       "path": "results/published/m01_regime_allocation_backtest/latest_allocation.json",
-      "sha256": "53649d25651ea462175202cd9ff8ac521fc23eb80cf05c313324deccf88452f1"
+      "sha256": "026db5489ea19c5bc166a146118bbce6f3525d2d63d865f53d66cef3bf9b3e2d"
     },
     {
-      "bytes": 9633,
+      "bytes": 9625,
       "path": "results/published/m01_regime_allocation_backtest/backtest_summary.json",
-      "sha256": "45cbb80ffffedbe3a8eb7ac3a4d3b116493132580528e71a44f9ad95fe3958f6"
+      "sha256": "64eaf111975eafa7b3ad34d529c4afe42f95e7a78e243836fc3afeb50c8299d7"
     },
     {
-      "bytes": 2217,
+      "bytes": 2206,
       "path": "results/published/m01_regime_allocation_backtest/performance_summary.csv",
-      "sha256": "4171141ae92cf9cf531deb11e713e0f94518a570cae981cd41a189a2e7714009"
+      "sha256": "bac13e546bb368ddb6b374b33d441e9cc68426cc01e206d204caad2c73a0baa2"
     },
     {
-      "bytes": 1367,
+      "bytes": 1370,
       "path": "results/published/m01_regime_allocation_backtest/comparison_uncertainty.csv",
-      "sha256": "ff6c5f2b2a8f8dcbba36e9e7354fe794b0eadacc8c3e01e7dda002e25029b9bb"
+      "sha256": "b304f2edebf2a9201a2cc5036f283937992828ad5fc1488931d8a1db1247b22f"
     },
     {
-      "bytes": 99964,
+      "bytes": 99979,
       "path": "results/published/m01_regime_allocation_backtest/monthly_returns.csv",
-      "sha256": "5c613f8e6c69e47b81029ebe374a0eed02395b289531d333bcf72096e1088db0"
+      "sha256": "917e00c935c6480afd6ba2d9f6ee08ce436adf7a64a00470125161ea25f2bcd8"
     },
     {
-      "bytes": 416293,
+      "bytes": 415759,
       "path": "results/published/m01_regime_allocation_backtest/monthly_weights.csv",
-      "sha256": "5f30ed370daea3fa51d7f8dc495a9e319e1a97684101ec20028ceb42121a9d8c"
+      "sha256": "8f2519f4c141bc798f3a6ea1126e3cc4e8a77a92bedc0eddeca4161256a485c7"
     },
     {
-      "bytes": 4880,
+      "bytes": 4897,
       "path": "results/published/m01_regime_allocation_backtest/sensitivity_metrics.csv",
-      "sha256": "ef783eaa13457269553389477a1a822a31c7646615af175f04655e9bb7c53f18"
+      "sha256": "8f872fb21cb45c67d754d965a7d844a08f9d5ef31542cae08ac051d60a191d3c"
     }
   ],
   "pooled_mean_ablation_included": true,

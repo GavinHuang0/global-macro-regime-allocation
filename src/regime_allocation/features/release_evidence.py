@@ -1,8 +1,12 @@
-"""Causal feature and event-table construction for non-defining evidence.
+"""Construct the canonical event table for non-defining regime evidence.
 
 This module contains no Bayesian inference.  It converts point-in-time release
 records into a provider-neutral, long event table that a later filtering layer
 can consume without reinterpreting release dates or recomputing features.
+Monthly block inputs are first-release component values; the weekly claims block
+uses causal AR(1) innovations. Outputs identify each release group, reference
+period, feature vector, availability date, and exclusion reason, enabling the
+walk-forward filter to impose strict historical training cutoffs.
 """
 
 from __future__ import annotations

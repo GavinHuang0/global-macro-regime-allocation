@@ -1,4 +1,12 @@
-"""Synthetic, no-network integration test for release evidence preparation."""
+"""Exercise the release-evidence build from synthetic provider observations.
+
+The suite replaces network acquisition with deterministic monthly and weekly
+release records, invokes the production evidence command, and checks event-table
+schema, feature provenance, release timing, archive policies, configuration
+validation, and output manifests. Inputs and outputs remain inside temporary test
+directories; no cached Model 01 data or external service is touched. These tests
+protect the point-in-time evidence contract used by the Bayesian filter.
+"""
 
 from __future__ import annotations
 
@@ -38,6 +46,7 @@ MONTHLY_SERIES = (
 
 
 def _vintage_zip(series_id: str, months: pd.DatetimeIndex) -> bytes:
+    """Encode deterministic monthly first releases as an in-memory vintage ZIP."""
     series_number = MONTHLY_SERIES.index(series_id) + 1
     values = [80.0 + 5.0 * series_number]
     for position in range(1, len(months)):
@@ -75,6 +84,7 @@ def _vintage_zip(series_id: str, months: pd.DatetimeIndex) -> bytes:
 
 
 def _config() -> dict[str, object]:
+    """Build a synthetic configuration that preserves the production block contract."""
     blocks: dict[str, object] = {}
     for block_name, expected in build_m01_evidence._EXPECTED_BLOCKS.items():
         sources = [
@@ -123,6 +133,8 @@ def _config() -> dict[str, object]:
 
 
 class _FakeProvider:
+    """Supply deterministic first-release observations through the provider API."""
+
     provider_id = "fred_api"
     provider_description = "synthetic authenticated FRED provider"
     cache_namespace = "fred_api"

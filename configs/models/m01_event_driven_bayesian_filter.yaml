@@ -132,6 +132,7 @@ evaluation:
   exclude_unclassified_targets: true
   score_only_before_target_confirmation: true
   score_post_confirmation: false
+  same_day_pre_confirmation_scoring: false
   probability_floor_for_log_score: null
   zero_probability_log_score_policy: infinite
   calibration_bins: 10

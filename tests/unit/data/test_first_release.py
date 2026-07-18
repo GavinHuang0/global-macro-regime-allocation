@@ -1,4 +1,11 @@
-"""Tests for release-coherent first-release feature extraction."""
+"""Test release-coherent extraction and transformation of vintage matrices.
+
+Hand-built matrices expose first appearances, later revisions, lagged backfills,
+and an initial archive snapshot. Assertions require each transformed feature to
+use the current and prior observation from the same eligible vintage and enforce
+the archive-start and release-lag policies. These unit tests perform no I/O and
+guard the earliest causal stage of the deterministic regime target.
+"""
 
 from __future__ import annotations
 
@@ -95,6 +102,35 @@ def test_bulk_backfill_outside_release_lag_limit_is_rejected() -> None:
         "transformed_value",
         "release_lag_days",
     ]
+
+
+def test_archive_start_policy_keeps_only_latest_first_snapshot_reference() -> None:
+    matrix = pd.DataFrame(
+        {
+            "TEST_20200110": [90.0, 100.0, 110.0, None],
+            "TEST_20200207": [91.0, 101.0, 111.0, 120.0],
+        },
+        index=pd.to_datetime(
+            ["2019-10-01", "2019-11-01", "2019-12-01", "2020-01-01"]
+        ),
+    )
+
+    actual = extract_first_release_features(
+        matrix,
+        series_id="TEST",
+        component="test_component",
+        transform="difference",
+        max_release_lag_days=92,
+        archive_start_latest_only=True,
+    )
+
+    assert actual["reference_month"].tolist() == [
+        pd.Timestamp("2019-12-01"),
+        pd.Timestamp("2020-01-01"),
+    ]
+    assert actual.attrs["extraction_diagnostics"][
+        "rows_excluded_archive_bootstrap"
+    ] == 2
 
 
 @pytest.mark.parametrize(

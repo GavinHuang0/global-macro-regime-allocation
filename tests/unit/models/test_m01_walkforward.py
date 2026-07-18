@@ -1,4 +1,12 @@
-"""Tests for Model 01's causal walk-forward orchestration."""
+"""Test event ordering, checkpoints, confirmation, and evaluation walk-forward.
+
+Compact synthetic regime histories, release events, and block vectors are passed
+through the real filter orchestration. Assertions cover ICSA-only vector assembly,
+strict likelihood-fit cutoffs, same-day event ordering, pre-confirmation and hard
+confirmation checkpoints, and paired evaluation against transition-only forecasts.
+All data remain in memory; the purpose is to prevent timing conventions from
+turning diagnostic states into infeasible scored forecasts.
+"""
 
 from __future__ import annotations
 
@@ -16,6 +24,7 @@ from regime_allocation.models.m01_deterministic_composite.walkforward import (
 
 
 def _history() -> pd.DataFrame:
+    """Return four monthly regimes with staggered point-in-time availability."""
     return pd.DataFrame(
         {
             "reference_month": pd.to_datetime(
@@ -30,6 +39,7 @@ def _history() -> pd.DataFrame:
 
 
 def _events() -> pd.DataFrame:
+    """Return monthly and same-day claims events for ordering tests."""
     records = []
     values = [0.0, 1.0, 2.0, -1.0]
     releases = ["2020-02-05", "2020-03-05", "2020-04-05", "2020-04-20"]
@@ -67,6 +77,7 @@ def _events() -> pd.DataFrame:
 
 
 def _vectors() -> dict[str, pd.DataFrame]:
+    """Prepare likelihood-ready block vectors from the synthetic fixtures."""
     return prepare_block_vectors(
         _events(),
         _history(),
@@ -222,3 +233,18 @@ def test_forecast_evaluation_uses_transition_only_on_identical_rows() -> None:
     assert set(fixed["specification_id"]) == {"baseline", "transition_only"}
     assert fixed["observation_count"].eq(1).all()
     assert fixed["brier_skill_vs_transition_only"].notna().all()
+
+    same_day = forecasts.loc[
+        forecasts["checkpoint_type"].eq("pre_confirmation")
+    ]
+    assert not same_day.empty
+    assert same_day["checkpoint_date"].eq(
+        same_day["target_label_available_at"]
+    ).all()
+    # This synthetic fixture predates the configured evaluation start, so the
+    # status may be reported as either causal exclusion.  The invariant that
+    # matters is that a checkpoint on the label-release date is never scored.
+    assert set(same_day["evaluation_status"]).issubset(
+        {"before_evaluation_start", "not_strictly_pre_confirmation"}
+    )
+    assert not same_day["evaluation_eligible"].any()

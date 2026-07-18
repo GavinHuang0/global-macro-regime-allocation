@@ -1,4 +1,11 @@
-"""Model 01 deterministic regimes, inference, and evaluation primitives."""
+"""Public interface for the frozen Model 01 regime architecture.
+
+Model 01 deterministically labels monthly growth/inflation quadrants, estimates
+a causal first-order transition model, updates a joint four-month path with
+release-block likelihoods, and evaluates the resulting probability forecasts.
+This package re-exports the stable primitives used by CLIs and tests; file I/O
+and artifact publication remain outside the mathematical core.
+"""
 
 from regime_allocation.models.m01_deterministic_composite.evaluation import (
     CalibrationBin,

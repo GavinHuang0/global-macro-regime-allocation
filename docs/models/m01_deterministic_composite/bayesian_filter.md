@@ -32,6 +32,32 @@ model.
 This stage remains a regime-inference experiment. It does not optimize a
 portfolio, simulate execution, or constitute an investment recommendation.
 
+## Notation
+
+The following notation is used throughout the Model 01 documentation:
+
+- $m$ is a monthly economic reference period, while $\ell$ denotes another
+  historical reference month;
+- $d$ is a calendar date on which information is known, and $\mathcal D_d$ is
+  everything available by the end of that date under Model 01's documented
+  within-day convention;
+- $R_m\in\mathcal R$ is the regime for month $m$, where $\mathcal R$ is the
+  four-regime state set;
+- $S_m=(R_{m-3},R_{m-2},R_{m-1},R_m)$ is the four-month random path, and $s$
+  is one particular candidate path;
+- $r_\ell(s)$ is the regime assigned to month $\ell$ by candidate path $s$;
+- $e$ identifies a release event, $d_e$ is its publication date, $m(e)$ is its
+  reference month, and $b(e)$ is its release block;
+- $q_{m,d}(s)=\Pr(S_m=s\mid\mathcal D_d)$ is the posterior probability of path
+  $s$ at knowledge date $d$.
+
+Superscripts $-$ and $+$ denote the probabilities immediately before and
+after an operation on the same date. Bold lowercase letters denote vectors;
+bold uppercase letters denote matrices. A hat marks an estimate, and a tilde
+marks a shrunken estimate. These symbols describe reference months and
+knowledge dates separately; a release published in month $m+1$ can still be
+evidence about reference month $m$.
+
 ## 1. State and fixed-lag path
 
 The permanent state order is:
@@ -41,11 +67,11 @@ The permanent state order is:
 3. `growth_up_inflation_down`;
 4. `growth_down_inflation_down`.
 
-On a day in calendar month $m$, the filter retains
+On knowledge date $d$ in calendar month $m$, the filter retains
 
 $$
-q_t(a,b,c,d)
-=P(R_{m-3}=a,R_{m-2}=b,R_{m-1}=c,R_m=d\mid\mathcal F_t).
+q_{m,d}(s)
+=\Pr(S_m=s\mid\mathcal D_d).
 $$
 
 There are $4^4=256$ possible paths. The four-month window allows a delayed
@@ -59,13 +85,23 @@ are strictly before the initial cutoff are then clamped atomically, and the
 remaining path mass is normalized. This explicit rule avoids estimating an
 initial distribution from future regime frequencies.
 
-At the beginning of a new calendar month, the filter shifts with the expanding
-transition matrix available strictly before the roll date:
+At the beginning of month $m+1$, the filter shifts with the expanding
+transition matrix available strictly before the roll date $d$. For candidate
+states $r_{m-3},\ldots,r_{m+1}\in\mathcal R$, the shifted prior is
 
 $$
-q^-_{m+1}(b,c,d,e)
-=\sum_{a=1}^4 q_m(a,b,c,d)\overline A^{(t)}_{de}.
+\begin{aligned}
+q^-_{m+1,d}(r_{m-2},r_{m-1},r_m,r_{m+1})
+={}&\sum_{r_{m-3}\in\mathcal R}
+q_{m,d^-}(r_{m-3},r_{m-2},r_{m-1},r_m)\\
+&\times\overline A^{(d^-)}_{r_m,r_{m+1}}.
+\end{aligned}
 $$
+
+Here $d^-$ means the information set immediately before the month roll, and
+$\overline{\mathbf A}^{(d^-)}$ is the causally estimated transition matrix
+available at that point. The sum discards the oldest month, keeps the three
+overlapping months, and appends a possible state for month $m+1$.
 
 The transition matrix uses the same consecutive-month eligibility and
 Dirichlet-$0.5$ smoothing rules specified in
@@ -112,16 +148,19 @@ block $b$, the expanding training set is
 
 $$
 \mathcal T_b(d)=
-\{(y_e,R_{q(e)}):
-d_e<d,\ T_{q(e)}<d,\ y_e\text{ is a complete usable block vector}\},
+\{e:b(e)=b,\ d_e<d,\ T_{m(e)}<d,\ \boldsymbol y_e
+\text{ is a complete usable block vector}\},
 $$
 
 where:
 
+- $\mathcal T_b(d)$ is the set of block-$b$ event records allowed into the
+  fit made on date $d$;
 - $d_e$ is the historical event's publication date;
-- $q(e)$ is its regime reference month;
-- $T_{q(e)}$ is that deterministic label's `label_available_at` date;
-- $y_e\in\mathbb R^{p_b}$ is its causal standardized feature vector.
+- $m(e)$ is its regime reference month;
+- $T_{m(e)}$ is that deterministic label's `label_available_at` date;
+- $\boldsymbol y_e\in\mathbb R^{p_b}$ is its vector of causal standardized
+  features, and $p_b$ is the number of features in block $b$.
 
 Both inequalities are strict. An event published today cannot train today's
 likelihood, and a label confirmed today cannot enter today's likelihood fit.
@@ -146,26 +185,34 @@ assigned to regime $r$. Define the unshrunk regime mean and the global block
 mean as
 
 $$
-\bar y_{b,r}=\frac{1}{n_{b,r}}
-\sum_{e\in\mathcal T_b(d):R_{q(e)}=r}y_e,
+\overline{\boldsymbol y}_{b,r}=\frac{1}{n_{b,r}}
+\sum_{e\in\mathcal T_b(d):R_{m(e)}=r}\boldsymbol y_e,
 $$
 
 $$
-\bar y_b=\frac{1}{n_b}\sum_{e\in\mathcal T_b(d)}y_e.
+\overline{\boldsymbol y}_b
+=\frac{1}{n_b}\sum_{e\in\mathcal T_b(d)}\boldsymbol y_e,
+\qquad
+n_b=\sum_{r\in\mathcal R}n_{b,r}.
 $$
+
+$\overline{\boldsymbol y}_{b,r}$ is the ordinary sample mean for regime $r$,
+whereas $\overline{\boldsymbol y}_b$ is the mean across every usable training
+event in block $b$.
 
 The production mean is
 
 $$
-\widetilde\mu_{b,r}
-=\frac{n_{b,r}\bar y_{b,r}+\kappa\bar y_b}{n_{b,r}+\kappa},
+\widetilde{\boldsymbol\mu}_{b,r}
+=\frac{n_{b,r}\overline{\boldsymbol y}_{b,r}
++\kappa\overline{\boldsymbol y}_b}{n_{b,r}+\kappa},
 \qquad \kappa=5.
 $$
 
 Thus the block-wide mean contributes five pseudo-observations to each regime.
 Well-populated regimes remain data-driven, while a rare or not-yet-observed
 regime is pulled toward the global mean. When $n_{b,r}=0$ and $\kappa>0$, its
-mean is exactly $\bar y_b$.
+mean is exactly $\overline{\boldsymbol y}_b$.
 
 This is shrinkage of conditional means, not a Bayesian posterior over mean
 parameters. The baseline carries the resulting point estimates into the
@@ -177,22 +224,25 @@ performance and the $\kappa$ sensitivity grid.
 For each labeled training vector, construct the residual
 
 $$
-e_e=y_e-\widetilde\mu_{b,R_{q(e)}}.
+\boldsymbol\varepsilon_e
+=\boldsymbol y_e-\widetilde{\boldsymbol\mu}_{b,R_{m(e)}}.
 $$
 
 All regimes' residuals are pooled within block $b$. Let
-$S_b^{\mathrm{emp}}$ be their maximum-likelihood empirical covariance and let
+$\mathbf S_b^{\mathrm{emp}}$ be their maximum-likelihood empirical covariance
+and let
 
 $$
-F_b=\frac{\operatorname{tr}(S_b^{\mathrm{emp}})}{p_b}I_{p_b}
+\mathbf F_b
+=\frac{\operatorname{tr}(\mathbf S_b^{\mathrm{emp}})}{p_b}\mathbf I_{p_b}
 $$
 
 be the spherical target. The Ledoit-Wolf estimate has the form
 
 $$
-\widehat C_b^{\mathrm{LW}}
-=(1-\widehat\lambda_b)S_b^{\mathrm{emp}}
-+\widehat\lambda_b F_b,
+\widehat{\mathbf C}_b^{\mathrm{LW}}
+=(1-\widehat\lambda_b)\mathbf S_b^{\mathrm{emp}}
++\widehat\lambda_b\mathbf F_b,
 \qquad 0\leq\widehat\lambda_b\leq1,
 $$
 
@@ -214,37 +264,45 @@ interpreted as an invariance check, not as three genuinely different models.
 
 ## 6. Student-$t$ parameterization
 
-For block dimension $p_b$, Model 01 uses the multivariate Student-$t$ density
+For a block of dimension $p_b$, Model 01 uses the multivariate Student-$t$
+density
 
 $$
-f(y\mid\mu,\Psi,\nu)
+f_b(\boldsymbol y\mid\boldsymbol\mu,\boldsymbol\Psi,\nu)
 =\frac{\Gamma((\nu+p_b)/2)}
-{\Gamma(\nu/2)(\nu\pi)^{p_b/2}|\Psi|^{1/2}}
+{\Gamma(\nu/2)(\nu\pi)^{p_b/2}|\boldsymbol\Psi|^{1/2}}
 \left[
-1+\frac{1}{\nu}(y-\mu)^\top\Psi^{-1}(y-\mu)
+1+\frac{1}{\nu}(\boldsymbol y-\boldsymbol\mu)^\top
+\boldsymbol\Psi^{-1}(\boldsymbol y-\boldsymbol\mu)
 \right]^{-(\nu+p_b)/2}.
 $$
 
-Here $\Psi$ is a shape matrix, not the covariance. For $\nu>2$,
+Let $\boldsymbol Y$ denote the random block-feature vector and let
+$\boldsymbol y$ be one possible observed value. The vector $\boldsymbol\mu$ is
+the distribution's location, $\boldsymbol\Psi$ is its positive-definite shape
+matrix, and $\nu$ is the number of degrees of freedom controlling tail
+thickness. The shape matrix is not the covariance. For $\nu>2$,
 
 $$
-\operatorname{Cov}(Y)=\frac{\nu}{\nu-2}\Psi.
+\operatorname{Cov}(\boldsymbol Y)
+=\frac{\nu}{\nu-2}\boldsymbol\Psi.
 $$
 
 The baseline fixes $\nu=7$ and wants the $t$ covariance to equal the fitted
 Ledoit-Wolf residual covariance. It therefore uses
 
 $$
-\widehat\Psi_b
-=\frac{\nu-2}{\nu}\widehat C_b^{\mathrm{LW}}
-=\frac{5}{7}\widehat C_b^{\mathrm{LW}}.
+\widehat{\boldsymbol\Psi}_b
+=\frac{\nu-2}{\nu}\widehat{\mathbf C}_b^{\mathrm{LW}}
+=\frac{5}{7}\widehat{\mathbf C}_b^{\mathrm{LW}}.
 $$
 
 The regime-conditioned block likelihood is
 
 $$
-y_e\mid R_{q(e)}=r
-\sim t_7(\widetilde\mu_{b,r},\widehat\Psi_b).
+\boldsymbol y_e\mid R_{m(e)}=r
+\sim t_7(\widetilde{\boldsymbol\mu}_{b,r},
+\widehat{\boldsymbol\Psi}_b).
 $$
 
 Seven degrees of freedom provide heavier tails than a Gaussian without making
@@ -254,12 +312,19 @@ likelihoods. Calculations are performed in log space.
 
 ## 7. Event-level update
 
-For a usable event $e$ from block $b$ referring to month $q(e)$, its likelihood
+For a usable event $e$ from block $b$ referring to month $m(e)$, its likelihood
 on candidate path $s$ is
 
 $$
-L_e(s)=f_b(y_e\mid R_{q(e)}=r_{q(e)}(s)).
+L_e(s)
+=f_b\!\left(\boldsymbol y_e
+\mid\widetilde{\boldsymbol\mu}_{b,r_{m(e)}(s)},
+\widehat{\boldsymbol\Psi}_b,\nu\right).
 $$
+
+In words, the candidate path selects a regime for the event's reference month;
+the density of the observed feature vector under that regime is the path's
+likelihood multiplier.
 
 If several eligible events share publication date $d$, their atomic multiplier
 is
@@ -271,8 +336,9 @@ $$
 The posterior is normalized once:
 
 $$
-q_d^+(s)
-=\frac{q_d^-(s)L_d(s)}{\sum_{s'}q_d^-(s')L_d(s')}.
+q_{m,d}^+(s)
+=\frac{q_{m,d}^-(s)L_d(s)}
+{\sum_{s'\in\mathcal R^4}q_{m,d}^-(s')L_d(s')}.
 $$
 
 Computing $\log q+\sum_e\log L_e$ and using log-sum-exp prevents numerical
@@ -297,19 +363,26 @@ as a timely nowcast.
 
 ## 8. Hard deterministic confirmations
 
-On date $T_q$, a deterministic regime label for reference month $q$ becomes
-available. Its confirmation multiplier is
+On date $T_\ell$, the deterministic regime label for reference month $\ell$
+becomes available. Its confirmation multiplier is
 
 $$
-C_q(s)=\mathbf 1[r_q(s)=R_q^{\mathrm{observed}}].
+C_\ell(s)=\mathbf 1\!\left[r_\ell(s)=R_\ell^{\mathrm{observed}}\right].
 $$
 
-All confirmations sharing the date are applied atomically:
+The indicator $\mathbf 1[\cdot]$ equals one when the statement inside the
+brackets is true and zero otherwise. A path consistent with the newly observed
+label survives; an inconsistent path receives zero probability.
+
+Let $\mathcal C_d$ be the set of reference months whose valid deterministic
+labels become available on date $d$. All confirmations in that set are applied
+atomically:
 
 $$
-q^+(s)
-=\frac{q^-(s)\prod_q C_q(s)}
-{\sum_{s'}q^-(s')\prod_q C_q(s')}.
+q_{m,d}^+(s)
+=\frac{q_{m,d}^-(s)\prod_{\ell\in\mathcal C_d} C_\ell(s)}
+{\sum_{s'\in\mathcal R^4}q_{m,d}^-(s')
+\prod_{\ell\in\mathcal C_d} C_\ell(s')}.
 $$
 
 The denominator must be positive; otherwise the build fails rather than
@@ -323,8 +396,10 @@ this conservative fixed order:
 3. apply all deterministic confirmations as one atomic end-of-day group.
 
 This preserves a pre-confirmation snapshot when leading evidence and a target
-confirmation share a date. It is a documented date-level convention, not a
-claim about the releases' actual intraday ordering.
+confirmation share a date. It is a documented state-reconstruction convention,
+not a claim about the releases' actual intraday ordering. Because date-only data
+cannot establish that this snapshot was live-observable before the defining
+release, same-date pre-confirmation rows are diagnostic-only and never scored.
 
 ## 9. Posterior checkpoints
 
@@ -372,10 +447,12 @@ perfect accuracy. Events for an already confirmed reference month are also not
 given a forecast score.
 
 Metrics are reported separately by meaningful checkpoint slice, including
-month roll, month-end, last pre-confirmation forecast, and eligible post-release
-groups. Heterogeneous weekly and monthly event snapshots must not be pooled
-into one flattering headline average. Every slice reports its number of target
-months, forecast rows, date range, and class support.
+month roll, month-end, and eligible numbered ICSA-release groups. The last
+pre-confirmation state is retained for audit but is not an evaluation slice
+when it shares the target's release date. Heterogeneous weekly and monthly event
+snapshots must not be pooled into one flattering headline average. Every slice
+reports its number of target months, forecast rows, date range, and class
+support.
 
 The comparison baseline replays the same expanding monthly transitions, path
 shifts, initial conditions, and hard confirmations but suppresses every leading
@@ -384,15 +461,18 @@ layer rather than a different transition or confirmation history.
 
 ## 11. Evaluation metrics
 
-Let $N$ be the number of eligible forecasts in a reported slice,
-$p_{i,k}$ the predicted probability of regime $k$, and $y_{i,k}$ its one-hot
-realization.
+Let $H$ be the number of eligible forecasts in a reported slice. For forecast
+$h$, let $p_{h,r}$ be the predicted probability of regime $r$, and let $o_h$ be
+the regime that was eventually observed. The indicator
+$\mathbf 1[o_h=r]$ equals one when regime $r$ occurred and zero otherwise.
+This direct definition is used below instead of assuming familiarity with
+classification-vector terminology.
 
 ### Negative log likelihood
 
 $$
 \mathrm{NLL}
-=-\frac{1}{N}\sum_{i=1}^N\log p_{i,y_i}.
+=-\frac{1}{H}\sum_{h=1}^H\log p_{h,o_h}.
 $$
 
 NLL is a strictly proper probability score: it rewards probability assigned to
@@ -405,7 +485,8 @@ missing finite summary value while the raw forecast remains available.
 
 $$
 \mathrm{Brier}
-=\frac{1}{N}\sum_{i=1}^N\sum_{k=1}^4(p_{i,k}-y_{i,k})^2.
+=\frac{1}{H}\sum_{h=1}^H\sum_{r\in\mathcal R}
+\left(p_{h,r}-\mathbf 1[o_h=r]\right)^2.
 $$
 
 This unscaled convention ranges from 0 for a perfect forecast to 2 for a
@@ -415,18 +496,20 @@ NLL. Lower is better.
 
 ### MAP accuracy
 
-The maximum-a-posteriori forecast is $\widehat y_i=\arg\max_k p_{i,k}$.
-Accuracy is the fraction with $\widehat y_i=y_i$. Ties use the frozen state
+The maximum-a-posteriori forecast is
+$\widehat o_h=\arg\max_{r\in\mathcal R}p_{h,r}$.
+Accuracy is the fraction with $\widehat o_h=o_h$. Ties use the frozen state
 order. Accuracy is familiar but discards the rest of the probability vector,
 so it is secondary to NLL and Brier score.
 
 ### Balanced accuracy / macro recall
 
-For class $k$, recall is
+For regime $r$, recall is
 
 $$
-\mathrm{Recall}_k
-=\frac{\mathrm{true\ positives}_k}{\mathrm{actual\ observations}_k}.
+\mathrm{Recall}_r
+=\frac{\text{correct predictions of regime }r}
+{\text{observed instances of regime }r}.
 $$
 
 Balanced accuracy is the unweighted mean of recalls for classes with positive
@@ -446,18 +529,21 @@ probability calibration.
 
 ### Top-label and classwise ECE and reliability
 
-Each regime is treated as a one-versus-rest probability forecast. Probabilities
-are assigned to ten fixed equal-width bins. For class $k$,
+Each regime is treated as a separate yes-or-no probability forecast.
+Probabilities are assigned to ten fixed equal-width bins. Let $B_{j,r}$ be the
+set of forecasts whose probability for regime $r$ falls in bin $j$, and let
+$n_{j,r}=|B_{j,r}|$. For regime $r$,
 
 $$
-\mathrm{ECE}_k
-=\sum_{j=1}^{10}\frac{n_j}{N}
-\left|\operatorname{freq}_{j,k}-\overline p_{j,k}\right|,
+\mathrm{ECE}_r
+=\sum_{j=1}^{10}\frac{n_{j,r}}{H}
+\left|\operatorname{freq}_{j,r}-\overline p_{j,r}\right|,
 $$
 
-where $\operatorname{freq}_{j,k}$ is the realized class frequency and
-$\overline p_{j,k}$ the mean forecast in bin $j$. Lower is better. The full
-reliability table stores bin edges, count, mean probability, observed
+where $\operatorname{freq}_{j,r}$ is the fraction of forecasts in $B_{j,r}$
+for which regime $r$ occurred, and $\overline p_{j,r}$ is the mean predicted
+probability in that same bin. Empty bins contribute zero. Lower is better. The
+full reliability table stores bin edges, count, mean probability, observed
 frequency, and gap; ECE alone can conceal offsetting or sparse-bin behavior.
 The output also reports top-label confidence ECE, which compares the selected
 regime's probability with whether that selected regime was correct.
@@ -467,31 +553,40 @@ regime's probability with whether that selected regime was correct.
 The four probabilities are collapsed to the two economic axes:
 
 $$
-p_i^{G+}
-=p_{i,\text{growth up, inflation up}}
-+p_{i,\text{growth up, inflation down}},
+p_h^{G+}
+=p_{h,\text{growth up, inflation up}}
++p_{h,\text{growth up, inflation down}},
 $$
 
 $$
-p_i^{I+}
-=p_{i,\text{growth up, inflation up}}
-+p_{i,\text{growth down, inflation up}}.
+p_h^{I+}
+=p_{h,\text{growth up, inflation up}}
++p_{h,\text{growth down, inflation up}}.
 $$
 
 Each axis uses the binary squared error
 
 $$
-\mathrm{Brier}_{axis}
-=\frac{1}{N}\sum_i(p_i^{axis+}-y_i^{axis+})^2,
+\mathrm{Brier}_{G}
+=\frac{1}{H}\sum_{h=1}^H
+\left(p_h^{G+}-\mathbf 1[o_h\text{ has growth up}]\right)^2,
 $$
 
-which lies in $[0,1]$. These scores distinguish failure to infer the growth
-direction from failure to infer the inflation direction.
+and
+
+$$
+\mathrm{Brier}_{I}
+=\frac{1}{H}\sum_{h=1}^H
+\left(p_h^{I+}-\mathbf 1[o_h\text{ has inflation up}]\right)^2,
+$$
+
+each of which lies in $[0,1]$. These scores distinguish failure to infer the
+growth direction from failure to infer the inflation direction.
 
 ### Posterior entropy
 
 $$
-H_i=-\sum_{k=1}^4p_{i,k}\log p_{i,k}.
+\mathcal H_h=-\sum_{r\in\mathcal R}p_{h,r}\log p_{h,r}.
 $$
 
 Entropy lies between 0 and $\log4$. Lower entropy means a sharper forecast, not
@@ -503,7 +598,9 @@ overconfidence is not mistaken for information.
 For the Brier score, release-model skill is
 
 $$
-\mathrm{Skill}_S=1-\frac{S_{release}}{S_{transition\ only}}.
+\mathrm{BrierSkill}
+=1-\frac{\mathrm{Brier}_{\mathrm{release}}}
+{\mathrm{Brier}_{\mathrm{transition\ only}}}.
 $$
 
 Positive skill indicates improvement, zero indicates no change, and negative
@@ -526,9 +623,11 @@ $$
 $$
 
 For every finite $\nu$, the shape conversion
-$\Psi=(\nu-2)C/\nu$ preserves the fitted covariance. The Gaussian variant uses
-$\mathcal N(\widetilde\mu,C)$ directly. This checks whether results depend on
-extreme-event robustness rather than ordinary location differences.
+$\boldsymbol\Psi=(\nu-2)\mathbf C/\nu$ preserves the fitted covariance. The
+Gaussian variant uses
+$\mathcal N(\widetilde{\boldsymbol\mu},\mathbf C)$ directly. This checks
+whether results depend on extreme-event robustness rather than ordinary
+location differences.
 
 ### Mean shrinkage
 
@@ -550,8 +649,8 @@ The alternatives are:
 3. fixed spherical shrinkage
 
 $$
-C_{\lambda}=(1-\lambda)S^{\mathrm{emp}}
-+\lambda\frac{\operatorname{tr}(S^{\mathrm{emp}})}{p_b}I,
+\mathbf C_{\lambda}=(1-\lambda)\mathbf S^{\mathrm{emp}}
++\lambda\frac{\operatorname{tr}(\mathbf S^{\mathrm{emp}})}{p_b}\mathbf I,
 \qquad \lambda\in\{0.25,0.50,0.75\}.
 $$
 
@@ -564,18 +663,20 @@ so `ICSA` should be invariant apart from numerical tolerance.
 The optional standard-deviation multipliers are
 
 $$
-s\in\{0.75,1.00,1.25\},
-\qquad \Psi_s=s^2\Psi.
+\zeta\in\{0.75,1.00,1.25\},
+\qquad \boldsymbol\Psi_{\zeta}=\zeta^2\boldsymbol\Psi.
 $$
 
-This deliberately sharpens or flattens every block likelihood without changing
-its mean or correlation. It is a direct check for posterior overconfidence
-caused by multiplying conditionally dependent evidence.
+Here $\zeta$ is the likelihood-scale sensitivity multiplier. It multiplies
+each modeled standard deviation, so $\zeta^2$ multiplies the shape matrix. This
+deliberately sharpens or flattens every block likelihood without changing its
+mean or correlation. It is a direct check for posterior overconfidence caused
+by multiplying conditionally dependent evidence.
 
 Every sensitivity specification records a stable ID, the varied parameter,
 baseline and alternate values, and all fixed settings. Its metric rows record
 the matched eligible forecast count and complete evaluation set. Baseline-equivalent
-settings such as $\nu=7$, $\kappa=5$, Ledoit-Wolf covariance, and $s=1$ are
+settings such as $\nu=7$, $\kappa=5$, Ledoit-Wolf covariance, and $\zeta=1$ are
 represented once by the single baseline specification rather than duplicated
 under every parameter family.
 
@@ -591,8 +692,9 @@ Local reproducible tables are written below
 - `event_update_audit.csv`: applied, skipped, and no-op release events;
 - `likelihood_fit_audit.csv`: causal sample sizes, means, covariance, shrinkage,
   numerical diagnostics, and training cutoffs;
-- `forecast_predictions.csv`: pre-confirmation probability forecasts joined to
-  eventual deterministic outcomes;
+- `forecast_predictions.csv`: fixed-checkpoint, numbered-ICSA, and diagnostic
+  pre-confirmation candidates joined to outcomes and explicit eligibility
+  reasons;
 - `evaluation_metrics.csv`: metric values by model, checkpoint slice, block or
   horizon where applicable;
 - `calibration_bins.csv`: classwise and top-label reliability-bin inputs to ECE;

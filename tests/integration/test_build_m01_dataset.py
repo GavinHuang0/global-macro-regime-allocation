@@ -1,9 +1,18 @@
-"""Synthetic, no-network integration test for model 01 publication."""
+"""Exercise Model 01's deterministic dataset builder without network access.
+
+Synthetic ALFRED-style vintage archives and a temporary YAML configuration are
+fed through the real publication command. Assertions cover first-release
+selection, archive-start filtering, cumulative label availability, deterministic
+composites, hashes, and public artifact contracts. The tests write only to
+pytest-managed temporary directories and exist to prevent timing or provenance
+changes from silently introducing look-forward information.
+"""
 
 from __future__ import annotations
 
 from datetime import date
 from io import BytesIO
+import hashlib
 import json
 import math
 from pathlib import Path
@@ -80,6 +89,7 @@ def _vintage_zip(series_id: str, months: pd.DatetimeIndex) -> bytes:
 
 
 def _model_config() -> dict[str, object]:
+    """Return a complete, compact deterministic-model configuration fixture."""
     return {
         "schema_version": 1,
         "model_id": "m01_deterministic_composite",
@@ -159,6 +169,27 @@ def _model_config() -> dict[str, object]:
             "published_dir": "results/published/model_01",
         },
     }
+
+
+def test_label_availability_carries_forward_delayed_prerequisite() -> None:
+    months = pd.date_range("2020-01-01", periods=3, freq="MS")
+    ordinary = pd.DataFrame(
+        pd.Timestamp("2020-02-15"),
+        index=months,
+        columns=list(ALL_COMPONENTS),
+    )
+    ordinary.loc[months[1]:, :] = pd.Timestamp("2020-03-15")
+    ordinary.loc[months[2]:, :] = pd.Timestamp("2020-04-15")
+    # One January prerequisite arrives after the nominal February releases.
+    ordinary.loc[months[0], "payrolls"] = pd.Timestamp("2020-04-01")
+    availability = build_m01_dataset._cumulative_label_availability(
+        ordinary,
+        scores_available=pd.Series(True, index=months),
+    )
+
+    assert availability.loc[months[0]] == pd.Timestamp("2020-04-01")
+    assert availability.loc[months[1]] == pd.Timestamp("2020-04-01")
+    assert availability.loc[months[2]] == pd.Timestamp("2020-04-15")
 
 
 def test_build_dataset_end_to_end_without_network(
@@ -344,3 +375,10 @@ def test_build_dataset_end_to_end_without_network(
     assert {item["cache_origin"] for item in manifest["raw_files"]} == {
         "downloaded"
     }
+    generated = manifest["generated_file_hashes"]
+    assert len(generated) == 4
+    for record in generated:
+        path = tmp_path / record["path"]
+        assert path.is_file()
+        assert record["bytes"] == path.stat().st_size
+        assert record["sha256"] == hashlib.sha256(path.read_bytes()).hexdigest()

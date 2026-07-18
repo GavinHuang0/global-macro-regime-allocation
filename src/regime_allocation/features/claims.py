@@ -1,10 +1,12 @@
-"""Causal feature construction for weekly unemployment-insurance claims.
+"""Construct causal AR(1) innovations for weekly initial claims.
 
 The functions in this module are deliberately independent of data retrieval and
 release-calendar logic. They expect a series ordered by reference week and an
 optional parallel release-date sequence. Each AR(1) is estimated strictly from
 observations published before the release-date group being forecast, and each
 innovation is standardized strictly from innovations published on earlier dates.
+The output records levels, fitted parameters, forecasts, residuals, expanding
+scales, standardized innovations, and audit counts for every eligible release.
 """
 
 from __future__ import annotations

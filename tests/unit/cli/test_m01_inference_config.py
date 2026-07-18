@@ -1,4 +1,10 @@
-"""Contract tests for the frozen Model 01 inference configuration."""
+"""Lock the public Model 01 Bayesian-filter configuration contract.
+
+The tests read the repository's frozen YAML file and assert the baseline
+Student-t parameters, one-at-a-time sensitivity grid, and the decision to use
+only ICSA in the weekly-claims likelihood. They produce no artifacts and do not
+run inference; their role is to make accidental specification drift visible.
+"""
 
 from __future__ import annotations
 
@@ -36,4 +42,3 @@ def test_weekly_claims_likelihood_is_explicitly_icsa_only() -> None:
     claims = config["blocks"]["weekly_claims"]
     assert claims["source_series"] == ["ICSA"]
     assert claims["feature_names"] == ["initial_claims_innovation"]
-

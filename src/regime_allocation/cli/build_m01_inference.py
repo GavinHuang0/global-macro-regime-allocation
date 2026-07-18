@@ -1,4 +1,15 @@
-"""Build Model 01's causal release-likelihood and Bayesian-filter artifacts."""
+"""Fit release likelihoods and replay Model 01's causal Bayesian filter.
+
+The command reads deterministic labels, leading-evidence events, and inference
+configuration; estimates release-block likelihoods at successive historical
+cutoffs; updates the joint four-month regime path; and publishes event
+posteriors, forecast checkpoints, metrics, calibration tables, sensitivities,
+the latest state, and a hash manifest.
+
+Every likelihood fit uses events and target labels available strictly before
+the forecast event. Forecast scoring also requires the checkpoint to precede
+the realized label's cumulative availability date.
+"""
 
 from __future__ import annotations
 
@@ -628,6 +639,7 @@ def _parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Parse arguments and publish Model 01 inference artifacts."""
     args = _parse_args()
     project_root = args.project_root.resolve()
     config_path = args.config

@@ -1,4 +1,11 @@
-"""No-network tests for ALFRED's public vintage-matrix adapter."""
+"""Test the keyless ALFRED vintage adapter with fully mocked HTTP responses.
+
+Synthetic HTML, text calendars, CSV graphs, and ZIP archives exercise vintage
+discovery, release-date parsing, matrix normalization, cache compatibility,
+chunk boundaries, and reconstruction of earliest first-release observations.
+The tests never contact ALFRED and write only temporary cache files. Their purpose
+is to ensure provider transport details cannot alter point-in-time semantics.
+"""
 
 from __future__ import annotations
 
@@ -27,6 +34,7 @@ from regime_allocation.data.providers.vintage_matrix import (
 
 
 def _zip_csv(csv_text: str, *, filename: str = "observations.csv") -> bytes:
+    """Package CSV text as the in-memory ZIP payload returned by ALFRED."""
     buffer = BytesIO()
     with ZipFile(buffer, mode="w") as archive:
         archive.writestr(filename, csv_text)

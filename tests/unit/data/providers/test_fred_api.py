@@ -1,4 +1,11 @@
-"""No-network tests for the authenticated FRED API provider and selector."""
+"""Test authenticated FRED retrieval, pagination, caching, and secret hygiene.
+
+Mocked JSON and ZIP responses cover provider selection, missing-key errors,
+initial-release and calendar pagination, vintage-matrix normalization, cache
+reuse, refresh behavior, and transport failures. Assertions also ensure API keys
+cannot appear in representations, public source URLs, cache identities, or
+credential-bearing exceptions. No network request or production data write occurs.
+"""
 
 from __future__ import annotations
 

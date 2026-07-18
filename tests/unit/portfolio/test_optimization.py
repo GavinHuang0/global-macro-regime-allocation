@@ -1,3 +1,13 @@
+"""Test constrained long-only optimization and its ordered fallback policy.
+
+Small expected-return, covariance, cost, and constraint inputs verify full
+investment, per-asset and group caps, volatility caps, turnover penalties, and
+initial formation costs. Mocked solver failures establish the hold-current,
+minimum-variance, cash, and terminal-error sequence without relaxing constraints.
+The tests produce no files and protect feasibility and execution semantics rather
+than any particular historical result.
+"""
+
 from __future__ import annotations
 
 import numpy as np
@@ -13,6 +23,7 @@ from regime_allocation.portfolio.optimization import (
 
 
 def _failed_attempt(n_values: int, message: str = "forced failure") -> OptimizeResult:
+    """Create a deterministic unsuccessful SciPy result for fallback tests."""
     return OptimizeResult(
         x=np.zeros(n_values),
         success=False,
@@ -245,4 +256,3 @@ def test_result_weight_mapping_and_array_are_independent() -> None:
     mapping = result.weight_by_asset
     mapping["SPY"] = 99.0
     assert result.weights[0] != 99.0
-

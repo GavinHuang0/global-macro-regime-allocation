@@ -22,6 +22,19 @@ accounting are walk-forward.
 This is a frozen research specification, not an investment recommendation. No
 result is stated in this methodology document.
 
+### 1.1 Notation
+
+The upstream notation follows
+[`bayesian_filter.md`](bayesian_filter.md#notation): $m$ is the target
+reference month, $\ell$ is another historical reference month, $d$ is a
+knowledge date, $\mathcal D_d$ is the information available by that date,
+and $R_m\in\mathcal R$ is the month-$m$ regime. The candidate-path symbol
+$s$ remains reserved for the upstream four-month filter. In this document,
+$a$ and $a'$ index assets, $d_m^{\mathrm{sig}}$ is the month-start signal
+date, and $d_m^{\mathrm{exe}}$ is the first common trading session used for
+execution. Bold lowercase letters denote asset vectors and bold uppercase
+letters denote matrices.
+
 ## 2. Investment universe
 
 ### 2.1 Strategy assets
@@ -73,27 +86,29 @@ or distributions. They are not point-in-time price vintages.
 
 ### 3.1 Selected checkpoint
 
-For holding month \(m\), the allocation signal is the Model 01 `baseline`
+For holding month $m$, the allocation signal is the Model 01 `baseline`
 checkpoint satisfying all of the following:
 
 - checkpoint type: `post_month_roll`;
 - marginal type: `path`;
 - relative month: `0`;
-- reference month: \(m\);
+- reference month: $m$;
 - four regimes in the canonical order recorded in the configuration;
-- probability sum within \(10^{-10}\) of one.
+- probability sum within $10^{-10}$ of one.
 
 Let the selected probability vector be
 
-\[
+$$
 p_{m,r}
-=P(R_m=r\mid\mathcal F_{s_m^-}),
+=\Pr(R_m=r\mid\mathcal D_{(d_m^{\mathrm{sig}})^-}),
 \qquad r\in\mathcal R,
-\]
+$$
 
-where \(s_m\) is the first calendar day of month \(m\), \(\mathcal R\) is the
-four-regime set, and \(\mathcal F_{s_m^-}\) denotes the causal information
-carried into the month roll.
+where $d_m^{\mathrm{sig}}$ is the first calendar day of month $m$,
+$\mathcal R$ is the four-regime set, and
+$\mathcal D_{(d_m^{\mathrm{sig}})^-}$ is the causal information carried into
+the month roll immediately before that day's operations. The vector containing
+the four entries is written $\boldsymbol p_m$.
 
 The `post_month_roll` checkpoint is phase one on the first calendar day. The
 previous four-month joint posterior has already been shifted and propagated
@@ -113,8 +128,8 @@ rules identical.
 
 The strategy trades the month that the propagated marginal describes. It does
 not select the maximum-probability state and does not discard uncertainty. The
-entire vector \(p_m\) enters the expected-return and covariance calculations in
-Section 6.
+entire vector $\boldsymbol p_m$ enters the expected-return and covariance
+calculations in Section 6.
 
 The joint path remains essential to the upstream filter because delayed
 releases can revise earlier months and propagate forward. Portfolio
@@ -123,17 +138,22 @@ filtering and propagation have occurred.
 
 ## 4. Execution and holding-period return
 
-Let \(d_m\) be the first trading session in month \(m\) for which every required
-asset has an adjusted-open observation. The target is executed at the adjusted
-open on \(d_m\) and held until the adjusted open on \(d_{m+1}\).
+Let $d_m^{\mathrm{exe}}$ be the first trading session in month $m$ for which
+every required asset has an adjusted-open observation. The target is executed
+at the adjusted open on $d_m^{\mathrm{exe}}$ and held until the adjusted open
+on $d_{m+1}^{\mathrm{exe}}$.
 
-For asset \(i\), the simple monthly holding return is
+For asset $a$, the simple monthly holding return is
 
-\[
-x_{m,i}
-=\frac{P^{\mathrm{adj,open}}_{i,d_{m+1}}}
-       {P^{\mathrm{adj,open}}_{i,d_m}}-1.
-\]
+$$
+x_{m,a}
+=\frac{P^{\mathrm{adj,open}}_{a,d_{m+1}^{\mathrm{exe}}}}
+       {P^{\mathrm{adj,open}}_{a,d_m^{\mathrm{exe}}}}-1.
+$$
+
+The vector of all seven asset returns is $\boldsymbol x_m$. The symbol
+$P^{\mathrm{adj,open}}_{a,d}$ means asset $a$'s provider-adjusted opening
+price on trading date $d$.
 
 This first-open-to-next-first-open definition aligns estimation and realized
 performance. It prevents a target formed at the beginning of a month from
@@ -148,11 +168,12 @@ that month is excluded from performance until its exit open exists.
 ## 5. Causal estimation sample
 
 At each month-start signal, return parameters are refit on an expanding sample.
-A historical holding month \(q\) is eligible only when both of these facts were
-available by the recorded prior-day knowledge cutoff:
+A historical holding month $\ell$ is eligible only when both of these facts
+were available by the recorded prior-day knowledge cutoff:
 
-1. its open-to-open return \(x_q\), which becomes observable at \(d_{q+1}\);
-2. its deterministic first-release regime label \(R_q\), whose
+1. its open-to-open return $\boldsymbol x_\ell$, which becomes observable at
+   $d_{\ell+1}^{\mathrm{exe}}$;
+2. its deterministic first-release regime label $R_\ell$, whose
    `label_available_at` date is stored in the public regime history.
 
 Because the cutoff is the day before the new month's signal, these non-strict
@@ -167,36 +188,43 @@ is fit.
 
 ## 6. Regime return model
 
-Let \(N_m\) be the number of eligible training months at signal \(m\), and let
-\(n_{m,r}\) be the number assigned to regime \(r\). All vectors below have one
+Let $N_m$ be the number of eligible training months at signal $m$, and let
+$n_{m,r}$ be the number assigned to regime $r$. All vectors below have one
 element per strategy asset.
 
 ### 6.1 Global and regime sample means
 
-The pooled sample mean is
+Let $\mathcal T_m$ be the set of eligible historical holding months available
+at the month-$m$ signal. The pooled sample mean is
 
-\[
-\bar\mu_m=\frac{1}{N_m}\sum_{q\in\mathcal T_m}x_q.
-\]
+$$
+\overline{\boldsymbol\mu}_m
+=\frac{1}{N_m}\sum_{\ell\in\mathcal T_m}\boldsymbol x_\ell.
+$$
 
 For a nonempty regime, the unshrunk sample mean is
 
-\[
-\bar\mu_{m,r}
+$$
+\overline{\boldsymbol\mu}_{m,r}
 =\frac{1}{n_{m,r}}
- \sum_{q\in\mathcal T_m:R_q=r}x_q.
-\]
+ \sum_{\ell\in\mathcal T_m:R_\ell=r}\boldsymbol x_\ell.
+$$
+
+Both are seven-element vectors of arithmetic monthly sample means:
+$\overline{\boldsymbol\mu}_m$ pools all eligible months, whereas
+$\overline{\boldsymbol\mu}_{m,r}$ uses only months labeled $r$.
 
 ### 6.2 Pseudo-month shrinkage
 
-The production regime mean uses \(\kappa=24\) pooled pseudo-months:
+The production regime mean uses $\kappa=24$ pooled pseudo-months:
 
-\[
-\widetilde\mu_{m,r}
-=\frac{n_{m,r}\bar\mu_{m,r}+\kappa\bar\mu_m}
+$$
+\widetilde{\boldsymbol\mu}_{m,r}
+=\frac{n_{m,r}\overline{\boldsymbol\mu}_{m,r}
++\kappa\overline{\boldsymbol\mu}_m}
        {n_{m,r}+\kappa},
 \qquad \kappa=24.
-\]
+$$
 
 The value 24 means that the pooled mean carries the same algebraic weight as
 24 observations. It is not 24 duplicated return rows. A well-populated regime
@@ -209,18 +237,23 @@ pooled mean.
 For every eligible month, define a residual around the corresponding
 *unshrunk* regime sample mean:
 
-\[
-e_q=x_q-\bar\mu_{m,R_q}.
-\]
+$$
+\boldsymbol\varepsilon_\ell
+=\boldsymbol x_\ell-\overline{\boldsymbol\mu}_{m,R_\ell}.
+$$
 
 Residuals from all regimes are pooled and passed to the Ledoit-Wolf covariance
 estimator with `assume_centered=true`:
 
-\[
-C_m=\operatorname{LW}\!\left(\{e_q:q\in\mathcal T_m\}\right).
-\]
+$$
+\mathbf C_m
+=\operatorname{LW}\!\left(
+\{\boldsymbol\varepsilon_\ell:\ell\in\mathcal T_m\}
+\right).
+$$
 
-Thus \(C_m\) is one shared monthly within-regime covariance matrix. Separate
+Here $\operatorname{LW}$ denotes the Ledoit-Wolf shrinkage estimator. Thus
+$\mathbf C_m$ is one shared monthly within-regime covariance matrix. Separate
 regime covariances are not estimated. Centering on unshrunk sample means is
 intentional: pulling a sparse regime mean toward the global mean must not
 mechanically appear as additional within-regime volatility.
@@ -235,25 +268,25 @@ sampling error, structural change, or common factor concentration.
 The strategy integrates over every regime rather than selecting a hard state.
 The expected one-month return vector is
 
-\[
-\mu_m
-=\sum_{r\in\mathcal R}p_{m,r}\widetilde\mu_{m,r}.
-\]
+$$
+\boldsymbol\mu_m
+=\sum_{r\in\mathcal R}p_{m,r}\widetilde{\boldsymbol\mu}_{m,r}.
+$$
 
 The between-regime covariance of the conditional means is
 
-\[
-B_m
+$$
+\mathbf B_m
 =\sum_{r\in\mathcal R}p_{m,r}
-  (\widetilde\mu_{m,r}-\mu_m)
-  (\widetilde\mu_{m,r}-\mu_m)^\top.
-\]
+  (\widetilde{\boldsymbol\mu}_{m,r}-\boldsymbol\mu_m)
+  (\widetilde{\boldsymbol\mu}_{m,r}-\boldsymbol\mu_m)^\top.
+$$
 
 Applying the law of total covariance gives the monthly predictive covariance:
 
-\[
-\Sigma_m^{\mathrm{month}}=C_m+B_m.
-\]
+$$
+\boldsymbol\Sigma_m^{\mathrm{month}}=\mathbf C_m+\mathbf B_m.
+$$
 
 The first term represents shared within-regime return variation. The second
 term represents risk caused by uncertainty over regime-dependent mean returns.
@@ -262,9 +295,10 @@ its probability-weighted mean were certain.
 
 For the volatility constraint only, the matrix is annualized as
 
-\[
-\Sigma_m^{\mathrm{annual}}=12\Sigma_m^{\mathrm{month}}.
-\]
+$$
+\boldsymbol\Sigma_m^{\mathrm{annual}}
+=12\boldsymbol\Sigma_m^{\mathrm{month}}.
+$$
 
 Expected returns remain in one-month units in the optimization objective.
 
@@ -278,27 +312,30 @@ removed.
 
 Let the causal historical regime frequency be
 
-\[
+$$
 f_{m,r}=\frac{n_{m,r}}{N_m}.
-\]
+$$
 
 The ablation's expected-return vector is the pooled sample mean
-\(\bar\mu_m\), irrespective of the current posterior. Its between-regime risk
-term uses the historical frequencies and the *unshrunk* regime sample means:
+$\overline{\boldsymbol\mu}_m$, irrespective of the current posterior. Its
+between-regime risk term uses the historical frequencies and the *unshrunk*
+regime sample means:
 
-\[
-B_m^{\mathrm{pool}}
+$$
+\mathbf B_m^{\mathrm{pool}}
 =\sum_{r\in\mathcal R} f_{m,r}
-  (\bar\mu_{m,r}-\bar\mu_m)
-  (\bar\mu_{m,r}-\bar\mu_m)^\top.
-\]
+  (\overline{\boldsymbol\mu}_{m,r}-\overline{\boldsymbol\mu}_m)
+  (\overline{\boldsymbol\mu}_{m,r}-\overline{\boldsymbol\mu}_m)^\top.
+$$
 
-An empty regime receives \(\bar\mu_m\) in this calculation and therefore adds
+An empty regime receives $\overline{\boldsymbol\mu}_m$ in this calculation
+and therefore adds
 zero between-regime dispersion. The predictive covariance is
 
-\[
-\Sigma_m^{\mathrm{pool,month}}=C_m+B_m^{\mathrm{pool}}.
-\]
+$$
+\boldsymbol\Sigma_m^{\mathrm{pool,month}}
+=\mathbf C_m+\mathbf B_m^{\mathrm{pool}}.
+$$
 
 This comparator is more informative about the incremental contribution of the
 current posterior than a static benchmark because portfolio constraints,
@@ -311,34 +348,38 @@ forecasting.
 
 ### 8.1 Objective
 
-Let \(w_m\) be the target weights and \(\widehat w_m^-\) the causal estimate of
+Let $\boldsymbol w_m$ be the target-weight vector and
+$\widehat{\boldsymbol w}_m^-$ the causal estimate of
 pretrade weights available when the target is formed. This estimate drifts the
 previous target from its entry adjusted open through the last adjusted close
 strictly before the first-calendar-day signal. It does not use the execution
-open, which is not yet known. Let \(u_{m,i}\) be auxiliary absolute-trade
-variables and \(c_i=0.0005\) for every strategy ETF.
+open, which is not yet known. Let $\boldsymbol u_m$ contain auxiliary
+absolute-trade variables $u_{m,a}$, and set $c_a=0.0005$ for every
+strategy ETF. Let $\boldsymbol 1_7$ be the seven-element vector of ones and let
+$\overline w_a$ be asset $a$'s individual maximum weight from Section 8.2.
 
 The baseline problem is
 
-\[
-\max_{w_m,u_m}
-\quad \mu_m^\top w_m-\sum_i c_i u_{m,i}
-\]
+$$
+\max_{\boldsymbol w_m,\boldsymbol u_m}
+\quad \boldsymbol\mu_m^\top\boldsymbol w_m-\sum_a c_a u_{m,a}
+$$
 
 subject to
 
-\[
+$$
 \begin{aligned}
-\mathbf 1^\top w_m&=1,\\
-0\leq w_{m,i}&\leq \overline w_i,\\
-u_{m,i}&\geq w_{m,i}-\widehat w_{m,i}^-,\\
-u_{m,i}&\geq -(w_{m,i}-\widehat w_{m,i}^-),\\
-w_m^\top\Sigma_m^{\mathrm{annual}}w_m&\leq 0.10^2,
+\boldsymbol 1_7^\top\boldsymbol w_m&=1,\\
+0\leq w_{m,a}&\leq \overline w_a,\\
+u_{m,a}&\geq w_{m,a}-\widehat w_{m,a}^-,\\
+u_{m,a}&\geq -(w_{m,a}-\widehat w_{m,a}^-),\\
+\boldsymbol w_m^\top\boldsymbol\Sigma_m^{\mathrm{annual}}
+\boldsymbol w_m&\leq 0.10^2,
 \end{aligned}
-\]
+$$
 
 together with the group caps below. At the optimum, the cost penalty makes
-\(u_{m,i}=|w_{m,i}-\widehat w_{m,i}^-|\). The problem maximizes expected
+$u_{m,a}=|w_{m,a}-\widehat w_{m,a}^-|$. The problem maximizes expected
 one-month return net of an estimated, causally available trading cost. This
 penalty can differ from the cost realized at the later execution open. The
 objective does not include a quadratic risk penalty; risk enters through the
@@ -370,7 +411,7 @@ guarantee about future realized volatility.
 ### 8.4 Solver and fallback contract
 
 The constrained problem is solved with SLSQP, with at most 2,000 iterations.
-Every returned portfolio is independently checked using a \(10^{-7}\)
+Every returned portfolio is independently checked using a $10^{-7}$
 feasibility tolerance. No fallback is allowed to relax the long-only rule, full
 investment, an individual cap, a group cap, or the volatility ceiling.
 
@@ -388,36 +429,37 @@ relaxed portfolio.
 
 ### 9.1 Pretrade estimate used to form the target
 
-Let \(\ell_m\) be the last session with an adjusted close strictly before the
-first-calendar-day signal for month \(m\). The optimizer estimates the pretrade
-weights as
+Let $d_m^{\mathrm{close}}$ be the last session with an adjusted close strictly
+before the first-calendar-day signal for month $m$. The optimizer estimates
+the pretrade weights as
 
-\[
-\widehat w_{m,i}^-
-=\frac{w_{m-1,i}
-       P^{\mathrm{adj,close}}_{i,\ell_m}/
-       P^{\mathrm{adj,open}}_{i,d_{m-1}}}
-       {\sum_j w_{m-1,j}
-       P^{\mathrm{adj,close}}_{j,\ell_m}/
-       P^{\mathrm{adj,open}}_{j,d_{m-1}}}.
-\]
+$$
+\widehat w_{m,a}^-
+=\frac{w_{m-1,a}
+       P^{\mathrm{adj,close}}_{a,d_m^{\mathrm{close}}}/
+       P^{\mathrm{adj,open}}_{a,d_{m-1}^{\mathrm{exe}}}}
+       {\sum_{a'} w_{m-1,a'}
+       P^{\mathrm{adj,close}}_{a',d_m^{\mathrm{close}}}/
+       P^{\mathrm{adj,open}}_{a',d_{m-1}^{\mathrm{exe}}}}.
+$$
 
 Only prices strictly before the signal enter this estimate. This preserves a
 causal target when the first calendar day is also the execution session. The
-optimizer's reported expected turnover and cost use \(\widehat w_m^-\).
+optimizer's reported expected turnover and cost use
+$\widehat{\boldsymbol w}_m^-$.
 
 ### 9.2 Realized pretrade weights at execution
 
 The execution open can differ from the last known close because of an
 overnight or holiday-gap return. After the complete open-to-open return
-\(x_{m-1,i}\) is realized, the backtest obtains the actual execution-open
+$x_{m-1,a}$ is realized, the backtest obtains the actual execution-open
 pretrade weights as
 
-\[
-w_{m,i}^{-,\mathrm{exec}}
-=\frac{w_{m-1,i}(1+x_{m-1,i})}
-       {\sum_j w_{m-1,j}(1+x_{m-1,j})}.
-\]
+$$
+w_{m,a}^{-,\mathrm{exec}}
+=\frac{w_{m-1,a}(1+x_{m-1,a})}
+       {\sum_{a'} w_{m-1,a'}(1+x_{m-1,a'})}.
+$$
 
 Realized turnover and realized cost are measured against these execution-open
 weights, not against the prior target and not against the optimizer's
@@ -428,43 +470,44 @@ backtest accounting.
 
 The cost rate at a rebalance is
 
-\[
-K_m=\sum_i c_i|w_{m,i}-w_{m,i}^{-,\mathrm{exec}}|,
-\qquad c_i=0.0005.
-\]
+$$
+K_m=\sum_a c_a|w_{m,a}-w_{m,a}^{-,\mathrm{exec}}|,
+\qquad c_a=0.0005.
+$$
 
-Each \(c_i\) is a one-way cost per dollar bought or sold. A complete rotation
-from one fully invested asset to another has full \(L^1\) traded notional of
+Each $c_a$ is a one-way cost per dollar bought or sold. A complete rotation
+from one fully invested asset to another has full $L^1$ traded notional of
 two and therefore costs ten basis points under uniform five-basis-point rates.
 Reported one-way turnover is
 
-\[
-T_m=\frac{1}{2}\sum_i
-|w_{m,i}-w_{m,i}^{-,\mathrm{exec}}|.
-\]
+$$
+T_m=\frac{1}{2}\sum_a
+|w_{m,a}-w_{m,a}^{-,\mathrm{exec}}|.
+$$
 
 The initial portfolio starts from zero holdings. Its full investment therefore
 incurs an initial five-basis-point formation cost when all asset cost rates are
-five basis points. The initial full \(L^1\) traded notional is one, meaning 100%
-of NAV is purchased, but the reported half-\(L^1\) one-way-turnover convention
+five basis points. The initial full $L^1$ traded notional is one, meaning 100%
+of NAV is purchased, but the reported half-$L^1$ one-way-turnover convention
 records that formation trade as 0.5, or 50%.
 
-The optimizer uses the same formula with \(\widehat w_m^-\) to penalize
+The optimizer uses the same formula with $\widehat w_m^-$ to penalize
 estimated turnover. The target's published `estimated_rebalance_cost` is this
 causal estimate, not a claim that the execution-open cost is already known.
 
-If \(g_m=w_m^\top x_m\) is the gross holding-period return, the net return is
+If $g_m=\boldsymbol w_m^\top\boldsymbol x_m$ is the gross holding-period
+return, the net return is
 
-\[
+$$
 r_m^{\mathrm{net}}=(1-K_m)(1+g_m)-1.
-\]
+$$
 
 This multiplicative convention charges costs at the entry open before the
 holding-period return is earned. The same realized cost convention applies to
-the optimized strategy and all comparators. Daily marked NAV begins at the
-post-formation-cost entry-open value, so the initial formation cost is included
-in net monthly return, cost drag, and terminal wealth but is not itself a
-drawdown from an earlier pre-cost NAV peak.
+the optimized strategy and all comparators. Daily marked NAV records both the
+pre-trade and post-trade entry-open values. The initial formation cost is
+therefore included in net monthly return, cost drag, terminal wealth, and
+maximum drawdown from the initial pre-cost peak.
 
 ## 10. Comparison portfolios
 
@@ -477,7 +520,7 @@ other portfolio mechanics.
 
 ### 10.2 Equal weight
 
-The equal-weight method allocates \(1/7\) to each strategy asset and rebalances
+The equal-weight method allocates $1/7$ to each strategy asset and rebalances
 at every first common monthly open. It pays the same per-asset realized costs
 as the optimized strategy.
 
@@ -486,35 +529,41 @@ as the optimized strategy.
 `legacy_sharpe_map` preserves the original paper's Sharpe score and positivity
 shift while removing its hard-label look-ahead problem.
 
-At signal \(m\), it selects the MAP regime
+At signal $m$, it selects the MAP regime
 
-\[
+$$
 r_m^*=\arg\max_r p_{m,r}.
-\]
+$$
 
 It then uses daily ETF returns from historical calendar months labeled
-\(r_m^*\), but only when the return date precedes the signal and that month's
+$r_m^*$, but only when the return date precedes the signal and that month's
 deterministic label was known strictly before the signal. All assets share one
 complete daily sample. If fewer than 60 eligible daily observations exist, the
 target is equal weight.
 
 Otherwise, for each asset,
 
-\[
-s_i=\sqrt{252}\frac{\bar r_i}{\widehat\sigma_i}.
-\]
+$$
+\mathrm{SR}_a=\sqrt{252}\frac{\overline r_a}{\widehat\sigma_a}.
+$$
 
 Zero-variance or nonfinite scores are neutralized to zero. The legacy shift is
 
-\[
-c=\left|\min_i s_i\right|+0.1,
-\]
+$$
+\gamma=\left|\min_a \mathrm{SR}_a\right|+0.1,
+$$
 
 and the long-only weights are
 
-\[
-w_i=\frac{s_i+c}{\sum_j(s_j+c)}.
-\]
+$$
+w_a=\frac{\mathrm{SR}_a+\gamma}
+{\sum_{a'}(\mathrm{SR}_{a'}+\gamma)}.
+$$
+
+Here $\overline r_a$ and $\widehat\sigma_a$ are the sample mean and sample
+standard deviation of eligible daily returns for asset $a$,
+$\mathrm{SR}_a$ is its annualized Sharpe score, and $\gamma$ is the legacy
+positivity shift added to every score.
 
 This comparator is an adaptation, not a literal reproduction: it uses the new
 seven-ETF universe, a causal posterior MAP state, first-open monthly execution,
@@ -537,12 +586,12 @@ results and must not be replaced after viewing the sensitivity table.
 
 | Parameter | Baseline | Frozen values |
 |---|---:|---|
-| Regime-mean pseudo-months \(\kappa\) | 24 | 0, 12, 24, 48, 96 |
+| Regime-mean pseudo-months $\kappa$ | 24 | 0, 12, 24, 48, 96 |
 | Annualized volatility cap | 10% | 8%, 10%, 12% |
 | Position/group-cap multiplier | 1.0 | 0.8, 1.0, 1.2 |
 | Per-asset one-way transaction cost | 5 bp | 0 bp, 5 bp, 10 bp |
 
-The \(\kappa=0\) variant is the no-shrinkage limit for nonempty regimes. Under
+The $\kappa=0$ variant is the no-shrinkage limit for nonempty regimes. Under
 the frozen empty-regime policy, an unobserved regime still receives the pooled
 mean rather than an undefined vector.
 
@@ -562,18 +611,18 @@ They are not an in-sample parameter-selection tournament.
 ## 12. Evaluation metrics
 
 All return and trading metrics use net monthly returns unless explicitly
-identified as gross. With \(M\) complete months and monthly net returns \(r_m\):
+identified as gross. With $M$ complete months and monthly net returns $r_m$:
 
 ### 12.1 Return and risk
 
 - **Total return:**
-  \(\prod_{m=1}^{M}(1+r_m)-1\).
+  $\prod_{m=1}^{M}(1+r_m)-1$.
 - **CAGR:**
-  \(\left[\prod_m(1+r_m)\right]^{12/M}-1\).
+  $\left[\prod_m(1+r_m)\right]^{12/M}-1$.
 - **Gross CAGR:** the same geometric calculation using returns before costs.
 - **Annualized cost drag:** gross CAGR minus net CAGR.
 - **Annualized volatility:** sample standard deviation of monthly net returns
-  multiplied by \(\sqrt{12}\).
+  multiplied by $\sqrt{12}$.
 - **Zero-rate Sharpe:** annualized arithmetic mean net return divided by
   annualized volatility.
 - **BIL-excess Sharpe:** annualized arithmetic mean of monthly portfolio return
@@ -581,7 +630,7 @@ identified as gross. With \(M\) complete months and monthly net returns \(r_m\):
   deviation of that active-return series. Because the denominator is active
   volatility, this is also interpretable as an information ratio versus `BIL`.
 - **Zero-rate Sortino:** annualized arithmetic mean net return divided by
-  \(\sqrt{12}\) times the root mean square of \(\min(r_m,0)\).
+  $\sqrt{12}$ times the root mean square of $\min(r_m,0)$.
 
 ### 12.2 Drawdown and distribution diagnostics
 
@@ -599,8 +648,8 @@ fields even when they are not headline metrics.
 
 ### 12.3 Trading diagnostics
 
-- **Annualized one-way turnover:** 12 times the mean monthly half-\(L^1\)
-  turnover \(T_m\).
+- **Annualized one-way turnover:** 12 times the mean monthly half-$L^1$
+  turnover $T_m$.
 - **Annualized cost drag:** the geometric difference between gross and net
   CAGR, not merely twelve times average cost.
 - The audit output also records gross traded notional, each monthly cost rate,
@@ -611,19 +660,24 @@ target without a realized next-open exit cannot enter a metric.
 
 ### 12.4 Paired sampling uncertainty
 
-For every comparator \(b\), the monthly active-return difference is
+For every comparator $b$, the monthly active-return difference is
 
-\[
-d_m=r_m^{\mathrm{posterior}}-r_m^b.
-\]
+$$
+\delta_m^{(b)}=r_m^{\mathrm{posterior}}-r_m^{(b)}.
+$$
 
-The reported effect is the annualized arithmetic mean \(12\bar d\). Sampling
-uncertainty is estimated with a paired circular block bootstrap: six-month
-consecutive blocks are sampled with wraparound and truncated to the original
-102-month length. The same 10,000 bootstrap index paths are applied to the
-posterior and every comparator, using seed `20260718`. The public table reports
-the 2.5th and 97.5th percentiles and the fraction of bootstrap mean differences
-strictly above zero, written \(\Pr(\Delta>0)\).
+Define the annualized arithmetic mean effect as
+
+$$
+\Delta^{(b)}=12\overline\delta^{(b)}.
+$$
+
+Sampling uncertainty is estimated with a paired circular block bootstrap:
+six-month consecutive blocks are sampled with wraparound and truncated to the
+original 102-month length. The same 10,000 bootstrap index paths are applied
+to the posterior and every comparator, using seed `20260718`. The public table
+reports the 2.5th and 97.5th percentiles and the fraction of bootstrap mean
+differences strictly above zero, written $\Pr(\Delta^{(b)}>0)$.
 
 That fraction is not a p-value. The confidence interval is the headline
 uncertainty summary, and an interval containing zero does not support a claim

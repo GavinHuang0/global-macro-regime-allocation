@@ -37,6 +37,18 @@ feature coverage still begins only when a series has a genuinely
 contemporaneous first release and has satisfied its causal standardization
 requirements.
 
+## Notation
+
+The document uses $m$ for a monthly reference period, $\ell$ for another
+historical month, and $d$ for the calendar date on which information becomes
+available. Event $e$ has publication date $d_e$, reference month $m(e)$, and
+release block $b(e)$. Index $k$ identifies a source series. When one rule
+applies to either a month or a week, $\rho$ denotes that generic source
+reference period. Data vintage $v$
+is written as a parenthesized superscript, as in $x_{k,m}^{(v)}$, to distinguish
+it from an exponent. The regime and path notation follows
+[`bayesian_filter.md`](bayesian_filter.md#notation).
+
 The keyless ALFRED transport has later series-specific archive floors where
 older requests do not exist: August 15, 2013 for both claims series; June 13,
 2001 for both retail-sales series; December 1, 1996 for housing starts; and
@@ -87,37 +99,53 @@ than assuming that its economic label guarantees predictive value.
 
 ## 2. Point-in-time first-release rule
 
-Let $x_{s,p}^{v}$ denote the value for series $s$ and reference period $p$ as
-visible in vintage $v$. Candidate publication dates come from the authenticated
-FRED API's initial-release records when `FRED_API_KEY` is available; the
-retained keyless ALFRED path supplies the same normalized real-time contract.
-Provider choice must not change the feature mathematics.
+Let $x_{k,\rho}^{(v)}$ denote the value for series $k$ and source reference
+period $\rho$ as visible in vintage $v$. Candidate publication dates come from
+the authenticated FRED API's initial-release records when `FRED_API_KEY` is
+available; the retained keyless ALFRED path supplies the same normalized
+real-time contract. Provider choice must not change the feature mathematics.
 
-For each series and period, select the earliest admissible vintage containing
-the observation:
+For each series and period, first find the observation's earliest appearance in
+the acquired archive:
 
 $$
-v_s(p)=\min\left\{v:
-x_{s,p}^{v}\text{ exists and }v\text{ is an admissible first release}
+\widetilde v_k(\rho)=\min\left\{v\in V_k:
+x_{k,\rho}^{(v)}\text{ exists}
 \right\}.
 $$
 
+Here $V_k$ is the set of candidate vintage dates acquired for series $k$. That
+first appearance is either accepted or rejected by the lag and archive-start
+rules below. The extractor does not search a later vintage after rejecting the
+first appearance, because a later observation of the same period is a backfill
+or revision rather than its first release. If the first appearance is eligible,
+set $v_k(\rho)=\widetilde v_k(\rho)$; otherwise the feature is unavailable.
+
 Monthly and weekly observations use a general maximum release lag of 92
 calendar days. The monthly lag is measured from reference month-end; the
-weekly lag is measured from `reference_date`. Let $d_s^0$ be the earliest
-observed release date for series $s$, and let $p_s^0$ be the latest reference
-period present on that date. An observation is feature-eligible exactly when
+weekly lag is measured from `reference_date`. Define
 
 $$
-0\leq\operatorname{lag}_{s,p}\leq92
+\operatorname{lag}_{k,\rho}
+=\widetilde v_k(\rho)-\operatorname{anchor}(\rho),
+$$
+
+where $\operatorname{anchor}(\rho)$ is month-end for a monthly observation and
+the source reference date for a weekly observation. Let $d_k^0$ be the earliest
+observed release date for series $k$, and let $\rho_k^0$ be the latest
+reference period present on that date. Let $d_{k,\rho}=\widetilde v_k(\rho)$.
+An observation is feature-eligible exactly when
+
+$$
+0\leq\operatorname{lag}_{k,\rho}\leq92
 $$
 
 and
 
 $$
-d_{s,p}>d_s^0
+d_{k,\rho}>d_k^0
 \quad\text{or}\quad
-\left(d_{s,p}=d_s^0\text{ and }p=p_s^0\right).
+\left(d_{k,\rho}=d_k^0\text{ and }\rho=\rho_k^0\right).
 $$
 
 The additional earliest-date rule handles the bootstrap behavior of a
@@ -143,9 +171,9 @@ to the same record contract.
 The monthly current and previous values must be read from that one snapshot:
 
 $$
-x_{s,m}^{v_s(m)}
+x_{k,m}^{(v_k(m))}
 \quad\text{and}\quad
-x_{s,m-1}^{v_s(m)}.
+x_{k,m-1}^{(v_k(m))}.
 $$
 
 This is the same-vintage rule already used by the deterministic components. It
@@ -155,35 +183,41 @@ frozen previous-month level that may use a different revision or index base.
 For JOLTS rates, the transformed feature is
 
 $$
-u_{s,m}
-=x_{s,m}^{v_s(m)}-x_{s,m-1}^{v_s(m)}.
+u_{k,m}
+=x_{k,m}^{(v_k(m))}-x_{k,m-1}^{(v_k(m))}.
 $$
 
 For retail sales, housing, and durable-goods orders, it is
 
 $$
-u_{s,m}
+u_{k,m}
 =100\log\left(
-\frac{x_{s,m}^{v_s(m)}}{x_{s,m-1}^{v_s(m)}}
+\frac{x_{k,m}^{(v_k(m))}}{x_{k,m-1}^{(v_k(m))}}
 \right).
 $$
 
-Order one series' transformed observations by `release_date`. Let
-$H_{s,e^-}$ contain the transformed observations released strictly before
-event $e$. With sample standard deviation (`ddof = 1`), the monthly event
-feature is
+Order one series' transformed observations by `release_date`. Write $u_{k,e}$
+for the transformed value attached to event $e$. Let
+$\mathcal H_{k,e^-}$ contain the transformed observations released strictly
+before event $e$. With sample standard deviation (`ddof = 1`), the monthly
+event feature is
 
 $$
-z_{s,e}
+z_{k,e}
 =
-\frac{u_{s,e}-\widehat\mu_{s,e^-}}
-{\widehat\sigma_{s,e^-}}.
+\frac{u_{k,e}-\widehat\mu_{k,e^-}}
+{\widehat\sigma_{k,e^-}}.
 $$
+
+$\widehat\mu_{k,e^-}$ and $\widehat\sigma_{k,e^-}$ are the sample mean and
+sample standard deviation of the values in $\mathcal H_{k,e^-}$. The minus
+sign in $e^-$ means that observations published on the current event date are
+excluded; it is not subtraction.
 
 At least 60 prior transformed observations are required. The current event
 never contributes to its own mean or standard deviation, and a zero or
 nonfinite prior standard deviation leaves the feature unavailable. The event
-table stores $u_{s,e}$ as `transformed_value` and $z_{s,e}$ as `feature_value`.
+table stores $u_{k,e}$ as `transformed_value` and $z_{k,e}$ as `feature_value`.
 Rows before the threshold are retained with
 `feature_status = standardization_warmup`.
 
@@ -195,9 +229,9 @@ history in `standardization_prior_count`, `standardization_prior_mean`, and
 `standardization_prior_std`.
 
 There is no full-sample standardization, cross-sectional weighting, or
-three-month smoothing in this evidence layer. The downstream likelihood estimator
-must still estimate its regime-conditional parameters causally; it must not
-renormalize the whole event table using future releases.
+three-month smoothing in this evidence layer. The downstream likelihood
+estimator must still estimate its regime-conditional parameters causally; it
+must not renormalize the whole event table using future releases.
 
 ## 3. Weekly claims: expanding log-AR(1) innovations
 
@@ -207,33 +241,46 @@ information. Model 01 therefore treats the unexpected component of each
 release as the feature.
 
 For one claims series, order valid first-release observations first by release
-date and then by weekly reference date, and define
+date and then by weekly reference date. Index that ordered weekly sequence by
+$\tau$ and define
 
 $$
-x_t=\log L_t,
+x_\tau=\log L_\tau,
 $$
 
-where $L_t>0$ is the published claims level. Claims observations sharing a
-release date form one atomic publication group $B_d$. Immediately before group
-$d$, fit an AR(1) with an intercept using only levels published on earlier
-dates:
+where $L_\tau>0$ is the published claims level. Claims observations sharing a
+release date form one atomic publication group $\mathcal B_d$. Immediately
+before group $d$, fit an AR(1) with an intercept using only levels published on
+earlier dates:
 
 $$
-x_j=a_d+\phi_d x_{j-1}+\epsilon_j,
-\qquad \operatorname{release\_date}(j)<d.
+x_{\tau'}=a_d+\phi_d x_{\tau'-1}+\eta_{\tau'},
+\qquad d_{\tau'}<d.
 $$
 
-The fitted $(a_d,\phi_d)$ are frozen for the entire publication. For the
-reference weeks $w_1<\cdots<w_K$ in $B_d$, the one-step forecasts and
-innovations are
+Here $a_d$ is the fitted intercept, $\phi_d$ is the fitted lag-one coefficient,
+and $\eta_{\tau'}$ denotes an in-sample regression error. The date
+$d_{\tau'}$ is the publication date of observation $\tau'$. Both fitted
+parameters use only publication dates before $d$.
+
+The fitted $(a_d,\phi_d)$ are frozen for the entire publication. Let
+$\tau_1<\cdots<\tau_K$ be the positions in the ordered weekly sequence that
+belong to $\mathcal B_d$. Because the source sequence is required to have no
+missing weeks, position $\tau_g-1$ is the immediately preceding seven-day
+reference week. The one-step forecasts and innovations are
 
 $$
-\widehat x_{w_k}=a_d+\phi_d x_{w_k-1},
+\widehat x_{\tau_g}=a_d+\phi_d x_{\tau_g-1},
 \qquad
-e_{w_k}=x_{w_k}-\widehat x_{w_k}.
+\varepsilon_{\tau_g}=x_{\tau_g}-\widehat x_{\tau_g},
+\qquad g=1,\ldots,K.
 $$
 
-The lag $x_{w_k-1}$ is the actual preceding reference-week level. For the
+$\widehat x_{\tau_g}$ is the forecast log level and
+$\varepsilon_{\tau_g}$ is the new release's log-scale innovation: the observed
+log level minus its forecast.
+
+The lag $x_{\tau_g-1}$ is the actual preceding reference-week level. For the
 first row in a catch-up batch it normally comes from earlier published history;
 for later rows it can be the preceding level released in the same batch. Using
 that same-batch lag does not refit the AR parameters and does not pretend that
@@ -245,27 +292,31 @@ supply 51 lag/current transition pairs. It then standardizes every innovation
 in the group against valid innovations from strictly earlier release dates:
 
 $$
-z_t=
-\frac{e_t-\overline e_{t^-}}
-{s_{e,t^-}},
+z_{\tau_g}=
+\frac{\varepsilon_{\tau_g}-\overline\varepsilon_{<d}}
+{\widehat\sigma_{\varepsilon,<d}}.
 $$
 
-using sample standard deviation (`ddof = 1`) and requiring 26 prior valid
-innovations. All rows in one publication therefore share the same AR
-parameters and standardization moments. The current release group never
+Here $\overline\varepsilon_{<d}$ and
+$\widehat\sigma_{\varepsilon,<d}$ are the sample mean and sample standard
+deviation (`ddof = 1`) of innovations published strictly before the current
+group. At least 26 prior valid innovations are required. All rows in one
+publication therefore share the same AR parameters and standardization
+moments. The current release group never
 contributes to its own AR parameters, innovation mean, or innovation standard
-deviation. Each row's
-`feature_value` is $z_{w_k}$; the raw level, forecast, unstandardized innovation,
-fitted parameters, counts, and lagged moments remain available as audit fields.
+deviation. Each row's `feature_value` is $z_{\tau_g}$; the raw level, forecast,
+unstandardized innovation, fitted parameters, counts, and lagged moments remain
+available as audit fields.
 
-Only after every row in $B_d$ has been transformed are the group's levels and
-valid innovations appended to history for the next release date. Mathematically,
-the within-batch residual construction is a causal chain-rule factorization of
-the joint batch in reference-week order: later residuals may condition on an
-earlier actual level in the same batch, while every fitted parameter and
-scaling moment remains frozen at the pre-publication information set. It is not
-an intraday event ordering, an estimated probability density, or a Bayesian
-posterior update.
+Only after every row in $\mathcal B_d$ has been transformed are the group's
+levels and valid innovations appended to history for the next release date.
+Within a catch-up batch, rows are evaluated in reference-week order because the
+actual level for one week is the appropriate lag for the next week. A later
+row may therefore use an earlier level from the same published batch, but it
+cannot refit the AR coefficients or scaling moments. This is a calculation of
+weekly forecast errors inside one publication, not an assertion that the rows
+arrived at different intraday times, an estimated probability density, or a
+Bayesian posterior update.
 
 There is no hidden fallback. A missing or nonpositive level is invalid. A
 constant or numerically near-constant lag history does not identify both an
@@ -277,7 +328,7 @@ random-walk forecast, a trailing mean, zero, or a future-fitted parameter.
 The AR calculation is performed separately for `ICSA` and `CCSA`; one series
 never supplies lags or parameters to the other. The AR history consists of the
 sequence of frozen first-release levels. Later revisions do not rewrite prior
-$L_t$ values, and `previous_value_as_of_release` is unused for claims.
+$L_\tau$ values, and `previous_value_as_of_release` is unused for claims.
 
 After the archive-bootstrap and release-lag filters, one claims series must
 have unique reference dates, nondecreasing publication dates, strictly

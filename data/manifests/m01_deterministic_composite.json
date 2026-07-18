@@ -1,20 +1,49 @@
 {
+  "archive_start_policy": "latest_reference_period_only",
   "cache_format": "deterministically merged and normalized ZIP matrices",
-  "classified_months": 247,
+  "classified_months": 246,
   "configuration": "configs/models/m01_deterministic_composite.yaml",
-  "configuration_sha256": "a78a4d9922480b37828e991cba4b2cdf162c7c761fd35cf3ff7ea4c6561e2a86",
+  "configuration_sha256": "db688bf20b2e40cdc226922e29638c0831cc049d11e38c49c84260713ba3cafe",
   "data_snapshot_sha256": "b961550b4959ba40a9f3dec24289de9f8319d9c54a48af7efd294fa0f8619708",
-  "first_classified_month": "2005-07-01",
-  "generated_at_utc": "2026-07-15T19:17:03.580989+00:00",
-  "history_months": 251,
+  "first_classified_month": "2005-08-01",
+  "generated_at_utc": "2026-07-18T03:33:13.652155+00:00",
+  "generated_file_hashes": [
+    {
+      "bytes": 425575,
+      "path": "data/processed/m01_deterministic_composite/first_release_components_long.csv",
+      "sha256": "4df67d9f9fd8feb9dce7c665504f0c34a69b73d79dc47fffcb2d5da7caad40dd"
+    },
+    {
+      "bytes": 136498,
+      "path": "data/processed/m01_deterministic_composite/composite_features_and_regimes.csv",
+      "sha256": "8fb77d8ac3ddb2d11515045732d05f3e7b7ca2360e23e454fd8810b964276e34"
+    },
+    {
+      "bytes": 45747,
+      "path": "results/published/m01_deterministic_composite/regime_history.csv",
+      "sha256": "c3a948c057fff3eb7f6da53108f0afc814fcde72995ddceb5bb42dba3d6d145a"
+    },
+    {
+      "bytes": 371,
+      "path": "results/published/m01_deterministic_composite/latest_confirmed.json",
+      "sha256": "11ee818b70c7c92f8c3db75248436f010581b2d9b9e7deb93dc3f2c375a87ba2"
+    }
+  ],
+  "history_months": 250,
   "latest_classified_month": "2026-05-01",
   "model_id": "m01_deterministic_composite",
   "processed_files": [
     "data/processed/m01_deterministic_composite/first_release_components_long.csv",
     "data/processed/m01_deterministic_composite/composite_features_and_regimes.csv"
   ],
-  "provider": "ALFRED public release calendars and historical graph CSV",
+  "provider": "provider-neutral point-in-time vintage matrices",
   "provider_output": "batched as-of level snapshots by vintage date",
+  "provider_policy": "fred_api_preferred_when_FRED_API_KEY_is_present",
+  "provider_requested": "alfred",
+  "provider_selected": "alfred_web",
+  "providers_used": [
+    "alfred_web"
+  ],
   "published_files": [
     "results/published/m01_deterministic_composite/regime_history.csv",
     "results/published/m01_deterministic_composite/latest_confirmed.json"
@@ -22,15 +51,18 @@
   "raw_files": [
     {
       "bytes": 28948,
+      "cache_origin": "existing_normalized_cache",
       "extraction_diagnostics": {
         "matrix_rows": 449,
-        "rows_excluded_backfill_lag": 9,
+        "rows_excluded_archive_bootstrap": 11,
+        "rows_excluded_backfill_lag": 0,
         "rows_excluded_missing_prior": 0,
         "rows_excluded_negative_lag": 0,
-        "rows_retained": 440,
+        "rows_retained": 438,
         "rows_without_any_vintage": 0
       },
       "path": "data/raw/alfred/m01_deterministic_composite/PAYEMS_cdcf4003773a_levels_by_vintage.zip",
+      "provider": "alfred_web",
       "release_id": 50,
       "series_id": "PAYEMS",
       "sha256": "1cc58aa8a91535d7fe95d56e30946b4b4176dbbeb2415ff60fbd75e3e0b8b48c",
@@ -39,15 +71,18 @@
     },
     {
       "bytes": 47120,
+      "cache_origin": "existing_normalized_cache",
       "extraction_diagnostics": {
         "matrix_rows": 449,
-        "rows_excluded_backfill_lag": 9,
+        "rows_excluded_archive_bootstrap": 11,
+        "rows_excluded_backfill_lag": 0,
         "rows_excluded_missing_prior": 0,
         "rows_excluded_negative_lag": 0,
-        "rows_retained": 440,
+        "rows_retained": 438,
         "rows_without_any_vintage": 0
       },
       "path": "data/raw/alfred/m01_deterministic_composite/INDPRO_c6db58bca4d2_levels_by_vintage.zip",
+      "provider": "alfred_web",
       "release_id": 13,
       "series_id": "INDPRO",
       "sha256": "d42b103880fb02ad677665d9be6004872d5d7bf6d87a326174502d2a90f8e219",
@@ -56,15 +91,18 @@
     },
     {
       "bytes": 28231,
+      "cache_origin": "existing_normalized_cache",
       "extraction_diagnostics": {
         "matrix_rows": 449,
-        "rows_excluded_backfill_lag": 9,
+        "rows_excluded_archive_bootstrap": 11,
+        "rows_excluded_backfill_lag": 0,
         "rows_excluded_missing_prior": 0,
         "rows_excluded_negative_lag": 0,
-        "rows_retained": 440,
+        "rows_retained": 438,
         "rows_without_any_vintage": 0
       },
       "path": "data/raw/alfred/m01_deterministic_composite/PCEC96_3a8a4c9cc6b6_levels_by_vintage.zip",
+      "provider": "alfred_web",
       "release_id": 54,
       "series_id": "PCEC96",
       "sha256": "2930896cf85e363cb2b494521517f413aeecdc0243c359e376ab403de113f0d0",
@@ -73,15 +111,18 @@
     },
     {
       "bytes": 8224,
+      "cache_origin": "existing_normalized_cache",
       "extraction_diagnostics": {
         "matrix_rows": 449,
-        "rows_excluded_backfill_lag": 9,
+        "rows_excluded_archive_bootstrap": 11,
+        "rows_excluded_backfill_lag": 0,
         "rows_excluded_missing_prior": 1,
         "rows_excluded_negative_lag": 0,
-        "rows_retained": 438,
+        "rows_retained": 436,
         "rows_without_any_vintage": 1
       },
       "path": "data/raw/alfred/m01_deterministic_composite/UNRATE_ce7c16ece7dc_levels_by_vintage.zip",
+      "provider": "alfred_web",
       "release_id": 50,
       "series_id": "UNRATE",
       "sha256": "812dd09b4ff76ba779407c31384c1c52bf295a0d7d87caac9f6c5e32d021f2b1",
@@ -90,15 +131,18 @@
     },
     {
       "bytes": 12840,
+      "cache_origin": "existing_normalized_cache",
       "extraction_diagnostics": {
         "matrix_rows": 449,
-        "rows_excluded_backfill_lag": 92,
+        "rows_excluded_archive_bootstrap": 94,
+        "rows_excluded_backfill_lag": 0,
         "rows_excluded_missing_prior": 1,
         "rows_excluded_negative_lag": 0,
-        "rows_retained": 355,
+        "rows_retained": 353,
         "rows_without_any_vintage": 1
       },
       "path": "data/raw/alfred/m01_deterministic_composite/CPILFESL_3d51f6fa34ed_levels_by_vintage.zip",
+      "provider": "alfred_web",
       "release_id": 10,
       "series_id": "CPILFESL",
       "sha256": "148bc7b76ceab6f124901b01e478f10217e886f5d3fc35d42993adc2d92847c5",
@@ -107,15 +151,18 @@
     },
     {
       "bytes": 23417,
+      "cache_origin": "existing_normalized_cache",
       "extraction_diagnostics": {
         "matrix_rows": 449,
-        "rows_excluded_backfill_lag": 136,
+        "rows_excluded_archive_bootstrap": 137,
+        "rows_excluded_backfill_lag": 0,
         "rows_excluded_missing_prior": 0,
         "rows_excluded_negative_lag": 0,
-        "rows_retained": 313,
+        "rows_retained": 312,
         "rows_without_any_vintage": 0
       },
       "path": "data/raw/alfred/m01_deterministic_composite/PCEPILFE_62398ee76daf_levels_by_vintage.zip",
+      "provider": "alfred_web",
       "release_id": 54,
       "series_id": "PCEPILFE",
       "sha256": "6dbfc7271f80dcc0aa61f976e774d1a7e93e91889053ac0f9df43ec2ac9ad3b5",
@@ -124,15 +171,18 @@
     },
     {
       "bytes": 6664,
+      "cache_origin": "existing_normalized_cache",
       "extraction_diagnostics": {
         "matrix_rows": 324,
-        "rows_excluded_backfill_lag": 92,
+        "rows_excluded_archive_bootstrap": 94,
+        "rows_excluded_backfill_lag": 0,
         "rows_excluded_missing_prior": 0,
         "rows_excluded_negative_lag": 0,
-        "rows_retained": 232,
+        "rows_retained": 230,
         "rows_without_any_vintage": 0
       },
       "path": "data/raw/alfred/m01_deterministic_composite/PPILFE_1f057f197457_levels_by_vintage.zip",
+      "provider": "alfred_web",
       "release_id": 46,
       "series_id": "PPILFE",
       "sha256": "0c85c53264d63e2b5df7fe8025f97fbf028e1adfa2ade385556ad5ea83e152e6",
@@ -141,15 +191,18 @@
     },
     {
       "bytes": 7033,
+      "cache_origin": "existing_normalized_cache",
       "extraction_diagnostics": {
         "matrix_rows": 449,
-        "rows_excluded_backfill_lag": 311,
+        "rows_excluded_archive_bootstrap": 313,
+        "rows_excluded_backfill_lag": 0,
         "rows_excluded_missing_prior": 0,
         "rows_excluded_negative_lag": 0,
-        "rows_retained": 138,
+        "rows_retained": 136,
         "rows_without_any_vintage": 0
       },
       "path": "data/raw/alfred/m01_deterministic_composite/WPSFD4131_ff2b560e2cf5_levels_by_vintage.zip",
+      "provider": "alfred_web",
       "release_id": 46,
       "series_id": "WPSFD4131",
       "sha256": "34cd3704924957f21f4ea99717aa41c0440e0a6c594853e1b959f0677e1c0588",
@@ -158,15 +211,18 @@
     },
     {
       "bytes": 12691,
+      "cache_origin": "existing_normalized_cache",
       "extraction_diagnostics": {
         "matrix_rows": 449,
-        "rows_excluded_backfill_lag": 124,
+        "rows_excluded_archive_bootstrap": 126,
+        "rows_excluded_backfill_lag": 0,
         "rows_excluded_missing_prior": 0,
         "rows_excluded_negative_lag": 0,
-        "rows_retained": 325,
+        "rows_retained": 323,
         "rows_without_any_vintage": 0
       },
       "path": "data/raw/alfred/m01_deterministic_composite/AHETPI_d2b962a57f30_levels_by_vintage.zip",
+      "provider": "alfred_web",
       "release_id": 50,
       "series_id": "AHETPI",
       "sha256": "34ace384112e8033812d7cbbc65350026404fa53af758055d8329ca2883c8005",
@@ -177,7 +233,7 @@
   "reference_end": "2026-05-01",
   "reference_months": 312,
   "reference_start": "2000-06-01",
-  "schema_version": 1,
+  "schema_version": 2,
   "unavailable_months": [
     {
       "data_status": "missing_component_feature",
@@ -188,11 +244,11 @@
       "reference_month": "2025-11-01"
     },
     {
-      "data_status": "unavailable_trailing_window",
+      "data_status": "missing_component_feature",
       "reference_month": "2025-12-01"
     },
     {
-      "data_status": "unavailable_trailing_window",
+      "data_status": "missing_component_feature",
       "reference_month": "2026-01-01"
     }
   ]

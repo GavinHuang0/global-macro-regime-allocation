@@ -1,4 +1,11 @@
-"""Fit and publish Model 01's causal stationary transition model."""
+"""Fit and publish Model 01's causal stationary transition model.
+
+The command consumes the deterministic regime history and transition YAML,
+fits a Dirichlet-smoothed first-order Markov matrix at the configured cutoff,
+and writes posterior means, uncertainty intervals, a pair-level audit table,
+the latest prior, and a hash manifest. A transition pair is eligible only when
+both monthly labels were known by the fitting cutoff.
+"""
 
 from __future__ import annotations
 
@@ -296,6 +303,7 @@ def _parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Parse command-line arguments and publish transition artifacts."""
     args = _parse_args()
     project_root = args.project_root.resolve()
     config_path = args.config

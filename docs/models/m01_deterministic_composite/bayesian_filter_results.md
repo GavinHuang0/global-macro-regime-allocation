@@ -1,168 +1,103 @@
 # Model 01 Bayesian-filter results
 
-## Frozen run
+## Frozen scope
 
-These results were generated from the frozen specification in
-[`m01_event_driven_bayesian_filter.yaml`](../../../configs/models/m01_event_driven_bayesian_filter.yaml).
-The information cutoff is July 16, 2026. Forecast evaluation begins with the
-January 2018 target month and ends with May 2026, the latest classified target
-available at the cutoff. Every fixed-checkpoint comparison contains the same
-97 target months.
+These results were rebuilt on 18 July 2026 after the Model 01 closure audit.
+The deterministic history begins in August 2005, the filter runs through
+16 July 2026, and formal forecast evaluation covers 97 classified targets from
+January 2018 through May 2026. A forecast is eligible only if its checkpoint
+date is strictly earlier than `label_available_at`. Same-date
+`pre_confirmation` checkpoints remain in the state audit but are not scored.
 
-The results are descriptive research output. The sensitivity variants were
-predeclared and were not used to replace or retune the baseline after seeing
-the evaluation sample.
-
-## Fixed-checkpoint evaluation
-
-| Checkpoint | Model | NLL | Brier | MAP accuracy | Balanced accuracy | Classwise ECE | Mean entropy | Brier skill |
-|---|---|---:|---:|---:|---:|---:|---:|---:|
-| Month start | Student-t evidence | 1.0548 | 0.5785 | 60.82% | 33.17% | 0.1419 | 1.1887 | 1.41% |
-| Month start | Transition only | 1.0827 | 0.5868 | 60.82% | 33.17% | 0.1506 | 1.2197 | 0.00% |
-| Month end | Student-t evidence | 0.9224 | 0.5193 | 64.95% | 34.60% | 0.0990 | 0.9431 | 2.57% |
-| Month end | Transition only | 0.9819 | 0.5330 | 65.98% | 34.97% | 0.1106 | 1.0518 | 0.00% |
-| Pre-confirmation | Student-t evidence | 0.9351 | 0.5324 | 63.92% | 29.84% | 0.0935 | 0.8768 | -2.64% |
-| Pre-confirmation | Transition only | 0.9558 | 0.5187 | 68.04% | 36.59% | 0.1042 | 1.0394 | 0.00% |
-
-NLL is mean negative log probability assigned to the realized regime. Brier is
-the unscaled four-class squared probability error. Brier skill is measured
-against the paired transition-only forecast; positive is better. Entropy is a
-sharpness diagnostic, not an accuracy score.
-
-The evidence model improves both proper probability scores at month end: NLL
-falls by 0.0595 and Brier score falls by 2.57% relative to transition only.
-Its MAP accuracy is slightly lower, illustrating why hard-classification
-accuracy alone is an incomplete evaluation of a probability forecast.
-
-Immediately before deterministic confirmation, the evidence model still has
-better NLL but worse Brier score, MAP accuracy, and balanced accuracy. The
-posterior is sharper at that checkpoint, but some of the additional confidence
-is misplaced. This is evidence of residual overconfidence or dependence among
-release blocks rather than an unqualified improvement.
-
-## ICSA release checkpoints
-
-| ICSA release number in target month | Months | Evidence NLL | Transition NLL | Evidence Brier | Transition Brier | Brier skill |
-|---:|---:|---:|---:|---:|---:|---:|
-| 1 | 97 | 1.0125 | 1.0739 | 0.5650 | 0.5812 | 2.79% |
-| 2 | 97 | 0.9906 | 1.0733 | 0.5605 | 0.5819 | 3.68% |
-| 3 | 97 | 1.0009 | 1.0962 | 0.5711 | 0.5956 | 4.12% |
-| 4 | 97 | 0.8896 | 0.9784 | 0.4993 | 0.5267 | 5.20% |
-| 5 | 32 | 0.8975 | 0.9408 | 0.5332 | 0.5358 | 0.47% |
-
-These checkpoints contain all evidence processed earlier on the same date, not
-an isolated causal effect estimate for ICSA. They nevertheless show that the
-event-driven posterior generally improves proper probability scores as weekly
-information accumulates. The fifth-release slice is smaller because many
-calendar months contain only four eligible ICSA publications.
-
-## Sensitivity checks
-
-The tables below report the month-end slice. Complete results for month start,
-month end, pre-confirmation, and ICSA release number are stored in
+The full methodology is in [`bayesian_filter.md`](bayesian_filter.md); exact
+rows are published in
+[`evaluation_summary.json`](../../../results/published/m01_bayesian_filter/evaluation_summary.json)
+and
 [`sensitivity_metrics.csv`](../../../results/published/m01_bayesian_filter/sensitivity_metrics.csv).
 
-### Student-t degrees of freedom
+## Fixed-checkpoint performance
 
-| Distribution | NLL | Brier |
-|---|---:|---:|
-| Student-t, 3 df | 0.9208 | 0.5180 |
-| Student-t, 5 df | 0.9217 | 0.5190 |
-| **Student-t, 7 df baseline** | **0.9224** | **0.5193** |
-| Student-t, 10 df | 0.9231 | 0.5194 |
-| Student-t, 30 df | 0.9239 | 0.5195 |
-| Gaussian limit | 0.9112 | 0.5118 |
+| Checkpoint | Specification | NLL | Brier | MAP accuracy | Balanced accuracy | Macro F1 | Entropy |
+|---|---|---:|---:|---:|---:|---:|---:|
+| Month start | Student-$t$ evidence | 1.0464 | 0.5725 | 62.89% | 33.92% | 0.3231 | 1.1861 |
+| Month start | Transition only | 1.0741 | 0.5807 | 61.86% | 33.55% | 0.3043 | 1.2171 |
+| Month end | Student-$t$ evidence | **0.9170** | **0.5156** | 64.95% | 34.60% | 0.3488 | 0.9392 |
+| Month end | Transition only | 0.9762 | 0.5291 | **65.98%** | **34.97%** | **0.3529** | 1.0477 |
 
-The conclusion is not fragile to moderate changes in tail thickness. The
-Gaussian variant is best on this historical slice, but it remains a
-sensitivity result rather than a basis for replacing the predeclared 7-df
-baseline.
+The event model improves both proper probability scores at month start and
+month end. At month end, NLL improves by 0.0592 and Brier skill is 2.55% versus
+the paired transition-only replay. It does not improve the hard-label hit or
+balanced-accuracy metrics. The correct interpretation is a modest improvement
+in probability assignment, not clearly superior classification.
 
-### Regime-mean shrinkage
+The first four numbered monthly ICSA checkpoints contain 97 targets each. Their
+baseline NLL values are 1.0042, 0.9817, 0.9930, and 0.8832; the corresponding
+Brier scores are 0.5590, 0.5539, 0.5651, and 0.4946. A fifth release exists in
+32 months and has NLL 0.8899 and Brier 0.5280. These slices are descriptive:
+release number is correlated with calendar structure and should not be read as
+a controlled causal dose-response experiment.
 
-| Kappa | NLL | Brier |
-|---:|---:|---:|
-| 0 | 0.9193 | 0.5183 |
-| 2 | 0.9202 | 0.5186 |
-| **5 baseline** | **0.9224** | **0.5193** |
-| 10 | 0.9268 | 0.5202 |
-| 20 | 0.9365 | 0.5219 |
+## Metric interpretation
 
-Stronger pooling gradually weakens month-end performance, but the differences
-are modest. Kappa remains valuable during early or rare-regime fits because it
-gives unobserved regimes the pooled mean instead of an unidentified location.
+- **NLL** is mean negative log probability assigned to the realized regime;
+  confident mistakes are penalized heavily.
+- **Brier** is the unscaled sum of four squared probability errors, averaged
+  across forecasts; its range is 0 to 2.
+- **MAP accuracy** is the fraction of largest-probability class calls that are
+  correct.
+- **Balanced accuracy** is mean recall across realized regimes and therefore
+  gives rare quadrants equal weight.
+- **Macro F1** averages per-regime harmonic precision/recall.
+- **Entropy** measures posterior sharpness in nats; lower entropy is not
+  automatically better accuracy.
+- **Axis Brier scores** aggregate the quadrants into growth-up and inflation-up
+  binary events.
+- **Expected calibration error** is a bin-dependent summary of forecast-versus-
+  realized frequency and is diagnostic rather than a proper score.
 
-### Covariance shrinkage
+## Sensitivity summary
 
-| Shared covariance treatment | NLL | Brier |
-|---|---:|---:|
-| Empirical | 0.9225 | 0.5191 |
-| **Ledoit-Wolf baseline** | **0.9224** | **0.5193** |
-| 25% spherical shrinkage | 0.9226 | 0.5194 |
-| 50% spherical shrinkage | 0.9227 | 0.5195 |
-| 75% spherical shrinkage | 0.9227 | 0.5195 |
+The baseline fixes Student-$t$ degrees of freedom at 7, mean pseudo-count at 5,
+Ledoit-Wolf covariance, and scale multiplier at 1.0. Fifteen alternatives were
+specified before the final replay and change one choice at a time.
 
-The historical conclusion is essentially unchanged across these covariance
-treatments. For the univariate ICSA block, Ledoit-Wolf and empirical covariance
-are mathematically identical because the spherical target equals the scalar
-variance. Covariance sensitivity is meaningful only for the multivariate
-monthly blocks.
+At month end:
 
-### Residual scale
+- degrees-of-freedom/Gaussian variants span NLL 0.9058--0.9185 and Brier
+  0.5080--0.5157; the Gaussian alternative is best in this realized sample;
+- mean pseudo-count variants span NLL 0.9139--0.9311 and Brier 0.5146--0.5182;
+- covariance variants are nearly invariant, with NLL 0.9171--0.9174 and Brier
+  0.5154--0.5159;
+- scale 0.75 gives NLL 0.9120/Brier 0.5133, while scale 1.25 gives
+  0.9228/0.5172.
 
-| Standard-deviation multiplier | NLL | Brier |
-|---:|---:|---:|
-| 0.75 | 0.9174 | 0.5169 |
-| **1.00 baseline** | **0.9224** | **0.5193** |
-| 1.25 | 0.9283 | 0.5210 |
-
-The narrower likelihood performs somewhat better at month end, but the
-pre-confirmation deterioration in the main results cautions against simply
-making the posterior sharper. A later model should address cross-block
-dependence directly rather than tune the scale on this evaluation sample.
-
-## Evidence utilization
-
-The baseline replay contains 1,476 auditable event vectors:
-
-| Outcome | Count |
-|---|---:|
-| Applied | 1,244 |
-| Insufficient causal training history | 127 |
-| Already-confirmed target; recorded no-op | 101 |
-| Incomplete same-event vector | 4 |
-
-Only 14 JOLTS vectors moved the path posterior; 94 otherwise usable JOLTS
-vectors arrived after their target month had already been deterministically
-confirmed. This is a substantive architectural finding: JOLTS is often too
-late to nowcast the same reference month's target. It has not been silently
-remapped to a future regime.
-
-The weekly claims likelihood uses ICSA only. It applies 568 ICSA innovations
-after a 29-event causal warm-up. CCSA remains in the evidence data artifact but
-does not enter this likelihood or posterior.
+These differences do not justify replacing the baseline after observing the
+evaluation period. In particular, selecting the Gaussian alternative because
+it is best on these same 97 targets would be post-selection overfitting.
 
 ## Latest posterior
 
-As of July 16, 2026, April and May 2026 are confirmed. The unconfirmed
-posterior marginals are:
+At the 16 July 2026 cutoff, April and May are confirmed; June and July remain
+filtered distributions.
 
-| Target month | Growth up / inflation up | Growth down / inflation up | Growth up / inflation down | Growth down / inflation down |
-|---|---:|---:|---:|---:|
-| June 2026 | 71.96% | 15.57% | 12.46% | 0.00% |
-| July 2026 | 59.26% | 20.23% | 20.25% | 0.26% |
-| August 2026 transition forecast | 51.63% | 19.42% | 23.47% | 5.48% |
+| Regime | June 2026 | July 2026 | August transition forecast |
+|---|---:|---:|---:|
+| Growth up / inflation up | 72.24% | 59.66% | 52.10% |
+| Growth down / inflation up | 15.43% | 20.09% | 19.34% |
+| Growth up / inflation down | 12.33% | 19.98% | 23.07% |
+| Growth down / inflation down | 0.00% | 0.26% | 5.49% |
 
-The complete machine-readable result, including full precision and
-confirmation status, is
+The August column is the July marginal propagated through the transition matrix;
+it has not received August-reference evidence. The exact joint path and status
+fields are in
 [`latest_posterior.json`](../../../results/published/m01_bayesian_filter/latest_posterior.json).
 
-## Interpretation
+## Limitations visible in the results
 
-The first implementation provides evidence that the leading-release layer adds
-modest probabilistic value over the transition-only model, particularly by
-month end and after several ICSA releases. It does not establish strong rare-
-regime classification performance, and it becomes too sharp at the final
-pre-confirmation checkpoint under some metrics. Those mixed results are more
-useful than a single headline accuracy number: they identify calibration and
-cross-block dependence as the next modeling problems to solve.
+The four realized classes are imbalanced, the sample contains only 97 targets,
+and adjacent monthly errors are dependent. The block likelihoods also assume
+conditional independence across releases; repeated ICSA observations can make
+the filter sharper without supplying fully independent information. No
+confidence interval is attached to the forecast-score difference in frozen
+Model 01. These results are therefore a benchmark for later architectures, not
+evidence of a production-grade forecasting advantage.

@@ -1,9 +1,13 @@
-"""Generic joint-path filtering primitives for Model 01.
+"""Update Model 01's joint four-month regime-path distribution.
 
 The functions in this module know nothing about a particular release family or
 likelihood estimator.  They operate on a four-month probability tensor in the
 canonical Model 01 state order, which keeps the event orchestration layer
-separate from the underlying probability arithmetic.
+separate from the underlying probability arithmetic. Inputs are normalized
+transition matrices, path probabilities, event log likelihoods, or confirmed
+states; outputs are normalized paths, monthly marginals, entropy diagnostics,
+and update audits. No function reads dates or data files, so causality must be
+established by the orchestration layer before an update is supplied.
 """
 
 from __future__ import annotations

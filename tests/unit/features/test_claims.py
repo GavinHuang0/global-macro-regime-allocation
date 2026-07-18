@@ -1,4 +1,12 @@
-"""Tests for causal expanding-AR(1) claims innovations."""
+"""Test causal expanding-AR(1) innovations for weekly initial claims.
+
+Deterministic synthetic ICSA levels are used to verify strict-prior OLS fitting,
+minimum-history and zero-variance diagnostics, same-publication-date batching,
+sequential conditioning, expanding standardization, and invariance to current or
+future shocks. Invalid levels, parameters, and release sequences are rejected.
+The suite has no external inputs or outputs and protects the claims evidence block
+from look-forward fitting.
+"""
 
 from __future__ import annotations
 
@@ -13,6 +21,7 @@ from regime_allocation.features.claims import (
 
 
 def _claims_levels(periods: int = 40) -> pd.Series:
+    """Generate positive weekly claims levels with deterministic variation."""
     dates = pd.date_range("2020-01-02", periods=periods, freq="7D")
     time = np.arange(periods, dtype=float)
     log_levels = 11.8 + 0.001 * time + 0.06 * np.sin(time / 2.7)

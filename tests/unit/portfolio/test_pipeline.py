@@ -1,3 +1,12 @@
+"""Test frozen allocation configuration and causal portfolio-pipeline helpers.
+
+The repository YAML and small synthetic price/return tables are used to verify
+the baseline plus one-at-a-time sensitivity grid, selection of only prices known
+before each signal, the all-cash initial pre-trade state, and the pooled-mean
+ablation. No full backtest or file output is produced; this module guards the
+configuration and timing assumptions that connect inference to optimization.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path

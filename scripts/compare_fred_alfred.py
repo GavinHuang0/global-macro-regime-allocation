@@ -1,7 +1,16 @@
-"""Compare authenticated FRED and keyless ALFRED first-release data.
+"""Compare authenticated FRED and keyless ALFRED first-release histories.
 
-The comparison downloads into a temporary directory and writes only a compact
-JSON/Markdown report. It never reads or changes Model 01's existing raw cache.
+The command downloads PAYEMS and CPILFESL vintage matrices from both providers,
+extracts identical first-release features, and compares release dates, transformed
+values, and every common vintage-matrix cell over a caller-selected interval.
+It requires ``FRED_API_KEY`` for the authenticated provider; ALFRED remains the
+keyless comparison path.
+
+All temporary downloads are isolated in an operating-system temporary directory.
+The only persistent outputs are ``parity_report.json`` and ``parity_report.md``
+under ``--output-dir``. In particular, the script never reads, replaces, or
+mutates Model 01's existing raw cache. It exits with status 1 when any comparison
+fails, which makes it suitable for an explicit provider-parity check in CI.
 """
 
 from __future__ import annotations
@@ -31,6 +40,8 @@ from regime_allocation.data.providers.vintage_matrix import (
 
 @dataclass(frozen=True)
 class SeriesSpec:
+    """Identify one provider series and its Model 01 feature transformation."""
+
     series_id: str
     release_id: int
     component: str
@@ -55,6 +66,7 @@ def _value_comparison(
     atol: float,
     rtol: float,
 ) -> dict[str, int | float]:
+    """Compare one feature column and summarize numerical disagreements."""
     left = merged[f"{field}_fred"].to_numpy(dtype=float)
     right = merged[f"{field}_alfred"].to_numpy(dtype=float)
     matches = np.isclose(left, right, atol=atol, rtol=rtol, equal_nan=True)
@@ -79,6 +91,7 @@ def _matrix_comparison(
     atol: float,
     rtol: float,
 ) -> dict[str, int | float]:
+    """Compare common vintage-matrix cells within the observation interval."""
     fred_columns = set(map(str, fred.columns))
     alfred_columns = set(map(str, alfred.columns))
     common_columns = sorted(fred_columns.intersection(alfred_columns))
@@ -132,6 +145,11 @@ def _compare_series(
     atol: float,
     rtol: float,
 ) -> dict[str, Any]:
+    """Download, extract, and compare one series across both providers.
+
+    Raw provider responses live only below ``work_dir``. The returned dictionary
+    is JSON-safe and contains both feature-level and matrix-level pass criteria.
+    """
     fred_artifact = fred_client.download_level_matrix(
         spec.series_id,
         release_id=spec.release_id,
@@ -235,6 +253,7 @@ def _compare_series(
 
 
 def _markdown(report: dict[str, Any]) -> str:
+    """Format the machine-readable parity report as a compact Markdown table."""
     lines = [
         "# FRED API versus ALFRED parity check",
         "",
@@ -271,6 +290,7 @@ def _markdown(report: dict[str, Any]) -> str:
 
 
 def _parse_args() -> argparse.Namespace:
+    """Parse comparison windows and the persistent report destination."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--comparison-start", type=date.fromisoformat, default=date(2019, 1, 1))
     parser.add_argument("--comparison-end", type=date.fromisoformat, default=date(2023, 12, 1))
@@ -282,6 +302,7 @@ def _parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Run both provider downloads, write reports, and fail on non-parity."""
     args = _parse_args()
     if args.comparison_start > args.comparison_end:
         raise ValueError("comparison-start cannot follow comparison-end")

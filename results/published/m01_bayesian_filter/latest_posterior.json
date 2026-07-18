@@ -12,39 +12,39 @@
   },
   "checkpoint_type": "latest",
   "interpretation": "Event-driven posterior using leading releases and causal deterministic label confirmations. Unconfirmed months remain probability distributions.",
-  "joint_path_probability_sum": 0.9999999999999998,
+  "joint_path_probability_sum": 1.0000000000000002,
   "model_id": "m01_deterministic_composite",
   "next_month_transition_forecast": {
     "probabilities": [
       {
-        "probability": 0.5163447123107344,
+        "probability": 0.5210061874691517,
         "regime_id": "growth_up_inflation_up",
         "regime_label": "Growth composite up / inflation composite up"
       },
       {
-        "probability": 0.1941678840506918,
+        "probability": 0.19338610981041693,
         "regime_id": "growth_down_inflation_up",
         "regime_label": "Growth composite down / inflation composite up"
       },
       {
-        "probability": 0.23467359184572226,
+        "probability": 0.23073428942739868,
         "regime_id": "growth_up_inflation_down",
         "regime_label": "Growth composite up / inflation composite down"
       },
       {
-        "probability": 0.054813811792851386,
+        "probability": 0.05487341329303293,
         "regime_id": "growth_down_inflation_down",
         "regime_label": "Growth composite down / inflation composite down"
       }
     ],
-    "probability_sum": 0.9999999999999999,
+    "probability_sum": 1.0000000000000002,
     "reference_month": "2026-08-01",
     "transition_matrix_policy": "frozen_at_latest_calendar_month_roll"
   },
   "path_anchor_month": "2026-07-01",
   "path_marginals": [
     {
-      "entropy": 2.220446049250313e-16,
+      "entropy": -2.220446049250313e-16,
       "probabilities": [
         {
           "probability": 0.0,
@@ -52,7 +52,7 @@
           "regime_label": "Growth composite up / inflation composite up"
         },
         {
-          "probability": 0.9999999999999998,
+          "probability": 1.0000000000000002,
           "regime_id": "growth_down_inflation_up",
           "regime_label": "Growth composite down / inflation composite up"
         },
@@ -67,16 +67,16 @@
           "regime_label": "Growth composite down / inflation composite down"
         }
       ],
-      "probability_sum": 0.9999999999999998,
+      "probability_sum": 1.0000000000000002,
       "reference_month": "2026-04-01",
       "relative_month": -3,
       "status": "confirmed"
     },
     {
-      "entropy": 2.220446049250313e-16,
+      "entropy": -2.220446049250313e-16,
       "probabilities": [
         {
-          "probability": 0.9999999999999998,
+          "probability": 1.0000000000000002,
           "regime_id": "growth_up_inflation_up",
           "regime_label": "Growth composite up / inflation composite up"
         },
@@ -96,65 +96,65 @@
           "regime_label": "Growth composite down / inflation composite down"
         }
       ],
-      "probability_sum": 0.9999999999999998,
+      "probability_sum": 1.0000000000000002,
       "reference_month": "2026-05-01",
       "relative_month": -2,
       "status": "confirmed"
     },
     {
-      "entropy": 0.7863100586868597,
+      "entropy": 0.7817926403702087,
       "probabilities": [
         {
-          "probability": 0.719627235430862,
+          "probability": 0.7223713168061893,
           "regime_id": "growth_up_inflation_up",
           "regime_label": "Growth composite up / inflation composite up"
         },
         {
-          "probability": 0.15569766186470438,
+          "probability": 0.15427837757847354,
           "regime_id": "growth_down_inflation_up",
           "regime_label": "Growth composite down / inflation composite up"
         },
         {
-          "probability": 0.12463217331774878,
+          "probability": 0.12330776763474209,
           "regime_id": "growth_up_inflation_down",
           "regime_label": "Growth composite up / inflation composite down"
         },
         {
-          "probability": 4.29293866847327e-05,
+          "probability": 4.253798059530333e-05,
           "regime_id": "growth_down_inflation_down",
           "regime_label": "Growth composite down / inflation composite down"
         }
       ],
-      "probability_sum": 0.9999999999999999,
+      "probability_sum": 1.0000000000000002,
       "reference_month": "2026-06-01",
       "relative_month": -1,
       "status": "filtered_posterior"
     },
     {
-      "entropy": 0.9723213561651259,
+      "entropy": 0.9679642485580384,
       "probabilities": [
         {
-          "probability": 0.592611672285162,
+          "probability": 0.5966238508815556,
           "regime_id": "growth_up_inflation_up",
           "regime_label": "Growth composite up / inflation composite up"
         },
         {
-          "probability": 0.20227251896170928,
+          "probability": 0.2009354280823408,
           "regime_id": "growth_down_inflation_up",
           "regime_label": "Growth composite down / inflation composite up"
         },
         {
-          "probability": 0.20248893325712913,
+          "probability": 0.19981648958666118,
           "regime_id": "growth_up_inflation_down",
           "regime_label": "Growth composite up / inflation composite down"
         },
         {
-          "probability": 0.0026268754959994354,
+          "probability": 0.002624231449442703,
           "regime_id": "growth_down_inflation_down",
           "regime_label": "Growth composite down / inflation composite down"
         }
       ],
-      "probability_sum": 0.9999999999999998,
+      "probability_sum": 1.0000000000000002,
       "reference_month": "2026-07-01",
       "relative_month": 0,
       "status": "filtered_posterior"

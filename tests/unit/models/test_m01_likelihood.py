@@ -1,4 +1,12 @@
-"""Unit tests for Model 01's causal release-block likelihoods."""
+"""Test causal regime-conditional release-block likelihood estimation.
+
+Synthetic univariate and multivariate event vectors verify pooled-mean shrinkage,
+missing-regime fallback, Ledoit-Wolf and spherical covariance shrinkage, Student-t
+scale conversion, Gaussian sensitivities, and agreement with SciPy densities.
+Selection tests enforce strict pre-cutoff feature and label availability, while
+validation tests reject incomplete or singular inputs. Outputs are in-memory
+diagnostics only; the suite guards both statistical definitions and causality.
+"""
 
 from __future__ import annotations
 
@@ -21,6 +29,7 @@ A, B, C, D = CANONICAL_REGIME_IDS
 
 
 def _univariate_vectors() -> pd.DataFrame:
+    """Return a sparse one-feature sample that omits two canonical regimes."""
     return pd.DataFrame(
         {
             "regime_id": [A, A, B],
@@ -30,6 +39,7 @@ def _univariate_vectors() -> pd.DataFrame:
 
 
 def _two_dimensional_vectors() -> pd.DataFrame:
+    """Return a nonsingular two-feature sample for covariance checks."""
     return pd.DataFrame(
         {
             "regime_id": [A, A, A, A, A, B, B, B],
@@ -40,6 +50,7 @@ def _two_dimensional_vectors() -> pd.DataFrame:
 
 
 def _causal_vectors() -> pd.DataFrame:
+    """Return event vectors spanning eligible, same-day, and future information."""
     rows = [
         ("eligible-1", "2020-01-02", "2019-12-01", "2020-01-05", A, 1.0),
         ("eligible-2", "2020-01-03", "2019-12-01", "2020-01-06", B, 2.0),

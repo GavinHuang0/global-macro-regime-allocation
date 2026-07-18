@@ -1,4 +1,11 @@
-"""External data-provider adapters and deterministic runtime selection."""
+"""Select the point-in-time data provider without changing model semantics.
+
+The authenticated FRED API is primary when a valid in-memory key is available;
+the credential-free ALFRED web adapter remains a reproducible fallback. Both
+providers return the contracts in :mod:`vintage_matrix`, allowing acquisition
+provenance to differ while first-release selection and downstream calculations
+remain identical. Provider-selection records never contain secrets.
+"""
 
 from __future__ import annotations
 

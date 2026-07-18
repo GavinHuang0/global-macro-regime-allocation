@@ -1,4 +1,12 @@
-"""Unit tests for Model 01's fixed first-order transition model."""
+"""Test estimation and propagation of Model 01's fixed Markov transition model.
+
+Controlled monthly histories verify canonical state order, consecutive-calendar
+counting, inclusive knowledge cutoffs, both-endpoint label availability, Jeffreys
+Dirichlet smoothing, raw MLE reporting, credible intervals, and invariance to
+future labels. Exact 4-by-4 tensors then test the four-month path-shift operator.
+The suite performs no I/O and locks both causal estimation and probability-mass
+conservation.
+"""
 
 from __future__ import annotations
 
@@ -41,6 +49,7 @@ def _matrix_values(matrix: object) -> np.ndarray:
 def _history(
     rows: Iterable[tuple[str, Regime | str | None, str | None]],
 ) -> pd.DataFrame:
+    """Convert concise month, regime, and availability tuples into history rows."""
     records = []
     for reference_month, regime, available_at in rows:
         regime_id = regime.value if isinstance(regime, Regime) else regime
@@ -84,6 +93,7 @@ def _history_for_isolated_transitions(
 
 
 def _estimate(history: pd.DataFrame, **kwargs: object) -> object:
+    """Estimate a transition model with a deliberately distant knowledge cutoff."""
     return estimate_transition_matrix(
         history,
         knowledge_cutoff=pd.Timestamp("2100-01-01"),
@@ -428,6 +438,7 @@ def test_missing_required_history_column_is_rejected() -> None:
 
 
 def _example_transition_matrix() -> np.ndarray:
+    """Return an asymmetric stochastic matrix for joint-path propagation tests."""
     return np.array(
         [
             [0.7, 0.1, 0.1, 0.1],

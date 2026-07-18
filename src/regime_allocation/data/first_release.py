@@ -1,4 +1,13 @@
-"""Extract release-coherent features from provider-neutral vintage matrices."""
+"""Extract release-coherent monthly features from vintage matrices.
+
+Inputs are provider-neutral level matrices whose columns represent historical
+publication vintages. For each reference month, this module identifies the
+first vintage in which the level appeared, verifies that appearance against the
+configured release-lag and archive-start policies, and transforms current and
+prior levels from the same vintage. Outputs include both usable features and a
+row-level exclusion audit; no later revision may repair an ineligible first
+appearance.
+"""
 
 from __future__ import annotations
 
@@ -14,6 +23,13 @@ VALID_TRANSFORMS = {"difference", "negative_difference", "log_difference"}
 
 
 def apply_transform(current: float, previous: float, transform: str) -> float:
+    """Transform two same-vintage levels into one monthly component value.
+
+    ``difference`` returns current minus previous, ``negative_difference``
+    reverses that sign, and ``log_difference`` returns 100 times the log ratio.
+    The log form requires positive levels. Keeping both levels in one vintage
+    prevents a revision published later from entering the earlier feature.
+    """
     if transform == "difference":
         return current - previous
     if transform == "negative_difference":
@@ -32,6 +48,7 @@ def extract_first_release_features(
     component: str,
     transform: str,
     max_release_lag_days: int = 92,
+    archive_start_latest_only: bool = False,
 ) -> pd.DataFrame:
     """Freeze each monthly transformation at the month’s first release vintage.
 
@@ -44,13 +61,23 @@ def extract_first_release_features(
         raise ValueError(f"unsupported transform: {transform}")
     if max_release_lag_days < 0:
         raise ValueError("max_release_lag_days must be non-negative")
+    if not isinstance(archive_start_latest_only, bool):
+        raise TypeError("archive_start_latest_only must be a boolean")
 
     ordered_columns = sorted(matrix.columns, key=vintage_date_from_column)
     ordered = matrix.reindex(columns=ordered_columns).sort_index()
+    first_column = str(ordered_columns[0]) if ordered_columns else None
+    archive_latest_reference = None
+    if archive_start_latest_only and first_column is not None:
+        first_snapshot = pd.to_numeric(ordered[first_column], errors="coerce")
+        available_references = first_snapshot.index[first_snapshot.notna()]
+        if len(available_references):
+            archive_latest_reference = pd.Timestamp(available_references.max())
     records: list[dict[str, object]] = []
     diagnostics = {
         "matrix_rows": len(ordered),
         "rows_without_any_vintage": 0,
+        "rows_excluded_archive_bootstrap": 0,
         "rows_excluded_negative_lag": 0,
         "rows_excluded_backfill_lag": 0,
         "rows_excluded_missing_prior": 0,
@@ -63,6 +90,14 @@ def extract_first_release_features(
         release_column = str(available.index[0])
         release_date = vintage_date_from_column(release_column)
         month = pd.Timestamp(reference_month).to_period("M")
+        if (
+            archive_start_latest_only
+            and release_column == first_column
+            and archive_latest_reference is not None
+            and month.to_timestamp() != archive_latest_reference
+        ):
+            diagnostics["rows_excluded_archive_bootstrap"] += 1
+            continue
         month_end = month.end_time.normalize().date()
         release_lag_days = (release_date - month_end).days
         if release_lag_days < 0:

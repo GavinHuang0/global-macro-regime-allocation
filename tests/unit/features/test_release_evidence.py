@@ -1,4 +1,12 @@
-"""Tests for provider-neutral, causal release-evidence event records."""
+"""Test provider-neutral construction of causal release-evidence events.
+
+Synthetic first-release observations drive the monthly and ICSA event builders.
+The suite checks the frozen table schema, reference-period mapping, feature and
+event identifiers, strict-prior standardization, same-date batch information
+sets, claims AR diagnostics, archive-start filtering, release-lag eligibility,
+and comprehensive contract validation. No provider or filesystem is accessed;
+these tests guard the event stream consumed by walk-forward inference.
+"""
 
 from __future__ import annotations
 
@@ -19,6 +27,7 @@ from regime_allocation.features.release_evidence import (
 
 
 def _month_end(reference_month: pd.Timestamp) -> pd.Timestamp:
+    """Normalize a monthly reference period to its calendar month-end."""
     return reference_month.to_period("M").end_time.normalize()
 
 
@@ -28,6 +37,7 @@ def _monthly_records(
     series_id: str = "RSAFS",
     start: str = "2020-01-01",
 ) -> pd.DataFrame:
+    """Create monthly first-release rows with explicit reference and release dates."""
     reference_months = pd.date_range(start, periods=len(transformed), freq="MS")
     release_dates = [
         _month_end(month) + pd.Timedelta(days=12) for month in reference_months
@@ -58,6 +68,7 @@ def _build_monthly(
     feature: str = "retail_sales_log_change",
     min_history: int = 2,
 ) -> pd.DataFrame:
+    """Build one standardized monthly release block with production defaults."""
     return build_monthly_release_events(
         records,
         release_block=block,
@@ -71,6 +82,7 @@ def _build_monthly(
 
 
 def _claims_observations(periods: int = 14) -> list[FirstReleaseObservation]:
+    """Create deterministic weekly claims observations and publication dates."""
     references = [date(2020, 1, 4) + timedelta(days=7 * index) for index in range(periods)]
     time = np.arange(periods, dtype=float)
     levels = np.exp(11.8 + 0.001 * time + 0.06 * np.sin(time / 2.7))
@@ -90,6 +102,7 @@ def _build_claims(
     series_id: str = "ICSA",
     feature_name: str = "initial_claims_innovation",
 ) -> pd.DataFrame:
+    """Build ICSA evidence events using the production expanding-AR settings."""
     return build_claims_release_events(
         observations,
         release_block="claims",

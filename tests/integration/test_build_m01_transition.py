@@ -1,4 +1,12 @@
-"""End-to-end contract tests for the model 01 transition build."""
+"""Verify the complete fixed-transition build on controlled regime histories.
+
+Each test writes synthetic monthly labels and configuration files, runs the real
+transition builder, and inspects counts, posterior-predictive probabilities,
+credible intervals, joint-path priors, manifests, and documented defaults. The
+temporary inputs make calendar gaps and knowledge cutoffs explicit. No production
+data are modified; the purpose is to ensure the published transition artifacts
+remain causal, reproducible, and internally reconcilable.
+"""
 
 from __future__ import annotations
 
@@ -24,6 +32,7 @@ STATE_ORDER = [
 
 
 def _sha256(path: Path) -> str:
+    """Hash a temporary artifact for manifest reconciliation assertions."""
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
@@ -76,6 +85,7 @@ def _write_history(path: Path) -> None:
 
 
 def _write_config(path: Path) -> None:
+    """Write the frozen transition specification with temporary source paths."""
     config = {
         "schema_version": 1,
         "model_id": "m01_deterministic_composite",

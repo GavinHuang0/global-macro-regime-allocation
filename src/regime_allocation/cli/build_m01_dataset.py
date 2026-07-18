@@ -1,4 +1,16 @@
-"""Acquire, transform, classify, and publish model 01's historical dataset."""
+"""Build Model 01's deterministic point-in-time regime history.
+
+The command reads the Model 01 data configuration, acquires or reuses FRED or
+ALFRED vintage matrices, selects each component's genuine first appearance,
+applies release-coherent transformations, and constructs the standardized,
+three-month growth and inflation composites. It publishes component audit
+tables, composite features, deterministic regime labels, and a hash manifest.
+
+A monthly label becomes usable only after every historical component value
+needed by its expanding standardization and smoothing window was available.
+Archive-start backfills and late first appearances are excluded rather than
+relabeled as contemporaneous releases.
+"""
 
 from __future__ import annotations
 
@@ -55,6 +67,20 @@ def _write_json(payload: dict[str, Any], path: Path) -> None:
         encoding="utf-8",
     )
     temporary.replace(path)
+
+
+def _cumulative_label_availability(
+    releases: pd.DataFrame,
+    *,
+    scores_available: pd.Series,
+) -> pd.Series:
+    """Return the latest release among every prerequisite through each month."""
+
+    required = releases.reindex(columns=list(ALL_COMPONENTS))
+    if not required.index.equals(scores_available.index):
+        raise ValueError("release and score-availability indices must match")
+    cumulative_prerequisites = required.cummax()
+    return cumulative_prerequisites.max(axis=1).where(scores_available)
 
 
 def _load_config(path: Path) -> tuple[dict[str, Any], bytes]:
@@ -251,6 +277,16 @@ def build_dataset(
     provider: str = "auto",
     environ: Mapping[str, str] | None = None,
 ) -> dict[str, Path]:
+    """Build and publish the deterministic target dataset.
+
+    The parameters identify the repository root, model configuration,
+    acquisition provider, and optional cache-refresh behavior. The returned
+    mapping names the written component audits, composite features, regime
+    history, public snapshots, and manifest.
+
+    Provider selection may change how official vintages are retrieved, but it
+    does not change the first-release or label-availability rules.
+    """
     config, config_bytes = _load_config(config_path)
     data_config = config["data"]
     feature_config = config["features"]
@@ -262,6 +298,11 @@ def build_dataset(
     vintage_start = _as_date(data_config["vintage_start"])
     vintage_end = _as_date(data_config["vintage_end"])
     max_release_lag_days = int(data_config["max_release_lag_days"])
+    archive_start_latest_only = data_config.get(
+        "archive_start_latest_only", False
+    )
+    if not isinstance(archive_start_latest_only, bool):
+        raise TypeError("data.archive_start_latest_only must be a boolean")
 
     legacy_raw_dir = project_root / output_config["raw_dir"]
     processed_dir = project_root / output_config["processed_dir"]
@@ -316,6 +357,7 @@ def build_dataset(
                 component=component,
                 transform=transform,
                 max_release_lag_days=max_release_lag_days,
+                archive_start_latest_only=archive_start_latest_only,
             )
             extraction_diagnostics = dict(
                 records.attrs.get("extraction_diagnostics", {})
@@ -374,10 +416,19 @@ def build_dataset(
         smoothing_window=int(feature_config["smoothing_window_months"]),
         ddof=int(feature_config["standard_deviation_ddof"]),
     )
-    required_releases = releases[list(ALL_COMPONENTS)]
-    complete_release_rows = required_releases.notna().all(axis=1)
-    features["label_available_at"] = required_releases.max(axis=1).where(
-        complete_release_rows
+    # Each z-score uses the current transformed value and all earlier available
+    # transformed values. The three-month composite then uses the current and
+    # prior two z-scores. Therefore the causal availability date is the latest
+    # release among every prerequisite up through the reference month, not
+    # merely the latest release stamped on the current row. With the current
+    # data these dates coincide, but the cumulative rule remains safe if a
+    # future archive contains a delayed or catch-up publication.
+    scores_available = features[
+        ["growth_smoothed", "inflation_smoothed"]
+    ].notna().all(axis=1)
+    features["label_available_at"] = _cumulative_label_availability(
+        releases,
+        scores_available=scores_available,
     )
     classified = classify_frame(features)
     classified.index.name = "reference_month"
@@ -485,6 +536,21 @@ def build_dataset(
     _write_csv(public_history, public_history_path)
     _write_json(latest_payload, latest_path)
 
+    generated_paths = [
+        long_path,
+        features_path,
+        public_history_path,
+        latest_path,
+    ]
+    generated_file_hashes = [
+        {
+            "path": path.relative_to(project_root).as_posix(),
+            "sha256": _sha256(path.read_bytes()),
+            "bytes": path.stat().st_size,
+        }
+        for path in generated_paths
+    ]
+
     combined_hash = hashlib.sha256()
     for item in sorted(raw_files, key=lambda value: str(value["series_id"])):
         combined_hash.update(str(item["sha256"]).encode("ascii"))
@@ -500,6 +566,11 @@ def build_dataset(
             {str(item["provider"]) for item in raw_files}
         ),
         "provider_output": "batched as-of level snapshots by vintage date",
+        "archive_start_policy": (
+            "latest_reference_period_only"
+            if archive_start_latest_only
+            else "all_rows_within_release_lag_limit"
+        ),
         "cache_format": "deterministically merged and normalized ZIP matrices",
         "configuration": config_path.relative_to(project_root).as_posix(),
         "configuration_sha256": _sha256(config_bytes),
@@ -533,6 +604,7 @@ def build_dataset(
             public_history_path.relative_to(project_root).as_posix(),
             latest_path.relative_to(project_root).as_posix(),
         ],
+        "generated_file_hashes": generated_file_hashes,
     }
     _write_json(manifest, manifest_path)
     return {
@@ -578,6 +650,7 @@ def _parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Parse command-line arguments and build the Model 01 target dataset."""
     args = _parse_args()
     project_root = args.project_root.resolve()
     config_path = args.config

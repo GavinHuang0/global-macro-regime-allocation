@@ -14,41 +14,65 @@ The research panel contains 312 reference months from June 2000 through May
 core PCE real-time archive begins in 2000, the classified regime history begins
 later than the raw 26-year component panel.
 
+## Notation
+
+$m$ denotes the monthly reference period being classified, and $\ell$ denotes
+another historical reference month. Component index $k$ identifies one of the
+eight source features. $R_m\in\mathcal R$ is the deterministic regime assigned
+to month $m$, where $\mathcal R$ is the four-regime state set. A superscript
+$(v)$ identifies the data vintage that was available on date $v$; it is not an
+exponent. $T_m$ is the first date on which every input required to compute
+$R_m$ was available. This convention separates the month an observation
+describes from the later date on which it became known.
+
 ## 1. First-release vintage rule
 
-Let $x_{s,m}^{v}$ be the published level of series $s$ for reference month
-$m$ as it appeared in vintage $v$. Let $V_s$ be the available candidate dates
+Let $x_{k,m}^{(v)}$ be the published level of component series $k$ for reference
+month $m$ as it appeared in vintage $v$. Let $V_k$ be the available candidate dates
 inside the frozen acquisition window. Under the primary FRED API provider,
-$V_s$ contains the series-specific initial-release dates returned by output
+$V_k$ contains the series-specific initial-release dates returned by output
 type 4. Under the keyless fallback, it contains the configured ALFRED release
-family's calendar dates. Define the admissible candidate set
+family's calendar dates. Define the first appearance in the acquired archive:
 
 $$
-A_{s,m}=\left\{v\in V_s:
-x_{s,m}^{v}\text{ is available and }
-0\leq v-\operatorname{end}(m)\leq92\text{ days}\right\}.
+\widetilde v_k(m)=\min\left\{v\in V_k:x_{k,m}^{(v)}
+\text{ is available}\right\}.
 $$
 
-The selected first-release vintage is
+The observation is eligible only if that first appearance satisfies
 
 $$
-v_s(m)=\min A_{s,m}.
+0\leq \widetilde v_k(m)-\operatorname{end}(m)\leq92\text{ days}
 $$
+
+and the archive-start rule below. If it is eligible, set
+$v_k(m)=\widetilde v_k(m)$; otherwise the feature is unavailable. Here
+$\operatorname{end}(m)$ is the final calendar date of reference month $m$. The
+extractor does not search later vintages for one that happens to satisfy the
+lag rule. A late first appearance is archive backfill, not a contemporaneous
+release.
 
 The transformed first-release feature is
 
 $$
-u_{s,m}=h_s\left(x_{s,m}^{v_s(m)},x_{s,m-1}^{v_s(m)}\right).
+u_{k,m}=h_k\!\left(x_{k,m}^{(v_k(m))},x_{k,m-1}^{(v_k(m))}\right).
 $$
+
+Here $h_k$ is the fixed transformation for component $k$ and $u_{k,m}$ is the
+resulting first-release monthly feature.
 
 The current and prior month therefore come from the same vintage. This matters
 because the prior month is often revised when the current month is released,
 and index base years can change. Differencing two independently frozen
 first-release levels would mix vintages and can create artificial jumps.
 
-If $A_{s,m}$ is empty, the feature is unavailable. The 92-day admissibility rule
-treats later first appearances as archive backfills rather than contemporaneous
-releases.
+A separate archive-start rule applies before that lag test. The earliest
+selected vintage for a series can expose many older reference periods at once.
+Only the latest reference period visible in that initial snapshot is eligible;
+all older rows are archive-bootstrap history, not simultaneous first releases.
+Seventeen raw rows previously passed the 92-day lag gate; two belonged to the
+inactive pre-splice history of `WPSFD4131`, so 15 had entered active component
+history. The rule is frozen as `archive_start_latest_only: true`.
 
 ## 2. Component transformations
 
@@ -56,29 +80,41 @@ The growth components are
 
 $$
 u_{\text{payroll},m}
-=\mathrm{PAYEMS}_m^{v(m)}-\mathrm{PAYEMS}_{m-1}^{v(m)},
+=\mathrm{PAYEMS}_m^{(v_{\mathrm{PAYEMS}}(m))}
+-\mathrm{PAYEMS}_{m-1}^{(v_{\mathrm{PAYEMS}}(m))},
 $$
 
 $$
 u_{\text{IP},m}
-=100\log\left(\frac{\mathrm{INDPRO}_m^{v(m)}}{\mathrm{INDPRO}_{m-1}^{v(m)}}\right),
+=100\log\left(
+\frac{\mathrm{INDPRO}_m^{(v_{\mathrm{INDPRO}}(m))}}
+{\mathrm{INDPRO}_{m-1}^{(v_{\mathrm{INDPRO}}(m))}}
+\right),
 $$
 
 $$
 u_{\text{consumption},m}
-=100\log\left(\frac{\mathrm{PCEC96}_m^{v(m)}}{\mathrm{PCEC96}_{m-1}^{v(m)}}\right),
+=100\log\left(
+\frac{\mathrm{PCEC96}_m^{(v_{\mathrm{PCEC96}}(m))}}
+{\mathrm{PCEC96}_{m-1}^{(v_{\mathrm{PCEC96}}(m))}}
+\right),
 $$
 
 $$
 u_{\text{unemployment},m}
-=-\left(\mathrm{UNRATE}_m^{v(m)}-\mathrm{UNRATE}_{m-1}^{v(m)}\right).
+=-\left(
+\mathrm{UNRATE}_m^{(v_{\mathrm{UNRATE}}(m))}
+-\mathrm{UNRATE}_{m-1}^{(v_{\mathrm{UNRATE}}(m))}
+\right).
 $$
 
 The inflation components are monthly log changes:
 
 $$
-u_{s,m}
-=100\log\left(\frac{x_{s,m}^{v_s(m)}}{x_{s,m-1}^{v_s(m)}}\right),
+u_{k,m}
+=100\log\left(
+\frac{x_{k,m}^{(v_k(m))}}{x_{k,m-1}^{(v_k(m))}}
+\right),
 $$
 
 for core CPI ($\mathrm{CPILFESL}$), core PCE prices ($\mathrm{PCEPILFE}$), core
@@ -91,19 +127,22 @@ levels are never spliced.
 
 ## 3. Strictly lagged expanding standardization
 
-For component $k$, let $H_{k,m-1}$ be all valid transformed observations
-strictly before month $m$, and let $n_{k,m-1}$ be their count. With sample
+For component $k$, let $\mathcal H_{k,m-1}$ be the set of valid transformed
+observations strictly before month $m$, and let
+$n_{k,m-1}=|\mathcal H_{k,m-1}|$ be their count. With sample
 standard deviation ($\operatorname{ddof}=1$),
 
 $$
 \widehat\mu_{k,m-1}
-=\frac{1}{n_{k,m-1}}\sum_{t<m}u_{k,t},
+=\frac{1}{n_{k,m-1}}
+\sum_{\ell\in\mathcal H_{k,m-1}}u_{k,\ell},
 $$
 
 $$
 \widehat\sigma_{k,m-1}
 =\sqrt{\frac{1}{n_{k,m-1}-1}
-\sum_{t<m}(u_{k,t}-\widehat\mu_{k,m-1})^2},
+\sum_{\ell\in\mathcal H_{k,m-1}}
+(u_{k,\ell}-\widehat\mu_{k,m-1})^2},
 $$
 
 and
@@ -120,14 +159,17 @@ historical standard deviation also yields no score.
 
 ## 4. Equal-weight monthly composites
 
-Let $G$ and $I$ be the four growth and four inflation components. The raw axis
-scores are
+Let $\mathcal G$ and $\mathcal I$ be the index sets containing the four growth
+and four inflation components, respectively. The raw axis scores are
 
 $$
-C_m^G=\frac{1}{4}\sum_{k\in G}z_{k,m},
+C_m^G=\frac{1}{4}\sum_{k\in\mathcal G}z_{k,m},
 \qquad
-C_m^I=\frac{1}{4}\sum_{k\in I}z_{k,m}.
+C_m^I=\frac{1}{4}\sum_{k\in\mathcal I}z_{k,m}.
 $$
+
+$C_m^G$ and $C_m^I$ are the unsmoothed growth and inflation composites for
+month $m$. Their superscripts label the economic axis; they are not exponents.
 
 All four terms are required. Missing a component makes the axis unavailable;
 the implementation never redistributes its 25% weight.
@@ -139,6 +181,8 @@ G_m=\frac{C_m^G+C_{m-1}^G+C_{m-2}^G}{3},
 \qquad
 I_m=\frac{C_m^I+C_{m-1}^I+C_{m-2}^I}{3}.
 $$
+
+$G_m$ and $I_m$ are the final smoothed axis scores used to classify $R_m$.
 
 This is a trailing window containing only months $m$, $m-1$, and $m-2$; it is
 not a centered moving average.
@@ -154,7 +198,7 @@ Exact zero is assigned to the nonnegative ($\text{up}$) side.
 | $G_m \geq 0,\ I_m < 0$ | `growth_up_inflation_down` | Growth composite up / inflation composite down |
 | $G_m < 0,\ I_m < 0$ | `growth_down_inflation_down` | Growth composite down / inflation composite down |
 
-“Up” means that the trailing mean of an axis's four standardized components is
+"Up" means that the trailing mean of an axis's four standardized components is
 nonnegative. It does not guarantee that every component is above its own mean,
 nor does it necessarily imply literal economic expansion, acceleration,
 slowdown, inflation, or disinflation. The deliberately literal public labels
@@ -162,16 +206,33 @@ avoid making those stronger claims.
 
 ## 7. Availability date
 
-For a completed month,
+For a completed month, the availability date must cover every prerequisite
+release used by the expanding standardizations and trailing window. Let
+$v_k(\ell)$ be component $k$'s selected release date for reference month
+$\ell$. For a classified month $m$, define the set of required, available
+component observations as
 
 $$
-T_m=\max_{k\in G\cup I}v_k(m).
+\mathcal P_m=
+\left\{
+(k,\ell):\ell\le m,\ v_k(\ell)\text{ exists, and the corresponding observation}
+\text{ is required to calculate }G_m\text{ or }I_m
+\right\}.
 $$
 
-$T_m$ is stored as `label_available_at`; it is the latest selected admissible
-release-calendar vintage among the eight components. Any future backtest may
-use the label only on or after that date. This prevents reference-month dates
-from being mistaken for publication dates.
+Then
+
+$$
+T_m=\max_{(k,\ell)\in\mathcal P_m}v_k(\ell).
+$$
+
+$T_m$ is stored as `label_available_at`. With normally ordered publications,
+the cumulative maximum equals the latest release required by the current
+three-month score. The cumulative form remains correct if a delayed or catch-up
+publication makes an older prerequisite available later. Any future backtest
+may use the label only on or after this date. If a required current or trailing
+component is unavailable, $R_m$ and $T_m$ are left undefined rather than
+manufacturing a label or availability date.
 
 ## 8. Missing-data rule
 

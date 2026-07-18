@@ -1,8 +1,13 @@
-"""Deterministic growth and inflation composite construction.
+"""Construct Model 01's deterministic growth and inflation composites.
 
 The helpers in this module are intentionally independent of any data provider.
 Point-in-time vintage selection happens in :mod:`regime_allocation.data` before
-these functions standardize and combine the monthly component features.
+these functions transform, standardize, and combine the monthly components.
+Each component is standardized against expanding history shifted by one month;
+equal-weight axis means are then averaged over a trailing three-month window.
+Outputs retain component z-scores, axis scores, and audit counts used by regime
+classification. Missing or insufficient history remains missing rather than
+being filled from future observations.
 """
 
 from __future__ import annotations
@@ -158,4 +163,3 @@ def build_composite_features(
         smoothing_window=smoothing_window,
         ddof=ddof,
     )
-

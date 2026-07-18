@@ -1,35 +1,25 @@
-"""
-bayesian_v2.py
-==============
-Data-driven Bayesian regime inference — NO hand-coded weights.
+"""Preserve the original class project's Bayesian orchestration script.
 
-Architecture:
-  Prior:      HMM transition matrix × yesterday's posterior
-              P(regime_t = k) = Σ_j  A[j,k] · P(regime_{t-1} = j)
-  Likelihood: Multivariate Gaussian fitted from historical (macro_evidence, regime) pairs
-              P(e_t | regime_k) = N(e_t; μ_k, Σ_k)
-              e_t = 11-dim macro evidence vector (CPI, NFP, 10Y Treasury)
-  Posterior:  P(regime | e_t, market) ∝ Prior × Likelihood
+This file is a historical artifact, not executable Model 01 code. It depends on
+the missing local modules ``hmm_regime`` and ``macro_evidence`` and therefore
+cannot reproduce the original paper by itself. It remains here to document the
+surviving implementation and preserve the original team's work and attribution.
 
-Evidence vector e_t (11 dimensions):
-  CPI block  (4): cpi_yoy, cpi_mom, cpi_surprise, cpi_accel
-  NFP block  (3): nfp_change, nfp_surprise, nfp_trend
-  10Y block  (4): yield_level, yield_1d_chg, yield_5d_chg, yield_20d_vol
+The legacy architecture fits a Gaussian hidden Markov model (HMM) to market
+features, propagates its last smoothed state probabilities through the learned
+transition matrix, and combines that prior with an 11-feature Gaussian macro
+likelihood. The evidence vector contains four CPI features, three payroll
+features, and four 10-year Treasury-yield features. The script prints the
+resulting prior and posterior and attempts to write ``data/bayesian_v2_chart.png``.
 
-No news, no text, no AI — pure structured macro data as Bayesian evidence.
-
-Data flow:
-  1. HMM runs on market CSV → regime labels + transition matrix A
-  2. macro_evidence.py → 11-dim structured feature vector from CPI/NFP/10Y
-  3. This script:
-     a. Fits HMM → prior from transition matrix
-     b. Aligns macro evidence with HMM regime labels
-     c. Fits P(e_t | regime_k) per regime from historical data
-     d. Evaluates likelihood for today's e_t
-     e. Bayesian update → posterior
-
-Output:
-  - data/bayesian_v2_chart.png
+Several choices in this artifact are deliberately *not* carried into Model 01:
+the scaler and HMM are fitted on the full sample, historical probabilities are
+smoothed, Viterbi labels use the full sequence, and the macro likelihood is fit
+against HMM-derived labels. Those choices can leak future information or make
+the prior and likelihood circular. See ``legacy/README.md`` for the full audit.
+No calculations in this file have been repaired, because changing them would
+erase the distinction between the preserved class submission and the independent
+rewrite under ``src/regime_allocation``.
 """
 
 import pathlib
@@ -145,6 +135,12 @@ def build_regime_labels(
 # ══════════════════════════════════════════════════════════════════
 
 def bayesian_update(prior: np.ndarray, likelihood: np.ndarray) -> np.ndarray:
+    """Normalize the elementwise product of legacy prior and likelihood arrays.
+
+    Parameters are assumed to share the regime ordering used by
+    ``REGIME_NAMES``. The legacy implementation performs no validation for
+    negative values, incompatible shapes, or zero total mass.
+    """
     unnorm = prior * likelihood
     posterior = unnorm / unnorm.sum()
     return posterior
@@ -162,6 +158,12 @@ def plot_results(
     evidence_date: str,
     e_t: np.ndarray,
 ):
+    """Render the legacy prior, likelihood, posterior, and evidence diagnostics.
+
+    The function consumes the arrays produced by the missing legacy modules and
+    writes a chart through the module's historical main routine. It is retained
+    for documentation only and is not used by Model 01's result pipeline.
+    """
     labels = [REGIME_LABELS[r] for r in REGIME_NAMES]
     colors = [REGIME_COLORS[r] for r in REGIME_NAMES]
 

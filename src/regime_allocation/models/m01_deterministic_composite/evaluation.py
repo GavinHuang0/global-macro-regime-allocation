@@ -1,4 +1,12 @@
-"""Probabilistic and classification metrics for Model 01 forecasts."""
+"""Evaluate Model 01's four-state probability forecasts.
+
+Inputs are normalized probability rows in the canonical state order and their
+realized deterministic regime IDs. Outputs cover proper probability scores,
+classification accuracy and class balance, separate growth/inflation axis
+scores, entropy, and top-label and one-versus-rest calibration bins. This module
+does not choose which checkpoints are eligible; callers must first exclude any
+forecast made on or after its target label became available.
+"""
 
 from __future__ import annotations
 

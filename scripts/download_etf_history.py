@@ -1,8 +1,18 @@
-"""Download and validate daily ETF history for the portfolio backtest.
+"""Download, validate, and publish the ETF history used by Model 01.
 
-The script uses Yahoo Finance's keyless chart endpoint and retains the raw JSON
-responses alongside analysis-ready CSV files. Adjusted-close returns are used as
-the total-return series because they incorporate cash distributions and splits.
+The command queries Yahoo Finance's keyless chart endpoint for the frozen ETF
+universe, stores each raw JSON response, and produces analysis-ready long and
+wide CSV tables plus a hash manifest and data-quality report. Its required inputs
+are the date window and explicit raw, processed, and manifest paths supplied on
+the command line.
+
+Adjusted close is treated as the provider's split- and distribution-adjusted
+total-return series. The script derives adjusted OHLC values, daily total returns,
+monthly returns, and action checks; rejects duplicate, missing, non-positive, or
+stale price histories; and reconciles ordinary cash-distribution returns within
+a documented tolerance. Persistent outputs are written only to caller-provided
+paths. This acquisition is reproducible as code, although Yahoo's mutable adjusted
+history means a future download is not guaranteed to reproduce frozen bytes.
 """
 
 from __future__ import annotations
@@ -39,10 +49,12 @@ SOURCE_ENDPOINT = "https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"
 
 
 def _epoch(day: date) -> int:
+    """Convert a UTC calendar date to Yahoo's Unix-epoch query boundary."""
     return int(datetime(day.year, day.month, day.day, tzinfo=timezone.utc).timestamp())
 
 
 def _request_url(ticker: str, start: date, end_exclusive: date) -> str:
+    """Build a daily chart URL including corporate-action event records."""
     query = urlencode(
         {
             "period1": _epoch(start),
@@ -56,6 +68,7 @@ def _request_url(ticker: str, start: date, end_exclusive: date) -> str:
 
 
 def _download_one(ticker: str, start: date, end_exclusive: date, timeout: int) -> bytes:
+    """Return one ticker's raw Yahoo chart response without writing it to disk."""
     request = Request(
         _request_url(ticker, start, end_exclusive),
         headers={"User-Agent": "Mozilla/5.0 (compatible; regime-allocation-research/1.0)"},
@@ -67,6 +80,7 @@ def _download_one(ticker: str, start: date, end_exclusive: date, timeout: int) -
 
 
 def _exchange_dates(timestamps: list[int], exchange_timezone: str) -> pd.Series:
+    """Map UTC response timestamps to normalized exchange-local session dates."""
     return pd.Series(
         pd.to_datetime(timestamps, unit="s", utc=True)
         .tz_convert(exchange_timezone)
@@ -80,6 +94,7 @@ def _parse_actions(
     events: dict[str, Any],
     exchange_timezone: str,
 ) -> pd.DataFrame:
+    """Normalize Yahoo dividend and split dictionaries into auditable rows."""
     records: list[dict[str, Any]] = []
     for item in events.get("dividends", {}).values():
         event_date = pd.Timestamp(item["date"], unit="s", tz="UTC").tz_convert(
@@ -124,6 +139,7 @@ def _parse_actions(
 
 
 def _parse_chart(ticker: str, content: bytes) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, Any]]:
+    """Parse one raw chart response into prices, actions, and provider metadata."""
     payload = json.loads(content)
     chart = payload.get("chart", {})
     if chart.get("error") is not None:
@@ -174,6 +190,7 @@ def _parse_chart(ticker: str, content: bytes) -> tuple[pd.DataFrame, pd.DataFram
 
 
 def _sha256(path: Path) -> str:
+    """Return the hexadecimal SHA-256 digest of a generated artifact."""
     digest = hashlib.sha256()
     with path.open("rb") as handle:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
@@ -182,6 +199,7 @@ def _sha256(path: Path) -> str:
 
 
 def _write_csv(frame: pd.DataFrame, path: Path) -> None:
+    """Write a CSV using the pipeline's stable date and float formatting."""
     path.parent.mkdir(parents=True, exist_ok=True)
     frame.to_csv(path, index=False, date_format="%Y-%m-%d", float_format="%.10g")
 
@@ -193,6 +211,12 @@ def _validate_and_enrich(
     requested_start: date,
     as_of: date,
 ) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, Any]]:
+    """Validate raw price history and derive total-return fields and diagnostics.
+
+    Returns the enriched long-form price table, one quality-summary row per ETF,
+    and an aggregate adjusted-close versus cash-distribution reconciliation.
+    Validation errors raise ``RuntimeError`` before any processed table is used.
+    """
     numeric = ("open", "high", "low", "close", "adjusted_close", "volume")
     prices.loc[:, list(numeric)] = prices.loc[:, list(numeric)].apply(
         pd.to_numeric, errors="coerce"
@@ -351,6 +375,7 @@ def _validate_and_enrich(
 
 
 def main() -> None:
+    """Acquire the frozen ETF universe and write validated data plus its manifest."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--start", type=date.fromisoformat, default=date(2008, 1, 1))
     parser.add_argument("--as-of", type=date.fromisoformat, default=date.today())
@@ -471,8 +496,10 @@ def main() -> None:
             for path in output_files
         ],
         "caveats": [
-            "Adjusted values are back-adjusted by the provider and may change after future distributions or corrections.",
-            "No missing daily returns were forward-filled; portfolio calendar alignment is deferred to the backtest.",
+            "Adjusted values are back-adjusted by the provider and may change "
+            "after future distributions or corrections.",
+            "No missing daily returns were forward-filled; portfolio calendar "
+            "alignment is deferred to the backtest.",
             "Monthly returns exclude the current partial calendar month.",
         ],
     }

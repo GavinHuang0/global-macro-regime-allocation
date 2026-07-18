@@ -7,6 +7,12 @@ stage-specific contracts are defined in
 [`bayesian_filter.md`](bayesian_filter.md#13-output-and-audit-contract); the
 source, regime, and transition tables remain defined below.
 
+Mathematical symbols follow the shared convention in
+[bayesian_filter.md](bayesian_filter.md#notation): $m$ is a reference month,
+$d$ is a knowledge or publication date, $e$ is an event, $b$ is a release
+block, $R_m$ is the monthly regime, and $s$ is a candidate four-month path.
+Field names remain literal code identifiers and are shown in backticks.
+
 ## Source components
 
 | Component | FRED/ALFRED series | Release | Earliest vintage used | Axis | Frozen transformation |
@@ -28,6 +34,12 @@ family's ALFRED calendar and retrieves snapshots from the historical graph CSV
 endpoint. A release-family calendar can include a date on which another series
 changed; this is harmless because the extractor selects the earliest dated
 snapshot containing the target observation.
+
+At the first selected archive snapshot, only the latest visible reference
+period is eligible. Older periods exposed by that snapshot are archive-bootstrap
+history rather than first releases. This policy is recorded as
+`archive_start_latest_only` and its exclusions are counted per raw matrix in the
+deterministic manifest.
 
 Responses are requested in bounded vintage batches, validated against the exact
 requested vintage set, and merged into a deterministic normalized ZIP cache.
@@ -63,7 +75,7 @@ Axis and label fields:
 | `inflation_raw` | Equal-weight mean of four inflation z-scores |
 | `growth_smoothed` | Trailing three-month growth composite |
 | `inflation_smoothed` | Trailing three-month inflation composite |
-| `label_available_at` | Latest first release date among all eight components |
+| `label_available_at` | Latest release date among every component observation required by the expanding standardization history and trailing three-month composite; computed cumulatively through the reference month |
 | `regime_id` | Stable quadrant identifier |
 | `regime_label` | Human-readable regime name |
 | `data_status` | `classified`, `missing_component_feature`, or `unavailable_trailing_window` in the public history |
@@ -251,7 +263,52 @@ Small public outputs live under `results/published/m01_bayesian_filter/`:
 - `sensitivity_metrics.csv` contains the full published sensitivity summary.
 
 `data/manifests/m01_deterministic_composite.json` records the configuration
-hash, raw ZIP hashes, coverage, generated-file paths, requested and selected
-providers, the provider associated with each cache, and whether each matrix was
-newly downloaded or reused. Credentials and credential-derived identifiers are
-excluded.
+hash, raw ZIP hashes, coverage, generated-file paths and hashes, requested and
+selected providers, the provider associated with each cache, and whether each
+matrix was newly downloaded or reused. Credentials and credential-derived
+identifiers are excluded.
+
+## ETF market-data artifacts
+
+The Yahoo Finance snapshot is independent of the macro provider and is frozen
+by `data/manifests/us_cross_asset_etf_universe_v1.json`. The requested interval
+is 1 January 2008 through 18 July 2026, with the last observed US session on
+17 July 2026.
+
+| Artifact | Contract |
+|---|---|
+| `etf_daily_prices_long.csv` | One ticker/session row with raw and adjustment-consistent open/close fields used by execution and marking |
+| `etf_daily_total_returns_wide.csv` | Adjusted-close daily total returns in ticker-wide form |
+| `etf_monthly_total_returns_wide.csv` | Completed calendar-month adjusted total returns in ticker-wide form |
+| `etf_corporate_actions.csv` | Provider dividend and split events retained for audit |
+| `us_cross_asset_etf_universe_v1.json` | Retrieval cutoff, row counts, raw/processed hashes, adjustment tests, and provider caveats |
+
+The strategy uses `SPY`, `IEF`, `TIP`, `HYG`, `BIL`, `GLD`, and `LQD`;
+`AGG` is benchmark-only. `DBC`, `UUP`, `TLT`, and `USO` remain in the acquired
+research universe but are not traded by frozen Model 01.
+
+## Allocation and backtest artifacts
+
+Local detailed artifacts live in
+`data/processed/m01_regime_allocation_backtest/`. Small public counterparts
+live in `results/published/m01_regime_allocation_backtest/`.
+
+| Artifact | Meaning |
+|---|---|
+| `signal_table.csv` | Causal month-start posterior selected for each target month |
+| `holding_period_returns.csv` | Common adjusted-open-to-adjusted-open ETF returns and exact holding dates |
+| `regime_estimate_audit.csv` | Eligible return/label counts, pooled and regime means, shrunk means, and covariance inputs at every signal |
+| `optimizer_audit.csv` | Expected moments, pretrade estimate, solver outcome, costs, constraints, and feasibility residuals |
+| `monthly_weights.csv` | Long-form target weights for every method, including the incomplete latest target |
+| `monthly_strategy_returns.csv` | Gross return, realized turnover/cost, net return, and NAV accounting for complete holdings |
+| `daily_nav.csv.gz` | Pre-trade open, post-trade open, close, and terminal-open NAV checkpoints used for drawdown |
+| `performance_metrics.csv` | Full return, risk, drawdown, turnover, and cost metrics |
+| `comparison_uncertainty.csv` | Paired circular block-bootstrap comparisons with the posterior strategy |
+| `sensitivity_metrics.csv` | Frozen mean-shrinkage, volatility-cap, concentration-cap, and cost-policy variants |
+| `legacy_sharpe_audit.csv` | Causal same-regime observations and score-to-weight calculation for the legacy comparator |
+
+The tracked `m01_regime_allocation_backtest.json` manifest hashes the
+configuration, implementation files, upstream inputs, all detailed outputs,
+and all public summaries. `latest_allocation.json` may describe a target whose
+holding period is not yet complete; that target is explicitly excluded from
+performance until the next execution open exists.

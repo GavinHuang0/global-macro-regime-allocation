@@ -1,4 +1,10 @@
-"""Unit tests for deterministic four-quadrant regime classification."""
+"""Test deterministic mapping from composite signs to public regime identifiers.
+
+Scalar synthetic growth and inflation scores cover all four quadrants, the frozen
+zero-tie convention, missing-value rejection, and stable string identifiers.
+There is no estimation or I/O here: the module isolates the final classification
+rule so downstream transition, inference, and portfolio code share one meaning.
+"""
 
 from __future__ import annotations
 

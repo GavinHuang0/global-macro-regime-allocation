@@ -16,6 +16,10 @@ data:
   vintage_start: 1990-01-01
   vintage_end: 2026-07-16
   max_release_lag_days: 92
+  # The earliest selected archive snapshot can expose several older months at
+  # once. Only its latest reference month is a credible real-time observation;
+  # the older rows are archive-bootstrap history, not first releases.
+  archive_start_latest_only: true
 
   # BLS did not publish October 2025 core CPI or unemployment observations
   # during the federal shutdown. The missing October level also makes the

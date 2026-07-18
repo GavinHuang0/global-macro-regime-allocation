@@ -1,9 +1,11 @@
-"""Credential-free adapter for ALFRED's public web data endpoints.
+"""Retrieve point-in-time vintages from ALFRED without credentials.
 
 The official FRED API is the preferred stable interface, but it requires an API
 key. This adapter gets official release dates from ALFRED and requests batched
 historical snapshots from ``alfredgraph.csv``. Provider responses are cached so
-research can be reproduced even if the web interface changes later.
+research can be reproduced even if the web interface changes later. Returned
+objects follow the same provider-neutral contracts as the authenticated client;
+the adapter does not transform observations or infer regimes.
 """
 
 from __future__ import annotations
@@ -45,6 +47,8 @@ class AlfredDownloadError(RuntimeError):
 
 
 class _VintageDateParser(HTMLParser):
+    """Collect ISO dates from ALFRED's vintage-selection HTML element."""
+
     def __init__(self) -> None:
         super().__init__()
         self._inside_vintage_select = False
@@ -53,6 +57,7 @@ class _VintageDateParser(HTMLParser):
     def handle_starttag(
         self, tag: str, attrs: list[tuple[str, str | None]]
     ) -> None:
+        """Enter the vintage selector and collect valid option values."""
         attributes = dict(attrs)
         if tag == "select" and attributes.get("name") == (
             "form[selected_vintage_dates][]"
@@ -68,6 +73,7 @@ class _VintageDateParser(HTMLParser):
                     pass
 
     def handle_endtag(self, tag: str) -> None:
+        """Leave the vintage selector when its closing tag is reached."""
         if tag == "select" and self._inside_vintage_select:
             self._inside_vintage_select = False
 
@@ -106,12 +112,14 @@ class AlfredWebDownloadClient:
 
     @staticmethod
     def series_url(series_id: str) -> str:
+        """Return the validated ALFRED vintage-download form URL."""
         if not re.fullmatch(r"[A-Za-z0-9_]+", series_id):
             raise ValueError(f"invalid FRED series id: {series_id!r}")
         return f"{BASE_URL}?seid={series_id}"
 
     @staticmethod
     def series_page_url(series_id: str) -> str:
+        """Return the public FRED description page for a validated series ID."""
         if not re.fullmatch(r"[A-Za-z0-9_]+", series_id):
             raise ValueError(f"invalid FRED series id: {series_id!r}")
         return f"https://fred.stlouisfed.org/series/{series_id}"
@@ -247,6 +255,12 @@ class AlfredWebDownloadClient:
         chunk_cache_dir: Path | None = None,
         refresh_cache: bool = False,
     ) -> DownloadedVintageMatrix:
+        """Download and combine release-calendar level snapshots.
+
+        Only official release dates inside the requested vintage interval are
+        queried. Requests are chunked and optionally cached, then normalized
+        into one observation-by-vintage matrix with credential-free provenance.
+        """
         available = self.list_release_dates(release_id)
         selected = tuple(
             vintage

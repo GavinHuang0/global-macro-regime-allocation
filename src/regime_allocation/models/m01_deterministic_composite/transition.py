@@ -1,8 +1,11 @@
-"""Causal first-order transition estimation for Model 01 regimes.
+"""Estimate and propagate Model 01's first-order regime transitions.
 
 The transition process is time-homogeneous and first-order. Estimates may be
 recomputed at successive knowledge cutoffs, but every estimate uses only labels
-whose point-in-time availability date is on or before its cutoff.
+whose point-in-time availability date is on or before its cutoff. Inputs are a
+deterministic monthly regime history and Dirichlet prior; outputs include the
+posterior-mean transition matrix, row-wise credible intervals, eligible-pair
+audits, and propagation helpers for single-month and joint-path probabilities.
 """
 
 from __future__ import annotations

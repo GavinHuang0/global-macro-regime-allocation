@@ -1,8 +1,15 @@
-"""Acquire and prepare Model 01's non-defining release evidence.
+"""Build Model 01's non-defining, point-in-time release evidence.
 
 This command stops at the data boundary: it freezes first-release observations,
 constructs causal release features, and writes a canonical event table.  It does
-not estimate likelihoods or perform Bayesian filtering.
+not estimate likelihoods or perform Bayesian filtering. Inputs are versioned
+series and release-block definitions plus cached or newly acquired FRED/ALFRED
+observations; outputs are normalized observation, feature, event, exclusion,
+and manifest artifacts.
+
+Every event retains its publication date and reference period. Monthly archive
+backfills are excluded, and the weekly claims innovation at a release date is
+fit only from observations published on earlier dates.
 """
 
 from __future__ import annotations
@@ -687,6 +694,7 @@ def _parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Parse command-line arguments and publish the evidence event table."""
     args = _parse_args()
     project_root = args.project_root.resolve()
     config_path = args.config

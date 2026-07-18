@@ -1,4 +1,13 @@
-"""Performance metrics for monthly regime-allocation backtests."""
+"""Summarize and compare monthly regime-allocation backtests.
+
+Inputs are transaction-cost-aware monthly method returns and, where needed,
+phase-ordered daily NAV checkpoints. Outputs include cumulative and annualized
+return, volatility, Sharpe ratio, maximum drawdown, turnover, and cost totals.
+The paired circular block bootstrap resamples the same month indices for both
+methods, preserving contemporaneous dependence while estimating uncertainty in
+their annualized return difference. These functions evaluate supplied results;
+they do not alter execution timing or portfolio weights.
+"""
 
 from __future__ import annotations
 

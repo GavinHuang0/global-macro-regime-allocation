@@ -1,4 +1,11 @@
-"""Tests for causal regime-return estimation and posterior moments."""
+"""Test causal return alignment, regime estimation, and posterior mixture moments.
+
+Synthetic adjusted-open prices, checkpoints, labels, and monthly returns establish
+next-month execution alignment, canonical posterior ordering, pseudo-month mean
+shrinkage, global fallback, strict signal cutoffs, and the covariance contribution
+from uncertainty between regime means. The module performs no I/O and guards the
+information boundary between forecasts and portfolio estimation.
+"""
 
 from __future__ import annotations
 
@@ -21,6 +28,7 @@ A, B, C, D = CANONICAL_REGIME_IDS
 
 
 def _checkpoints() -> pd.DataFrame:
+    """Return post-month-roll checkpoints used to select allocation signals."""
     return pd.DataFrame(
         {
             "checkpoint_id": ["before", "signal-1", "signal-2"],
@@ -39,6 +47,7 @@ def _checkpoints() -> pd.DataFrame:
 
 
 def _marginals() -> pd.DataFrame:
+    """Return normalized current-month marginals in canonical regime order."""
     records: list[dict[str, object]] = []
     for checkpoint_id, month, probabilities in (
         ("signal-1", "2020-02-01", [0.1, 0.2, 0.3, 0.4]),
@@ -108,6 +117,7 @@ def test_adjusted_open_returns_use_next_month_first_common_open() -> None:
 
 
 def _labeled_returns() -> pd.DataFrame:
+    """Return monthly returns carrying their causal regime labels."""
     return pd.DataFrame(
         {
             "holding_month": pd.date_range("2019-01-01", periods=6, freq="MS"),

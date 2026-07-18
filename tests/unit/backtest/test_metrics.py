@@ -1,3 +1,12 @@
+"""Test performance summaries and paired circular-block bootstrap uncertainty.
+
+The inputs are compact synthetic monthly return panels and NAV paths with known
+closed-form answers. Tests reconcile compounded return and drawdown, reproduce
+bootstrap samples manually, verify deterministic seeds and comparator ordering,
+and reject misaligned months or invalid configurations. No result artifacts are
+written; the suite protects the statistical reporting layer from silent changes.
+"""
+
 from __future__ import annotations
 
 import numpy as np
@@ -35,6 +44,7 @@ def test_performance_metrics_reconcile_geometric_return_and_drawdown() -> None:
 
 
 def _monthly_methods(method_returns: dict[str, list[float]]) -> pd.DataFrame:
+    """Convert aligned method-return lists into the evaluator's long-form table."""
     observations = len(next(iter(method_returns.values())))
     months = pd.date_range("2019-01-01", periods=observations, freq="MS")
     frames = []

@@ -1,0 +1,92 @@
+name: Reproduce frozen Model 01
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: reproduce-model-01
+  cancel-in-progress: false
+
+jobs:
+  reproduce:
+    name: Build, test, and package the complete frozen model
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      PYTHONUNBUFFERED: "1"
+
+    steps:
+      - name: Check out repository without push credentials
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install project and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Acquire frozen macro target data through FRED
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: >-
+          python -m regime_allocation.cli.build_m01_dataset
+          --provider fred
+          --refresh
+
+      - name: Acquire frozen non-defining evidence through FRED
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: >-
+          python -m regime_allocation.cli.build_m01_evidence
+          --provider fred
+          --refresh
+
+      - name: Fit transition and event-driven posterior stages
+        run: |
+          python -m regime_allocation.cli.build_m01_transition
+          python -m regime_allocation.cli.build_m01_inference
+
+      - name: Acquire the frozen ETF snapshot
+        run: >-
+          python scripts/download_etf_history.py
+          --start 2008-01-01
+          --as-of 2026-07-18
+          --raw-dir data/raw/yahoo_finance/us_cross_asset_etf_universe_v1
+          --processed-dir data/processed/us_cross_asset_etf_universe_v1
+          --manifest data/manifests/us_cross_asset_etf_universe_v1.json
+
+      - name: Build allocation and backtest outputs
+        run: python -m regime_allocation.cli.build_m01_backtest
+
+      - name: Run complete test suite
+        run: python -m pytest
+
+      - name: Upload non-secret reproducibility artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frozen-model-01-${{ github.run_id }}
+          path: |
+            data/manifests/*.json
+            data/processed/m01_deterministic_composite/*
+            data/processed/m01_non_defining_release_evidence/*
+            data/processed/m01_bayesian_filter/*
+            data/processed/us_cross_asset_etf_universe_v1/*
+            data/processed/m01_regime_allocation_backtest/*
+            results/published/m01_deterministic_composite/*
+            results/published/m01_bayesian_filter/*
+            results/published/m01_regime_allocation_backtest/*
+          if-no-files-found: error
+          include-hidden-files: false
+          retention-days: 30

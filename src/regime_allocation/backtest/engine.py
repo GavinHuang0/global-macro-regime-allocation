@@ -3,7 +3,11 @@
 Targets are formed before the first executable session of each reference month,
 traded at that session's adjusted open, and held until the next month's first
 session adjusted open. Cash distributions and splits are already represented in
-the provider's adjusted price series and must not be added a second time.
+the provider's adjusted price series and must not be added a second time. Inputs
+are validated adjusted prices, monthly target weights, pre-trade holdings, and
+one-way costs; outputs are open-to-open holding returns, drifted weights,
+transaction-cost-aware monthly returns, and phase-ordered daily NAV. A pre-trade
+NAV point ensures the initial rebalance cost enters drawdown calculations.
 """
 
 from __future__ import annotations
@@ -278,6 +282,16 @@ def build_daily_nav(
                     "method": method,
                     "date": start_date,
                     "phase_order": 0,
+                    "phase": "pre_trade_open",
+                    "reference_month": reference_month,
+                    "nav": capital_before_cost,
+                }
+            )
+            records.append(
+                {
+                    "method": method,
+                    "date": start_date,
+                    "phase_order": 1,
                     "phase": "post_trade_open",
                     "reference_month": reference_month,
                     "nav": capital_after_cost,
@@ -292,7 +306,7 @@ def build_daily_nav(
                     {
                         "method": method,
                         "date": session_date,
-                        "phase_order": 1,
+                        "phase_order": 2,
                         "phase": "close",
                         "reference_month": reference_month,
                         "nav": capital_after_cost * float(np.dot(weights, relatives)),

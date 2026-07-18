@@ -1,4 +1,12 @@
-"""Provider-neutral observation-by-vintage matrix contracts and utilities."""
+"""Provider-neutral contracts for point-in-time observation vintages.
+
+The dataclasses and protocol in this module define the boundary between network
+adapters and model data preparation. Utilities serialize and parse deterministic
+observation-by-vintage matrices and select the earliest numeric appearance of
+each reference period. Inputs may be monthly or weekly; outputs preserve both
+the economic reference date and publication date so later stages can enforce
+causal cutoffs.
+"""
 
 from __future__ import annotations
 

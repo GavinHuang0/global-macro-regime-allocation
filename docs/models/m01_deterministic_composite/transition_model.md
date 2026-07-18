@@ -19,6 +19,17 @@ This layer produces a transition prior, not a daily posterior. A posterior will
 require the later event-update layer to condition that prior on releases known
 at the relevant timestamp.
 
+## Notation
+
+The notation follows [`bayesian_filter.md`](bayesian_filter.md#notation): $m$
+is a target reference month, $\ell$ is another historical reference month,
+$d$ is a knowledge date, and $\mathcal D_d$ is the information available by
+that date. $R_m\in\mathcal R$ is the monthly regime, where $\mathcal R$ is the
+four-state set. The four-month path is
+$S_m=(R_{m-3},R_{m-2},R_{m-1},R_m)$, $s$ denotes one candidate path, and
+$q_{m,d}(s)=\Pr(S_m=s\mid\mathcal D_d)$. Bold uppercase letters denote
+matrices.
+
 ## 1. State space and frozen order
 
 The state space is the four deterministic quadrants defined in
@@ -35,13 +46,14 @@ probability records also carry their stable regime IDs and labels. Consumers
 must not infer an order from display labels, alphabetical sorting, dictionary
 iteration, or numerical encodings.
 
-Let $R_m\in\{1,2,3,4\}$ denote the regime for reference month $m$. Define
+Let $R_m\in\{1,2,3,4\}$ denote the regime for reference month $m$. Define the
+transition matrix $\mathbf A=(A_{ij})$ by
 
 $$
-A_{ij}=P(R_{m+1}=j\mid R_m=i).
+A_{ij}=\Pr(R_{m+1}=j\mid R_m=i).
 $$
 
-Each row of $A$ is a categorical distribution and therefore satisfies
+Each row of $\mathbf A$ is a categorical distribution and therefore satisfies
 
 $$
 A_{ij}\geq0,
@@ -52,7 +64,7 @@ $$
 The first-order assumption is
 
 $$
-P(R_{m+1}\mid R_{m-3:m})=P(R_{m+1}\mid R_m).
+\Pr(R_{m+1}\mid R_{m-3:m})=\Pr(R_{m+1}\mid R_m).
 $$
 
 Retaining a joint distribution over four months supports delayed observations
@@ -63,7 +75,7 @@ fourth-order Markov chain.
 
 The historical input is the point-in-time regime history. For each classified
 month $m$, let $T_m$ be its `label_available_at` date. A candidate pair
-$(m,m+1)$ is eligible at information cutoff $\tau$ only when all of the
+$(\ell,\ell+1)$ is eligible at knowledge date $d$ only when all of the
 following are true:
 
 1. the two reference months are exactly one calendar month apart;
@@ -71,25 +83,25 @@ following are true:
 3. both labels were available by the cutoff:
 
 $$
-T_m\leq\tau
+T_\ell\leq d
 \quad\text{and}\quad
-T_{m+1}\leq\tau.
+T_{\ell+1}\leq d.
 $$
 
 Equivalently, define the pair availability date
 
 $$
-T_{m\rightarrow m+1}=\max(T_m,T_{m+1});
+T_{\ell\rightarrow \ell+1}=\max(T_\ell,T_{\ell+1});
 $$
 
-the transition becomes usable when $T_{m\rightarrow m+1}\leq\tau$.
+the transition becomes usable when $T_{\ell\rightarrow \ell+1}\leq d$.
 
 The implementation never bridges a missing label. For example, if October
 through January are unavailable, September-to-February is not treated as a
-one-month transition. The current frozen public history contains 251 calendar
-months, 247 classified months, and one four-month unavailable block. It
-therefore contains 245 eligible consecutive transitions at the latest full
-cutoff: the 250 adjacent pairs minus the five pairs that touch the block.
+one-month transition. The current frozen public history contains 250 calendar
+months, 246 classified months, and one four-month unavailable block. It
+therefore contains 244 eligible consecutive transitions at the latest full
+cutoff: the 249 adjacent pairs minus the five pairs that touch the block.
 
 This timing rule matters in a walk-forward evaluation. A regime belongs to a
 reference month but is not known on that month's final calendar day. Its
@@ -98,35 +110,39 @@ the destination and source labels have both become available.
 
 ## 3. Transition counts
 
-At cutoff $\tau$, define
+At knowledge date $d$, define
 
 $$
-N_{ij}^{(\tau)}
+N_{ij}^{(d)}
 =
-\sum_m
+\sum_\ell
 \mathbf 1\!\left[
-R_m=i,
-R_{m+1}=j,
-T_{m\rightarrow m+1}\leq\tau,
-\text{pair }(m,m+1)\text{ is eligible}
+R_\ell=i,
+R_{\ell+1}=j,
+T_{\ell\rightarrow\ell+1}\leq d,
+\text{pair }(\ell,\ell+1)\text{ is eligible}
 \right].
 $$
+
+The indicator $\mathbf 1[\cdot]$ equals one when every condition inside the
+brackets is true and zero otherwise, so $N_{ij}^{(d)}$ is an ordinary count of
+causally usable transitions from state $i$ to state $j$.
 
 The outgoing row total is
 
 $$
-N_i^{(\tau)}=\sum_{j=1}^{4}N_{ij}^{(\tau)}.
+N_i^{(d)}=\sum_{j=1}^{4}N_{ij}^{(d)}.
 $$
 
 For diagnostics, the unsmoothed maximum-likelihood estimate is
 
 $$
-\widehat A_{ij}^{\mathrm{MLE},(\tau)}
+\widehat A_{ij}^{\mathrm{MLE},(d)}
 =
-\frac{N_{ij}^{(\tau)}}{N_i^{(\tau)}}
+\frac{N_{ij}^{(d)}}{N_i^{(d)}}
 $$
 
-when $N_i^{(\tau)}>0$. It is undefined for an empty row and can assign an
+when $N_i^{(d)}>0$. It is undefined for an empty row and can assign an
 unseen transition a probability of exactly zero, so it is not the production
 estimate.
 
@@ -135,7 +151,7 @@ estimate.
 Each row receives an independent symmetric Dirichlet prior:
 
 $$
-A_{i,\cdot}
+\mathbf A_{i,\cdot}
 \sim
 \operatorname{Dirichlet}(\alpha,\alpha,\alpha,\alpha),
 \qquad
@@ -150,27 +166,29 @@ substantial history.
 Conditional on the eligible counts, the row posterior is
 
 $$
-A_{i,\cdot}\mid\mathcal D_\tau
+\mathbf A_{i,\cdot}\mid\mathcal D_d
 \sim
 \operatorname{Dirichlet}
 \left(
-N_{i1}^{(\tau)}+0.5,
-N_{i2}^{(\tau)}+0.5,
-N_{i3}^{(\tau)}+0.5,
-N_{i4}^{(\tau)}+0.5
+N_{i1}^{(d)}+0.5,
+N_{i2}^{(d)}+0.5,
+N_{i3}^{(d)}+0.5,
+N_{i4}^{(d)}+0.5
 \right).
 $$
 
-Model 01 uses the posterior-predictive mean
+Model 01 uses the posterior-predictive mean: the next-transition probability
+obtained by averaging each unknown transition probability over its Dirichlet
+posterior. It is
 
 $$
-\overline A_{ij}^{(\tau)}
+\overline A_{ij}^{(d)}
 =
-\frac{N_{ij}^{(\tau)}+0.5}
-{N_i^{(\tau)}+4(0.5)}
+\frac{N_{ij}^{(d)}+0.5}
+{N_i^{(d)}+4(0.5)}
 =
-\frac{N_{ij}^{(\tau)}+0.5}
-{N_i^{(\tau)}+2}
+\frac{N_{ij}^{(d)}+0.5}
+{N_i^{(d)}+2}
 $$
 
 as its transition probability. A row with no eligible history is therefore the
@@ -180,12 +198,12 @@ of zeros.
 The marginal posterior for a single entry is
 
 $$
-A_{ij}\mid\mathcal D_\tau
+A_{ij}\mid\mathcal D_d
 \sim
 \operatorname{Beta}
 \left(
-N_{ij}^{(\tau)}+0.5,
-N_i^{(\tau)}-N_{ij}^{(\tau)}+3(0.5)
+N_{ij}^{(d)}+0.5,
+N_i^{(d)}-N_{ij}^{(d)}+3(0.5)
 \right).
 $$
 
@@ -195,10 +213,11 @@ individual cells, not simultaneous intervals for an entire row.
 
 ## 5. Expanding estimation
 
-For a live build at cutoff $\tau$, the model uses every eligible transition
-available by $\tau$. For a historical forecast, it recomputes
-$\overline A^{(\tau)}$ from only the transitions then available. It never fits
-one matrix using the final sample and applies that matrix to earlier dates.
+For a live build at knowledge date $d$, the model uses every eligible
+transition available by $d$. For a historical forecast, it recomputes
+$\overline{\mathbf A}^{(d)}$ from only the transitions then available. It
+never fits one matrix using the final sample and applies that matrix to earlier
+dates.
 
 The following items are fixed across expanding fits:
 
@@ -219,21 +238,23 @@ without silently refitting or changing the transition law.
 
 ## 6. Shifting the four-month path distribution
 
-Suppose that immediately before the monthly shift the joint distribution is
+Suppose that immediately before a roll from month $m$ to month $m+1$ on
+knowledge date $d$, the joint distribution is
 
 $$
-q_m(a,b,c,d)
-=
-P(R_{m-3}=a,R_{m-2}=b,R_{m-1}=c,R_m=d\mid\mathcal D_\tau).
+q_{m,d^-}(s)=\Pr(S_m=s\mid\mathcal D_{d^-}).
 $$
 
-The prior over the shifted path is
+For candidate states $r_{m-3},\ldots,r_{m+1}\in\mathcal R$, the prior over the
+shifted path is
 
 $$
-q_{m+1}^{-}(b,c,d,e)
-=
-\sum_{a=1}^{4}
-q_m(a,b,c,d)\overline A_{de}^{(\tau)}.
+\begin{aligned}
+q_{m+1,d}^{-}(r_{m-2},r_{m-1},r_m,r_{m+1})
+={}&\sum_{r_{m-3}\in\mathcal R}
+q_{m,d^-}(r_{m-3},r_{m-2},r_{m-1},r_m)\\
+&\times\overline A_{r_m,r_{m+1}}^{(d^-)}.
+\end{aligned}
 $$
 
 This operation marginalizes the oldest state, preserves the three overlapping
@@ -243,10 +264,11 @@ $4^4=256$ paths to another normalized nonnegative distribution on 256 paths.
 The next-month marginal follows directly:
 
 $$
-P(R_{m+1}=e\mid\mathcal D_\tau)
+\Pr(R_{m+1}=j\mid\mathcal D_{d^-})
 =
-\sum_{d=1}^{4}
-P(R_m=d\mid\mathcal D_\tau)\overline A_{de}^{(\tau)}.
+\sum_{i\in\mathcal R}
+\Pr(R_m=i\mid\mathcal D_{d^-})
+\overline A_{ij}^{(d^-)}.
 $$
 
 The full marginal distribution of $R_m$ is propagated. Replacing it with its
@@ -287,22 +309,22 @@ the corresponding row of the posterior-predictive transition matrix. It states
 the source month, target month, and information cutoff explicitly. It is not a
 joint-path prior and does not condition on any current-month release evidence.
 It must not be interpreted as a current-month posterior. The event layer
-will publish separately named posterior snapshots.
+publishes separately named posterior snapshots under `m01_bayesian_filter`.
 
-## 8. Evaluation plan
+## 8. Evaluation
 
-Walk-forward evaluation will score the one-month predictive distributions with
-multiclass log loss and Brier score, plus calibration diagnostics. Classification
-accuracy is secondary because it discards probability quality. The required
-baselines are:
+The Dirichlet-smoothed transition model is replayed as the no-leading-evidence
+baseline for every event-filter checkpoint. It uses the same causal month
+rolls, expanding cutoff, initialization, and deterministic confirmations as the
+event model. The January 2018--May 2026 results are reported in
+[`bayesian_filter_results.md`](bayesian_filter_results.md).
 
-1. expanding unconditional regime frequencies;
-2. pure last-regime persistence;
-3. the unsmoothed transition MLE;
-4. the Dirichlet-smoothed transition model specified here.
-
-Sensitivity analysis will report $\alpha\in\{0,0.5,1\}$, but the final test
-period must not be used to choose the most flattering value.
+An expanding unconditional-frequency model, hard persistence rule, and
+unsmoothed transition MLE remain useful future diagnostics but are not part of
+the frozen headline comparison. Likewise, alternative Dirichlet alpha values
+were not added after observing the evaluation period. The absence of those
+additional baselines is a limitation, not evidence that the selected transition
+law is optimal.
 
 ## 9. Limitations
 

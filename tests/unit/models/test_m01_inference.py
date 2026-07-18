@@ -1,4 +1,12 @@
-"""Tests for Model 01's generic joint-path filtering primitives."""
+"""Test the numerical primitives for four-month joint-path Bayesian filtering.
+
+Small transition matrices and exact probability tensors verify Markov-path
+initialization, atomic log-likelihood updates, repeated evidence, stable
+normalization, hard confirmation, marginals, entropy, and relative entropy.
+Invalid state labels, shapes, normalization, and impossible updates must fail.
+No dates or files are involved; these tests isolate probability algebra from the
+walk-forward orchestration layer.
+"""
 
 from __future__ import annotations
 
@@ -23,6 +31,7 @@ from regime_allocation.models.m01_deterministic_composite.inference import (
 
 
 def _transition() -> np.ndarray:
+    """Return a normalized, asymmetric transition matrix for exact checks."""
     return np.array(
         [
             [0.70, 0.10, 0.10, 0.10],
@@ -34,6 +43,7 @@ def _transition() -> np.ndarray:
 
 
 def _uniform_path() -> np.ndarray:
+    """Return a normalized uniform distribution over all 256 four-month paths."""
     return np.full(PATH_SHAPE, 1.0 / np.prod(PATH_SHAPE))
 
 

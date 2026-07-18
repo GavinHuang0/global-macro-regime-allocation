@@ -6,7 +6,10 @@ single residual covariance is shared by every regime in a block.
 
 No filtering or posterior update lives here. The causal-selection helper makes
 the information-set boundary explicit so that a later filter cannot train on a
-release whose deterministic target label was not yet available.
+release whose deterministic target label was not yet available. Inputs are
+complete vectors from one release block and their causal labels; outputs are
+regime means, a shared positive-definite scale matrix, log densities, and a
+fully serializable fit audit.
 """
 
 from __future__ import annotations
@@ -245,6 +248,7 @@ class BlockLikelihoodFit:
 
     @property
     def distribution(self) -> str:
+        """Return the fitted density family name used in audit artifacts."""
         return "gaussian" if self.degrees_of_freedom is None else "student_t"
 
     def log_likelihoods(
@@ -290,6 +294,7 @@ class BlockLikelihoodFit:
         """Return a complete JSON-serializable fit record."""
 
         def timestamp_text(value: pd.Timestamp | None) -> str | None:
+            """Render an optional normalized timestamp as an ISO date."""
             return value.date().isoformat() if value is not None else None
 
         means = {

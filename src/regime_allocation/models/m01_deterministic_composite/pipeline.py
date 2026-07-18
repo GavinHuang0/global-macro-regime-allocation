@@ -1,4 +1,12 @@
-"""Four-quadrant regime classification for model 01."""
+"""Classify monthly Model 01 growth/inflation quadrants.
+
+Inputs are deterministic composite scores produced by the feature layer. A
+nonnegative score selects the corresponding ``up`` axis, while a negative
+score selects ``down``. Outputs use a permanent four-state order and
+stable machine identifiers shared by transitions, filtering, evaluation, and
+allocation. This module performs no inference and does not fill unavailable
+scores or inspect future months.
+"""
 
 from __future__ import annotations
 

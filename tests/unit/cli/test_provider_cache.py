@@ -1,4 +1,12 @@
-"""No-network tests for cross-provider normalized-cache preservation."""
+"""Verify provider-neutral cache reuse and preservation without network access.
+
+Synthetic normalized vintage matrices stand in for ALFRED and authenticated FRED
+downloads. The tests call the dataset acquisition helper and assert that a
+compatible cross-provider cache may be reused, while an explicit refresh writes
+provider-specific bytes separately and never overwrites the other provider's
+artifact. All paths are temporary and no credentials or production cache files
+are read.
+"""
 
 from __future__ import annotations
 
@@ -18,6 +26,7 @@ from regime_allocation.data.providers.vintage_matrix import (
 
 
 def _matrix_payload(series_id: str, vintage: date, value: float) -> bytes:
+    """Encode a one-cell normalized vintage matrix for cache tests."""
     frame = pd.DataFrame(
         {f"{series_id}_{vintage:%Y%m%d}": [value]},
         index=pd.DatetimeIndex(["2024-01-01"]),
@@ -26,6 +35,7 @@ def _matrix_payload(series_id: str, vintage: date, value: float) -> bytes:
 
 
 def _arguments(raw_dir: Path) -> dict[str, object]:
+    """Return common acquisition arguments rooted in a temporary cache directory."""
     return {
         "series_id": "PAYEMS",
         "release_id": 50,
@@ -40,6 +50,7 @@ def _arguments(raw_dir: Path) -> dict[str, object]:
 def _artifact(
     *, provider_id: str, source_url: str, content: bytes
 ) -> DownloadedVintageMatrix:
+    """Wrap normalized bytes in the provider-neutral acquisition record."""
     return DownloadedVintageMatrix(
         series_id="PAYEMS",
         selected_vintage_dates=(date(2024, 2, 2),),

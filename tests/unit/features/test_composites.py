@@ -1,4 +1,12 @@
-"""Unit tests for the deterministic macro-composite feature contract."""
+"""Test the deterministic growth and inflation composite specification.
+
+Synthetic monthly component levels exercise the frozen transformation registry,
+strictly lagged expanding z-scores, equal weighting, 60-observation warm-up, and
+three-month full-window smoothing. Tests also establish exact tie and missing-data
+behavior and verify that future observations cannot change earlier features.
+There is no I/O; the module locks the mathematical target definition used by all
+later Model 01 stages.
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,12 @@
-"""Unit tests for transparent portfolio baseline targets."""
+"""Test the equal-weight, static 60/40, and legacy Sharpe allocation baselines.
+
+Synthetic return histories, labels, and posteriors verify exact target weights,
+asset ordering, configurable benchmark legs, the preserved legacy score shift,
+60-observation fallback, common-sample handling, MAP-regime selection, and strict
+return and label cutoffs. Invalid universes and posteriors are rejected. The tests
+perform no I/O and keep each comparator interpretable and causally aligned with
+the main strategy.
+"""
 
 from __future__ import annotations
 
@@ -73,6 +81,7 @@ def test_static_60_40_target_rejects_invalid_specifications(
 
 
 def _returns(dates: pd.DatetimeIndex) -> pd.DataFrame:
+    """Return deterministic asset returns over the caller's monthly dates."""
     position = np.arange(len(dates), dtype=float)
     return pd.DataFrame(
         {
@@ -90,6 +99,7 @@ def _one_regime_history(
     regime_id: str = "regime_a",
     availability_lag_days: int = 35,
 ) -> pd.DataFrame:
+    """Label each month with one regime and an explicit availability lag."""
     return pd.DataFrame(
         {
             "reference_month": months,

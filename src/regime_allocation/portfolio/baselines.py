@@ -4,7 +4,9 @@ The legacy Sharpe allocator deliberately preserves the course project's score
 transformation while enforcing the rebuilt project's point-in-time contract.
 It selects the maximum-a-posteriori (MAP) regime from a causal posterior and
 uses only earlier daily returns whose calendar-month label was already known
-strictly before the signal date.
+strictly before the signal date. The module also supplies deterministic equal
+weight and static 60/40 targets. Outputs are normalized target vectors plus,
+for the legacy method, selection and fallback diagnostics suitable for audit.
 """
 
 from __future__ import annotations

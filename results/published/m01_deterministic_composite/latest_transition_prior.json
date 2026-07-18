@@ -6,22 +6,22 @@
   "model_id": "m01_deterministic_composite",
   "probabilities": [
     {
-      "probability": 0.6904761904761905,
+      "probability": 0.6933962264150944,
       "regime_id": "growth_up_inflation_up",
       "regime_label": "Growth composite up / inflation composite up"
     },
     {
-      "probability": 0.15714285714285714,
+      "probability": 0.15566037735849056,
       "regime_id": "growth_down_inflation_up",
       "regime_label": "Growth composite down / inflation composite up"
     },
     {
-      "probability": 0.12857142857142856,
+      "probability": 0.12735849056603774,
       "regime_id": "growth_up_inflation_down",
       "regime_label": "Growth composite up / inflation composite down"
     },
     {
-      "probability": 0.023809523809523808,
+      "probability": 0.02358490566037736,
       "regime_id": "growth_down_inflation_down",
       "regime_label": "Growth composite down / inflation composite down"
     }

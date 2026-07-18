@@ -9,66 +9,66 @@
     "scale_standard_deviation_multiplier": 1.0,
     "specification_id": "baseline"
   },
-  "checkpoint_count": 3916,
+  "checkpoint_count": 3914,
   "configuration": "configs/models/m01_event_driven_bayesian_filter.yaml",
-  "configuration_sha256": "c58c97cb4c89ae611948a257747ac591bacc90817beb1d4d16749092f7db7ee2",
+  "configuration_sha256": "fdf1087b5c61a4007883b1c61f89df6daf6ed06f949c4a119ed316905876f27a",
   "credential_policy": "Inference consumes processed, credential-free inputs and never reads or serializes FRED_API_KEY.",
-  "evaluation_metric_rows": 136,
+  "evaluation_metric_rows": 119,
   "event_audit_rows": 1476,
   "filter_end": "2026-07-16",
   "filter_start": "2005-07-01",
-  "forecast_rows_all_specifications": 22831,
-  "generated_at_utc": "2026-07-17T12:27:37.682492+00:00",
+  "forecast_rows_all_specifications": 22814,
+  "generated_at_utc": "2026-07-18T02:58:23.354812+00:00",
   "inputs": {
     "leading_event_table": "data/processed/m01_non_defining_release_evidence/non_defining_release_events.csv",
     "leading_event_table_sha256": "b9d1cd8d395a60d965a6851791c41368acc9c153c6dd23d1054d3cbb7c29ff05",
     "regime_history": "results/published/m01_deterministic_composite/regime_history.csv",
-    "regime_history_sha256": "2f83dbe910b7ddfc814837025f16298e4435a9ba2f0d8af32587b9173826ce2e"
+    "regime_history_sha256": "c3a948c057fff3eb7f6da53108f0afc814fcde72995ddceb5bb42dba3d6d145a"
   },
-  "joint_path_rows": 1002496,
-  "likelihood_fit_rows": 883,
-  "marginal_rows": 78320,
+  "joint_path_rows": 1001984,
+  "likelihood_fit_rows": 881,
+  "marginal_rows": 78280,
   "model_id": "m01_deterministic_composite",
   "processed_files": [
     {
-      "bytes": 784629,
+      "bytes": 787087,
       "path": "data/processed/m01_bayesian_filter/checkpoint_index.csv",
-      "sha256": "a4717169f93b609dac3884cede7a053b5459c18f80e7d79535e9bd121eb0b065"
+      "sha256": "a40315a35007fc7a4ef8ed3e15ccadd58af4823622b9f22e347bfce14ff4ab4c"
     },
     {
-      "bytes": 4292761,
+      "bytes": 4294084,
       "path": "data/processed/m01_bayesian_filter/joint_path_checkpoints.csv.gz",
-      "sha256": "3f8e3d99d8bac27795f75b1a343d5abc9b5dda18b56b406b379a013ea27272f4"
+      "sha256": "a3a5e5f7eccc800699bdbce25220b8c5f384b29b546b16d3aba88929048c25fa"
     },
     {
-      "bytes": 13991027,
+      "bytes": 14017431,
       "path": "data/processed/m01_bayesian_filter/marginal_checkpoints.csv",
-      "sha256": "9af5fb33ecd87f805f20b632c0b649d71e007e2ca61eeef306949ad20a658cd5"
+      "sha256": "0b1a33a476e9230e2d5e034c13f4bc9b30fe20bb26adbd73dd71b778deedf30a"
     },
     {
-      "bytes": 601160,
+      "bytes": 601146,
       "path": "data/processed/m01_bayesian_filter/event_update_audit.csv",
-      "sha256": "b5ab4a4e6f5e35542a2542e9f1e7d3466feb94e194bb153ba7ab1910dc0568ac"
+      "sha256": "c821170869becde4298095cbf0559e3f00d76f67b06ebe1e17e3a8e0c85927cf"
     },
     {
-      "bytes": 1643770,
+      "bytes": 1640319,
       "path": "data/processed/m01_bayesian_filter/likelihood_fit_audit.csv",
-      "sha256": "6a7098e15338730ea34a8f357955329df2711d52f8a85377872aa073562c6435"
+      "sha256": "80c940d67e91c97e7d3704244bf5398bf829973545a21c0a56d8aa4a8a63c366"
     },
     {
-      "bytes": 5648360,
+      "bytes": 5681783,
       "path": "data/processed/m01_bayesian_filter/forecast_predictions.csv",
-      "sha256": "7ecebaeea9b6d498a08e8b5e0fd03aedc1ff827fb1cf9dbf6799cf8aa04742a6"
+      "sha256": "0a48457cf7f1ef6e52a15ab3b44574b51295efe0dce46bd60976dafe1410e8a5"
     },
     {
-      "bytes": 49116,
+      "bytes": 43067,
       "path": "data/processed/m01_bayesian_filter/evaluation_metrics.csv",
-      "sha256": "da4afe57451805753f3946882ebcac830ac68403b48c02514aae596610d73ec9"
+      "sha256": "63c596e3feadd52c94fd9cafc8b99980f9a6c3419755e3b4e2abd7c9a26b028e"
     },
     {
-      "bytes": 893469,
+      "bytes": 777753,
       "path": "data/processed/m01_bayesian_filter/calibration_bins.csv",
-      "sha256": "97f7b3453b1f0f2274c8eef719489f0b702c038ff60edd9d6f1484f4d6c77130"
+      "sha256": "120ba02531f3328a3b4c10b8f446ae6c386b8db6e92a8c1d95f7714b7723a1b9"
     },
     {
       "bytes": 1248,
@@ -76,9 +76,9 @@
       "sha256": "f141bc3925572f82ace879a8d45c5610d5c14115b764d8c649f79493e9040c11"
     },
     {
-      "bytes": 46360,
+      "bytes": 40662,
       "path": "data/processed/m01_bayesian_filter/sensitivity_metrics.csv",
-      "sha256": "5fc49f71b54924044a4f069962899b2bf494a314d9200bff6725ac8b01d8bda8"
+      "sha256": "35bab7f6824478e18ceb1c50d4001e297374505c8de16b33fb442b7b17f33108"
     }
   ],
   "published_files": [
