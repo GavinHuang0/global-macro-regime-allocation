@@ -1,0 +1,159 @@
+{
+  "baseline": {
+    "entropy": 1.2834931401885108,
+    "map_correlation": -0.0020182841634331637,
+    "mapping_status": "available",
+    "omega_disagreement": [
+      [
+        1.690406847974234,
+        0.0
+      ],
+      [
+        0.0,
+        0.4371022225777805
+      ]
+    ],
+    "omega_map": [
+      [
+        1.7424896438427584,
+        -0.0018517439422001186
+      ],
+      [
+        -0.0018517439422001186,
+        0.48308887302116366
+      ]
+    ],
+    "omega_revision": [
+      [
+        0.052082795868524275,
+        -0.0018517439422001186
+      ],
+      [
+        -0.0018517439422001186,
+        0.0459866504433832
+      ]
+    ],
+    "probability_sum": 1.0,
+    "quadrant_weight_sum": 1.0,
+    "quadrants": [
+      {
+        "probability": 0.36701084096501885,
+        "regime_id": "growth_up_inflation_up",
+        "regime_label": "Growth composite up / inflation composite up",
+        "weight": 0.36701084096501885
+      },
+      {
+        "probability": 0.35558619001000596,
+        "regime_id": "growth_down_inflation_up",
+        "regime_label": "Growth composite down / inflation composite up",
+        "weight": 0.35558619001000596
+      },
+      {
+        "probability": 0.14126774180639784,
+        "regime_id": "growth_up_inflation_down",
+        "regime_label": "Growth composite up / inflation composite down",
+        "weight": 0.14126774180639784
+      },
+      {
+        "probability": 0.13613522721857735,
+        "regime_id": "growth_down_inflation_down",
+        "regime_label": "Growth composite down / inflation composite down",
+        "weight": 0.13613522721857735
+      }
+    ],
+    "revision_error_sample_mean": [
+      0.005509030017584231,
+      0.056995054589350884
+    ],
+    "revision_horizon_months": 12,
+    "specification_id": "baseline_revision_12m",
+    "training_counts": {
+      "disagreement_months": 248,
+      "revision_months": 238
+    }
+  },
+  "deterministic_score": {
+    "growth": 0.0273944260020107,
+    "inflation": 0.4104760171455257
+  },
+  "interpretation": "Gaussian quadrant mapping of the observed composite score; these weights are not yet transition forecasts or event-updated posteriors.",
+  "model_id": "m02_soft_composite",
+  "reference_month": "2026-05-01",
+  "score_available_at": "2026-06-25",
+  "sensitivities": [
+    {
+      "entropy": 1.2795383941879996,
+      "map_correlation": -0.0003992610032875173,
+      "mapping_status": "available",
+      "omega_disagreement": [
+        [
+          1.690406847974234,
+          0.0
+        ],
+        [
+          0.0,
+          0.4371022225777805
+        ]
+      ],
+      "omega_map": [
+        [
+          1.7294761297598193,
+          -0.0003575349746164512
+        ],
+        [
+          -0.0003575349746164512,
+          0.4636696860332538
+        ]
+      ],
+      "omega_revision": [
+        [
+          0.0390692817855853,
+          -0.0003575349746164512
+        ],
+        [
+          -0.0003575349746164512,
+          0.026567463455473356
+        ]
+      ],
+      "probability_sum": 1.0,
+      "quadrant_weight_sum": 1.0,
+      "quadrants": [
+        {
+          "probability": 0.3693274411615224,
+          "regime_id": "growth_up_inflation_up",
+          "regime_label": "Growth composite up / inflation composite up",
+          "weight": 0.3693274411615224
+        },
+        {
+          "probability": 0.3573563916873216,
+          "regime_id": "growth_down_inflation_up",
+          "regime_label": "Growth composite down / inflation composite up",
+          "weight": 0.3573563916873216
+        },
+        {
+          "probability": 0.13898222501889812,
+          "regime_id": "growth_up_inflation_down",
+          "regime_label": "Growth composite up / inflation composite down",
+          "weight": 0.13898222501889812
+        },
+        {
+          "probability": 0.13433394213225786,
+          "regime_id": "growth_down_inflation_down",
+          "regime_label": "Growth composite down / inflation composite down",
+          "weight": 0.13433394213225786
+        }
+      ],
+      "revision_error_sample_mean": [
+        0.011626836297669297,
+        0.02879078083171478
+      ],
+      "revision_horizon_months": 3,
+      "specification_id": "sensitivity_revision_3m",
+      "training_counts": {
+        "disagreement_months": 248,
+        "revision_months": 245
+      }
+    }
+  ],
+  "stage_id": "m02_probability_map"
+}

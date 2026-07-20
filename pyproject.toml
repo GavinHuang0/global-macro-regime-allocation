@@ -22,6 +22,8 @@ build-m01-evidence = "regime_allocation.cli.build_m01_evidence:main"
 build-m01-transition = "regime_allocation.cli.build_m01_transition:main"
 build-m01-inference = "regime_allocation.cli.build_m01_inference:main"
 build-m01-backtest = "regime_allocation.cli.build_m01_backtest:main"
+build-m02-scores = "regime_allocation.cli.build_m02_scores:main"
+build-m02-probabilities = "regime_allocation.cli.build_m02_probability_map:main"
 
 [project.optional-dependencies]
 dev = [

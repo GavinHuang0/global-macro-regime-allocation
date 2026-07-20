@@ -1,0 +1,10 @@
+{
+  "growth_score": 0.027394426002010745,
+  "inflation_score": 0.4104760171455257,
+  "model_id": "m02_soft_composite",
+  "reference_month": "2026-05-01",
+  "regime_probabilities_computed": false,
+  "score_available_at": "2026-06-25",
+  "stage": "deterministic_composite_scores",
+  "status": "latest_observed_deterministic_scores"
+}

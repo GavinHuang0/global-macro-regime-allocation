@@ -1,0 +1,64 @@
+{
+  "knowledge_cutoff": "2026-07-20",
+  "latest": {
+    "baseline_revision_horizon_months": 12,
+    "map_correlation": -0.0020182841634331637,
+    "omega_disagreement": [
+      [
+        1.690406847974234,
+        0.0
+      ],
+      [
+        0.0,
+        0.4371022225777805
+      ]
+    ],
+    "omega_map": [
+      [
+        1.7424896438427584,
+        -0.0018517439422001186
+      ],
+      [
+        -0.0018517439422001186,
+        0.48308887302116366
+      ]
+    ],
+    "omega_revision": [
+      [
+        0.052082795868524275,
+        -0.0018517439422001186
+      ],
+      [
+        -0.0018517439422001186,
+        0.0459866504433832
+      ]
+    ],
+    "reference_month": "2026-05-01"
+  },
+  "minimum_disagreement_months": 24,
+  "minimum_revision_months": 24,
+  "model_id": "m02_soft_composite",
+  "specifications": [
+    {
+      "available_probability_months": 223,
+      "complete_revision_errors": 246,
+      "first_probability_month": "2007-09-01",
+      "first_revision_error_month": "2005-07-01",
+      "is_baseline": false,
+      "latest_probability_month": "2026-05-01",
+      "latest_revision_error_month": "2026-02-01",
+      "revision_horizon_months": 3
+    },
+    {
+      "available_probability_months": 214,
+      "complete_revision_errors": 239,
+      "first_probability_month": "2008-06-01",
+      "first_revision_error_month": "2005-07-01",
+      "is_baseline": true,
+      "latest_probability_month": "2026-05-01",
+      "latest_revision_error_month": "2025-05-01",
+      "revision_horizon_months": 12
+    }
+  ],
+  "stage_id": "m02_probability_map"
+}

@@ -7,7 +7,7 @@ separate models, not as flags hidden inside one implementation.
 point-in-time data contract
         |
         +--> m01 deterministic composites
-        +--> m02 continuous latent state
+        +--> m02 soft deterministic composite scores
         +--> m03 switching state-space model
         |
         +--> shared evaluation --> shared backtest --> published comparison
@@ -35,3 +35,11 @@ states without changing their definition or adding a new latent state. A
 duration-dependent, semi-Markov, covariate-dependent, or time-varying transition
 law changes the inference graph and therefore belongs under a distinct model ID
 rather than behind a Model 01 configuration flag.
+
+`m02_soft_composite` preserves observed, economically specified composite
+scores but removes Model 01's trailing three-month average and hard quadrant
+target. Its score-definition stage uses percentage payroll growth and publishes
+no categorical regime. Its completed Gaussian map integrates score uncertainty
+over the four quadrants using pooled component disagreement and fixed-horizon
+revision covariance. Later Model 02 stages will add score transition dynamics
+and score-conditioned evidence updates without altering Model 01 artifacts.

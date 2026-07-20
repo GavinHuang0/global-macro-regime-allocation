@@ -221,6 +221,44 @@ def test_download_level_matrix_reuses_and_refreshes_chunk_cache(
     assert len(list(tmp_path.glob("*.csv"))) == 1
 
 
+def test_explicit_vintage_matrix_uses_requested_as_of_dates_without_calendar(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The keyless fallback must preserve arbitrary fixed-horizon dates."""
+
+    vintages = (date(2024, 2, 15), date(2024, 3, 15))
+    client = AlfredWebDownloadClient(
+        max_vintages_per_request=2,
+        request_pause_seconds=0,
+    )
+
+    def fail_calendar(*_: object, **__: object) -> tuple[date, ...]:
+        raise AssertionError("explicit as-of retrieval must not load a release calendar")
+
+    def fake_open(request: object) -> bytes:
+        query = parse_qs(urlparse(request.full_url).query)  # type: ignore[attr-defined]
+        assert query["vintage_date"] == ["2024-02-15,2024-03-15"]
+        return (
+            b"observation_date,PAYEMS_20240215,PAYEMS_20240315\n"
+            b"2024-01-01,157700,157710\n"
+        )
+
+    monkeypatch.setattr(client, "list_release_dates", fail_calendar)
+    monkeypatch.setattr(client, "_open", fake_open)
+    artifact = client.download_level_matrix_at_vintages(
+        "PAYEMS",
+        observation_start=date(2024, 1, 1),
+        observation_end=date(2024, 1, 1),
+        vintage_dates=vintages,
+    )
+
+    assert artifact.selected_vintage_dates == vintages
+    assert list(load_vintage_matrix(artifact.content, "PAYEMS").columns) == [
+        "PAYEMS_20240215",
+        "PAYEMS_20240315",
+    ]
+
+
 def test_historical_chunk_ends_observations_at_its_last_vintage(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

@@ -650,6 +650,34 @@ class FredApiDownloadClient:
             refresh_cache=refresh_cache,
         )
 
+        return self.download_level_matrix_at_vintages(
+            series_id,
+            observation_start=observation_start,
+            observation_end=observation_end,
+            vintage_dates=selected,
+            chunk_cache_dir=chunk_cache_dir,
+            refresh_cache=refresh_cache,
+        )
+
+    def download_level_matrix_at_vintages(
+        self,
+        series_id: str,
+        *,
+        observation_start: date,
+        observation_end: date,
+        vintage_dates: tuple[date, ...],
+        chunk_cache_dir: Path | None = None,
+        refresh_cache: bool = False,
+    ) -> DownloadedVintageMatrix:
+        """Download output-type-2 snapshots at explicit as-of dates."""
+
+        self._validate_series_id(series_id)
+        if observation_start > observation_end:
+            raise ValueError("observation_start cannot follow observation_end")
+        selected = tuple(sorted(set(vintage_dates)))
+        if not selected:
+            raise ValueError("vintage_dates cannot be empty")
+
         matrices: list[pd.DataFrame] = []
         for start in range(0, len(selected), self.max_vintages_per_request):
             chunk = selected[start : start + self.max_vintages_per_request]

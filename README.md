@@ -1,5 +1,118 @@
 # Global Macro Regime Detection and Allocation
 
+## Model 02: soft composite model in development
+
+Model 02 is now implemented through its Gaussian quadrant-mapping stage.
+It is a deliberately modest revision of Model 01, kept in the separate
+`m02_soft_composite` configuration, package, data, manifest, documentation, and
+result namespaces. Model 01 remains frozen below.
+
+The defining component set is unchanged: four first-release growth indicators
+and four first-release inflation indicators. Model 02 makes two score changes:
+
+1. payroll employment is transformed as monthly log growth rather than an
+   absolute change in thousands of employees;
+2. the equal-weight growth and inflation composites are not subsequently
+   averaged over three months.
+
+For component $k$ and reference month $m$, the current and previous levels
+come from the same first-release vintage. Log-transformed components use
+
+$$
+u_{k,m}=100\log\left(\frac{x_{k,m}}{x_{k,m-1}}\right),
+$$
+
+while unemployment uses the negative monthly difference. Each component is
+standardized using an expanding mean and sample standard deviation estimated
+only from at least 60 strictly earlier observations:
+
+$$
+z_{k,m}
+=\frac{u_{k,m}-\widehat\mu_{k,m-1}}
+{\widehat\sigma_{k,m-1}}.
+$$
+
+The unsmoothed scores are
+
+$$
+G_m=\frac14\sum_{k\in\mathcal G}z_{k,m},
+\qquad
+I_m=\frac14\sum_{k\in\mathcal I}z_{k,m}.
+$$
+
+All four components are required on each axis; missing data never trigger
+dynamic reweighting. No hard quadrant label is assigned.
+
+The authenticated FRED build contains a gapless 317-row reference panel from
+January 2000 through May 2026 and 249 complete score pairs. Authenticated
+first-release core PCE begins in July 2000, so January-June 2000 are retained
+but cannot have a complete eight-component score. With the 60-observation
+causal warm-up, the first complete score pair is July 2005. The latest May 2026
+scores, available on 25 June 2026, are:
+
+| Score | Value |
+|---|---:|
+| Growth | 0.027394 |
+| Inflation | 0.410476 |
+
+One diagnostic remains deliberately unresolved: the April 2020 payroll shock
+has an expanding z-score of $-103.0223$ and produces a
+growth score of $-51.8317$. The score is correct under the unbounded classical
+standardization specified here. The implemented baseline preserves this rule,
+while a later sensitivity should address crisis-outlier robustness.
+
+The observed score $\boldsymbol s_m=(G_m,I_m)^\top$ is perturbed by
+
+$$
+\widetilde{\boldsymbol s}_m
+=\boldsymbol s_m+\boldsymbol\varepsilon_m,
+\qquad
+\boldsymbol\varepsilon_m\sim
+\mathcal N(\boldsymbol 0,\boldsymbol\Omega_{\mathrm{map},m}),
+$$
+
+where
+
+$$
+\boldsymbol\Omega_{\mathrm{map},m}
+=\boldsymbol\Omega_{\mathrm{disagreement},m}
++\boldsymbol\Omega_{\mathrm{revision},m}.
+$$
+
+Disagreement is the diagonal expanding pool of the two axes' monthly
+delete-one-component jackknife variances. Revision covariance is estimated in
+the same standardized score units from exact later as-of vintages, using only
+mature errors strictly available before each historical score cutoff. The
+12-month revision is the baseline; the nested 3-month revision is reported
+separately rather than added.
+
+For May 2026, the baseline Gaussian quadrant weights are:
+
+| Quadrant | Probability |
+|---|---:|
+| Growth up / inflation up | 36.70% |
+| Growth down / inflation up | 35.56% |
+| Growth up / inflation down | 14.13% |
+| Growth down / inflation down | 13.61% |
+
+These are score-definition weights, not transition forecasts or
+release-updated posteriors. The 12-month map has 214 causal monthly probability
+vectors from June 2008 through May 2026.
+
+The complete mathematical definition, coverage limitations, and artifact
+contract are in
+[`docs/models/m02_soft_composite/README.md`](docs/models/m02_soft_composite/README.md).
+Published score history and provenance are under
+[`results/published/m02_soft_composite/`](results/published/m02_soft_composite/)
+and
+[`data/manifests/m02_soft_composite.json`](data/manifests/m02_soft_composite.json).
+The probability-map snapshot is under
+[`results/published/m02_soft_composite/probability_map/`](results/published/m02_soft_composite/probability_map/)
+with provenance in
+[`data/manifests/m02_probability_map.json`](data/manifests/m02_probability_map.json).
+
+---
+
 Model 01 is a frozen, point-in-time research pipeline for forecasting monthly
 US growth/inflation regimes and using the resulting probability distribution in
 a constrained cross-asset ETF allocation. It is an independent rebuild of a
@@ -26,7 +139,7 @@ small and statistically inconclusive.
 | ID | Architecture | Status |
 |---|---|---|
 | `m01_deterministic_composite` | Deterministic monthly target, event-driven Bayesian filter, posterior allocation | **Frozen** |
-| `m02_continuous_state` | Latent continuous growth/inflation state with quadrant probabilities | Planned |
+| `m02_soft_composite` | Unsmoothed deterministic scores, Gaussian quadrant mapping, score dynamics | **Quadrant mapping complete; dynamics pending** |
 | `m03_switching_state_space` | Regime-switching continuous state-space model | Planned |
 
 ## End-to-end architecture

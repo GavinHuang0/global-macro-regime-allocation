@@ -1,0 +1,528 @@
+{
+  "archive_start_policy": "latest_reference_period_only",
+  "complete_score_months": 249,
+  "configuration": "configs/models/m02_soft_composite.yaml",
+  "configuration_sha256": "0d03335fa2c71ff3564bc9c626f15bdea28ea86e86ee7f1319e31917105cee34",
+  "data_snapshot_sha256": "c61ea79869da798be0723cc8d47f3ab4ee5aa90ba8bab7ef51032ac538ed3243",
+  "first_complete_score_month": "2005-07-01",
+  "generated_at_utc": "2026-07-20T16:09:13.782151+00:00",
+  "generated_file_hashes": [
+    {
+      "bytes": 432948,
+      "path": "data/processed/m02_soft_composite/first_release_components_long.csv",
+      "sha256": "148c15f4e87e6806817499a6b50901d04d398944b4b7583d7f295815d372878d"
+    },
+    {
+      "bytes": 126093,
+      "path": "data/processed/m02_soft_composite/composite_scores.csv",
+      "sha256": "1af087293505536c3e65be9c17d003b250f2e883c693e2fca581303566a5a6bd"
+    },
+    {
+      "bytes": 30676,
+      "path": "results/published/m02_soft_composite/score_history.csv",
+      "sha256": "29211567c3d964177b3e517b924280e284f388cf2e616d4c520069dfccd47466"
+    },
+    {
+      "bytes": 342,
+      "path": "results/published/m02_soft_composite/latest_scores.json",
+      "sha256": "daef98a9d5a1f89653c1d4f4566013eebdbd8df3db8602c2dcdf7ab854ff1a8d"
+    }
+  ],
+  "latest_complete_score_month": "2026-05-01",
+  "model_id": "m02_soft_composite",
+  "processed_files": [
+    "data/processed/m02_soft_composite/first_release_components_long.csv",
+    "data/processed/m02_soft_composite/composite_scores.csv"
+  ],
+  "provider": "provider-neutral point-in-time vintage matrices",
+  "provider_output": "batched as-of level snapshots by vintage date",
+  "provider_policy": "fred_api_preferred_when_FRED_API_KEY_is_present",
+  "provider_requested": "fred",
+  "provider_selected": "fred_api",
+  "providers_used": [
+    "fred_api"
+  ],
+  "published_files": [
+    "results/published/m02_soft_composite/score_history.csv",
+    "results/published/m02_soft_composite/latest_scores.json"
+  ],
+  "raw_files": [
+    {
+      "bytes": 28053,
+      "cache_origin": "existing_normalized_cache",
+      "extraction_diagnostics": {
+        "matrix_rows": 449,
+        "rows_excluded_archive_bootstrap": 11,
+        "rows_excluded_backfill_lag": 0,
+        "rows_excluded_missing_prior": 0,
+        "rows_excluded_negative_lag": 0,
+        "rows_retained": 438,
+        "rows_without_any_vintage": 0
+      },
+      "path": "data/raw/fred_api/m02_soft_composite/PAYEMS_587f899363b5_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 50,
+      "series_id": "PAYEMS",
+      "sha256": "553f18fa49b76724ac3476ac9f1f81f1ee99d3c7cd4c99ecca5dc2490e8f60c6",
+      "source_url": "https://fred.stlouisfed.org/series/PAYEMS",
+      "vintage_end": "2026-07-20",
+      "vintage_start": "1990-01-01"
+    },
+    {
+      "bytes": 46556,
+      "cache_origin": "existing_normalized_cache",
+      "extraction_diagnostics": {
+        "matrix_rows": 449,
+        "rows_excluded_archive_bootstrap": 11,
+        "rows_excluded_backfill_lag": 0,
+        "rows_excluded_missing_prior": 0,
+        "rows_excluded_negative_lag": 0,
+        "rows_retained": 438,
+        "rows_without_any_vintage": 0
+      },
+      "path": "data/raw/fred_api/m02_soft_composite/INDPRO_287342b733c1_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 13,
+      "series_id": "INDPRO",
+      "sha256": "4cb5476a7935e85177e7963c5dc401cd5b3f04392874184a1249d7cb5ef0ab27",
+      "source_url": "https://fred.stlouisfed.org/series/INDPRO",
+      "vintage_end": "2026-07-20",
+      "vintage_start": "1990-01-01"
+    },
+    {
+      "bytes": 27891,
+      "cache_origin": "existing_normalized_cache",
+      "extraction_diagnostics": {
+        "matrix_rows": 449,
+        "rows_excluded_archive_bootstrap": 11,
+        "rows_excluded_backfill_lag": 0,
+        "rows_excluded_missing_prior": 0,
+        "rows_excluded_negative_lag": 0,
+        "rows_retained": 438,
+        "rows_without_any_vintage": 0
+      },
+      "path": "data/raw/fred_api/m02_soft_composite/PCEC96_e54c7aef383c_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 54,
+      "series_id": "PCEC96",
+      "sha256": "7aa6b326c0ae09ff6aef0cba8b1bb86dd5661a73033e86bd14686953b16ba99f",
+      "source_url": "https://fred.stlouisfed.org/series/PCEC96",
+      "vintage_end": "2026-07-20",
+      "vintage_start": "1990-01-01"
+    },
+    {
+      "bytes": 8166,
+      "cache_origin": "existing_normalized_cache",
+      "extraction_diagnostics": {
+        "matrix_rows": 449,
+        "rows_excluded_archive_bootstrap": 11,
+        "rows_excluded_backfill_lag": 0,
+        "rows_excluded_missing_prior": 1,
+        "rows_excluded_negative_lag": 0,
+        "rows_retained": 436,
+        "rows_without_any_vintage": 1
+      },
+      "path": "data/raw/fred_api/m02_soft_composite/UNRATE_da4e26503460_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 50,
+      "series_id": "UNRATE",
+      "sha256": "0e576a3575d6c0c09a79c59a87b5514983a5000b233c994ff2c19f38bfaa4a55",
+      "source_url": "https://fred.stlouisfed.org/series/UNRATE",
+      "vintage_end": "2026-07-20",
+      "vintage_start": "1990-01-01"
+    },
+    {
+      "bytes": 12568,
+      "cache_origin": "existing_normalized_cache",
+      "extraction_diagnostics": {
+        "matrix_rows": 449,
+        "rows_excluded_archive_bootstrap": 95,
+        "rows_excluded_backfill_lag": 0,
+        "rows_excluded_missing_prior": 1,
+        "rows_excluded_negative_lag": 0,
+        "rows_retained": 352,
+        "rows_without_any_vintage": 1
+      },
+      "path": "data/raw/fred_api/m02_soft_composite/CPILFESL_8d7dbecc0786_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 10,
+      "series_id": "CPILFESL",
+      "sha256": "84dd17cdfb532503366f7a840bd88d579eabf4b1b2b2bedf06fe3a308e4e9fb4",
+      "source_url": "https://fred.stlouisfed.org/series/CPILFESL",
+      "vintage_end": "2026-07-20",
+      "vintage_start": "1996-12-12"
+    },
+    {
+      "bytes": 23054,
+      "cache_origin": "existing_normalized_cache",
+      "extraction_diagnostics": {
+        "matrix_rows": 449,
+        "rows_excluded_archive_bootstrap": 138,
+        "rows_excluded_backfill_lag": 0,
+        "rows_excluded_missing_prior": 0,
+        "rows_excluded_negative_lag": 0,
+        "rows_retained": 311,
+        "rows_without_any_vintage": 0
+      },
+      "path": "data/raw/fred_api/m02_soft_composite/PCEPILFE_c76ac124238f_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 54,
+      "series_id": "PCEPILFE",
+      "sha256": "a42d6faf9f893f837c269a0a9f7c77b5299ed34b1789888091a19087b0581474",
+      "source_url": "https://fred.stlouisfed.org/series/PCEPILFE",
+      "vintage_end": "2026-07-20",
+      "vintage_start": "2000-08-01"
+    },
+    {
+      "bytes": 6534,
+      "cache_origin": "existing_normalized_cache",
+      "extraction_diagnostics": {
+        "matrix_rows": 324,
+        "rows_excluded_archive_bootstrap": 95,
+        "rows_excluded_backfill_lag": 0,
+        "rows_excluded_missing_prior": 0,
+        "rows_excluded_negative_lag": 0,
+        "rows_retained": 229,
+        "rows_without_any_vintage": 0
+      },
+      "path": "data/raw/fred_api/m02_soft_composite/PPILFE_1f057f197457_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 46,
+      "series_id": "PPILFE",
+      "sha256": "cf02e8cd2e7f4b95716c361f182ce6d7828324f25d960739feed4ab049effa36",
+      "source_url": "https://fred.stlouisfed.org/series/PPILFE",
+      "vintage_end": "2016-02-17",
+      "vintage_start": "1996-12-11"
+    },
+    {
+      "bytes": 6866,
+      "cache_origin": "existing_normalized_cache",
+      "extraction_diagnostics": {
+        "matrix_rows": 449,
+        "rows_excluded_archive_bootstrap": 314,
+        "rows_excluded_backfill_lag": 0,
+        "rows_excluded_missing_prior": 0,
+        "rows_excluded_negative_lag": 0,
+        "rows_retained": 135,
+        "rows_without_any_vintage": 0
+      },
+      "path": "data/raw/fred_api/m02_soft_composite/WPSFD4131_9ac518acf4f4_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 46,
+      "series_id": "WPSFD4131",
+      "sha256": "b52f7af8ace53f52a2a70d89a9555f41a2c5835373704c1338068e21b3e5d1a8",
+      "source_url": "https://fred.stlouisfed.org/series/WPSFD4131",
+      "vintage_end": "2026-07-20",
+      "vintage_start": "2015-03-13"
+    },
+    {
+      "bytes": 12500,
+      "cache_origin": "existing_normalized_cache",
+      "extraction_diagnostics": {
+        "matrix_rows": 449,
+        "rows_excluded_archive_bootstrap": 127,
+        "rows_excluded_backfill_lag": 0,
+        "rows_excluded_missing_prior": 0,
+        "rows_excluded_negative_lag": 0,
+        "rows_retained": 322,
+        "rows_without_any_vintage": 0
+      },
+      "path": "data/raw/fred_api/m02_soft_composite/AHETPI_ca61224d2522_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 50,
+      "series_id": "AHETPI",
+      "sha256": "4183e5a0635e0ae5bf474c77fca2726137b80e6b6ed75a00852c4544995cf2a3",
+      "source_url": "https://fred.stlouisfed.org/series/AHETPI",
+      "vintage_end": "2026-07-20",
+      "vintage_start": "1999-08-06"
+    }
+  ],
+  "reference_end": "2026-05-01",
+  "reference_months": 317,
+  "reference_start": "2000-01-01",
+  "schema_version": 1,
+  "score_definition": {
+    "component_weight": 0.25,
+    "hard_quadrant_labels": false,
+    "minimum_prior_observations": 60,
+    "payroll_transform": "100_log_current_over_previous",
+    "regime_probabilities": false,
+    "standardization": "lagged_expanding_mean_and_sample_standard_deviation",
+    "trailing_smoothing": false
+  },
+  "stage": "deterministic_composite_score_definition",
+  "unavailable_months": [
+    {
+      "data_status": "missing_component_feature",
+      "reference_month": "2000-01-01"
+    },
+    {
+      "data_status": "missing_component_feature",
+      "reference_month": "2000-02-01"
+    },
+    {
+      "data_status": "missing_component_feature",
+      "reference_month": "2000-03-01"
+    },
+    {
+      "data_status": "missing_component_feature",
+      "reference_month": "2000-04-01"
+    },
+    {
+      "data_status": "missing_component_feature",
+      "reference_month": "2000-05-01"
+    },
+    {
+      "data_status": "missing_component_feature",
+      "reference_month": "2000-06-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2000-07-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2000-08-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2000-09-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2000-10-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2000-11-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2000-12-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2001-01-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2001-02-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2001-03-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2001-04-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2001-05-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2001-06-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2001-07-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2001-08-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2001-09-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2001-10-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2001-11-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2001-12-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2002-01-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2002-02-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2002-03-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2002-04-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2002-05-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2002-06-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2002-07-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2002-08-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2002-09-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2002-10-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2002-11-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2002-12-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2003-01-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2003-02-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2003-03-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2003-04-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2003-05-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2003-06-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2003-07-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2003-08-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2003-09-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2003-10-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2003-11-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2003-12-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2004-01-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2004-02-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2004-03-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2004-04-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2004-05-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2004-06-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2004-07-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2004-08-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2004-09-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2004-10-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2004-11-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2004-12-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2005-01-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2005-02-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2005-03-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2005-04-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2005-05-01"
+    },
+    {
+      "data_status": "insufficient_standardization_history",
+      "reference_month": "2005-06-01"
+    },
+    {
+      "data_status": "missing_component_feature",
+      "reference_month": "2025-10-01"
+    },
+    {
+      "data_status": "missing_component_feature",
+      "reference_month": "2025-11-01"
+    }
+  ]
+}

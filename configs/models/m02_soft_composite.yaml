@@ -1,0 +1,132 @@
+schema_version: 1
+model_id: m02_soft_composite
+description: >-
+  First-release, equal-weight deterministic growth and inflation scores with
+  strictly lagged expanding standardization, percentage payroll growth, and no
+  trailing smoothing. This stage does not define quadrant probabilities.
+
+data:
+  # Preserve a gapless public panel from January 2000 even though authenticated
+  # first-release core PCE begins only in July 2000. The early unavailable rows
+  # remain explicit and are never backfilled or dynamically reweighted.
+  reference_start: 2000-01-01
+  reference_end: 2026-05-01
+  expected_reference_months: 317
+
+  # Earlier observations provide causal expanding-standardization history for
+  # series whose real-time archives existed before the publication panel.
+  observation_start: 1989-01-01
+  vintage_start: 1990-01-01
+  vintage_end: 2026-07-20
+  max_release_lag_days: 92
+  archive_start_latest_only: true
+
+  expected_missing_component_months:
+    core_pce:
+      - 2000-01-01
+      - 2000-02-01
+      - 2000-03-01
+      - 2000-04-01
+      - 2000-05-01
+      - 2000-06-01
+    unemployment_rate:
+      - 2025-10-01
+      - 2025-11-01
+    core_cpi:
+      - 2025-10-01
+      - 2025-11-01
+
+features:
+  min_history_months: 60
+  standard_deviation_ddof: 1
+  component_weight: 0.25
+  apply_trailing_smoothing: false
+
+components:
+  payrolls:
+    axis: growth
+    transform: log_difference
+    description: >-
+      Monthly continuously compounded percentage growth in total nonfarm
+      payroll employment; this replaces Model 01's scale-dependent level
+      change in thousands of persons.
+    sources:
+      - series_id: PAYEMS
+        release_id: 50
+
+  industrial_production:
+    axis: growth
+    transform: log_difference
+    description: Monthly log growth in total industrial production.
+    sources:
+      - series_id: INDPRO
+        release_id: 13
+
+  consumer_activity:
+    axis: growth
+    transform: log_difference
+    description: Monthly log growth in real personal consumption expenditures.
+    sources:
+      - series_id: PCEC96
+        release_id: 54
+
+  unemployment_rate:
+    axis: growth
+    transform: negative_difference
+    description: Negative monthly change in the civilian unemployment rate.
+    sources:
+      - series_id: UNRATE
+        release_id: 50
+
+  core_cpi:
+    axis: inflation
+    transform: log_difference
+    description: Monthly log growth in CPI excluding food and energy.
+    sources:
+      - series_id: CPILFESL
+        release_id: 10
+        vintage_start: 1996-12-12
+
+  core_pce:
+    axis: inflation
+    transform: log_difference
+    description: Monthly log growth in the core PCE price index.
+    sources:
+      - series_id: PCEPILFE
+        release_id: 54
+        vintage_start: 2000-08-01
+
+  producer_prices:
+    axis: inflation
+    transform: log_difference
+    description: >-
+      Monthly log growth in seasonally adjusted finished-goods producer prices
+      excluding food and energy; the official series break is spliced in
+      changes rather than levels.
+    sources:
+      - series_id: PPILFE
+        release_id: 46
+        vintage_start: 1996-12-11
+        vintage_end: 2016-02-17
+        active_end: 2015-12-01
+      - series_id: WPSFD4131
+        release_id: 46
+        vintage_start: 2015-03-13
+        active_start: 2016-01-01
+
+  average_hourly_earnings:
+    axis: inflation
+    transform: log_difference
+    description: >-
+      Monthly log growth in average hourly earnings of production and
+      nonsupervisory employees, total private.
+    sources:
+      - series_id: AHETPI
+        release_id: 50
+        vintage_start: 1999-08-06
+
+outputs:
+  raw_dir: data/raw/alfred/m02_soft_composite
+  processed_dir: data/processed/m02_soft_composite
+  manifest: data/manifests/m02_soft_composite.json
+  published_dir: results/published/m02_soft_composite

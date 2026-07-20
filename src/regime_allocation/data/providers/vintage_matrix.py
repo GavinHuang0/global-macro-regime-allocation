@@ -90,6 +90,20 @@ class VintageMatrixProvider(Protocol):
 
         ...
 
+    def download_level_matrix_at_vintages(
+        self,
+        series_id: str,
+        *,
+        observation_start: date,
+        observation_end: date,
+        vintage_dates: tuple[date, ...],
+        chunk_cache_dir: Path | None = None,
+        refresh_cache: bool = False,
+    ) -> DownloadedVintageMatrix:
+        """Return level snapshots at an explicit set of as-of dates."""
+
+        ...
+
     def list_release_dates(
         self,
         release_id: int,

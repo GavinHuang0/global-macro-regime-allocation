@@ -1,0 +1,243 @@
+{
+  "configuration": "configs/models/m02_probability_map.yaml",
+  "configuration_sha256": "6f1caccc9a032dba4ee096e91d1895ffb38f7a65b8311c3cbdb0213a62fc219d",
+  "coverage": [
+    {
+      "available_probability_months": 223,
+      "complete_revision_errors": 246,
+      "first_probability_month": "2007-09-01",
+      "first_revision_error_month": "2005-07-01",
+      "is_baseline": false,
+      "latest_probability_month": "2026-05-01",
+      "latest_revision_error_month": "2026-02-01",
+      "revision_horizon_months": 3
+    },
+    {
+      "available_probability_months": 214,
+      "complete_revision_errors": 239,
+      "first_probability_month": "2008-06-01",
+      "first_revision_error_month": "2005-07-01",
+      "is_baseline": true,
+      "latest_probability_month": "2026-05-01",
+      "latest_revision_error_month": "2025-05-01",
+      "revision_horizon_months": 12
+    }
+  ],
+  "data_snapshot_sha256": "27afc81bd17d79a81410f13f35f55ee09ccf3ff70737359edf0f3193754c2dd5",
+  "generated_at_utc": "2026-07-20T17:09:30.489795+00:00",
+  "generated_file_hashes": [
+    {
+      "bytes": 678721,
+      "path": "data/processed/m02_soft_composite/probability_map/component_revision_errors.csv",
+      "sha256": "b0bde73bae1e64e1deaf86274b0f31d6ad09d86a58a9784f85fbfe433746774f"
+    },
+    {
+      "bytes": 43689,
+      "path": "data/processed/m02_soft_composite/probability_map/axis_revision_errors.csv",
+      "sha256": "684eeaba6febe09224bf95c6e6b36c311353989f270ca9a5e6648c3df9bfce41"
+    },
+    {
+      "bytes": 20526,
+      "path": "data/processed/m02_soft_composite/probability_map/component_disagreement.csv",
+      "sha256": "e9926446c3d43fd28d46c5ea350bd77599412185603cfbd305e72cb852b88761"
+    },
+    {
+      "bytes": 253112,
+      "path": "data/processed/m02_soft_composite/probability_map/probability_map_all_specifications.csv",
+      "sha256": "419f0e2636ad3da85074352500d0b90877ece7e0f2855a99d8c71d22a76479e0"
+    },
+    {
+      "bytes": 124728,
+      "path": "results/published/m02_soft_composite/probability_map/quadrant_probabilities.csv",
+      "sha256": "bd234853b48a3fc4f67c267a6470d33dbb469c03c0e10e15c6dbdba420d3a67d"
+    },
+    {
+      "bytes": 129178,
+      "path": "results/published/m02_soft_composite/probability_map/revision_horizon_sensitivity.csv",
+      "sha256": "c92f0fe23eec8e6d6a6bf61143dd9c5e2b55478c6601ec2ecb77f71ec1a94536"
+    },
+    {
+      "bytes": 4514,
+      "path": "results/published/m02_soft_composite/probability_map/latest_quadrant_probabilities.json",
+      "sha256": "607cda89a23f1fd036fd7caba5bced3988ff8fa8f6745868553ff78216f00a20"
+    },
+    {
+      "bytes": 1635,
+      "path": "results/published/m02_soft_composite/probability_map/uncertainty_summary.json",
+      "sha256": "704d7f9bdadb782be5b2883b140c5e9c8104bba6b16895389a2075700034e63b"
+    }
+  ],
+  "input_files": [
+    {
+      "path": "data/processed/m02_soft_composite/first_release_components_long.csv",
+      "sha256": "148c15f4e87e6806817499a6b50901d04d398944b4b7583d7f295815d372878d"
+    },
+    {
+      "path": "data/processed/m02_soft_composite/composite_scores.csv",
+      "sha256": "1af087293505536c3e65be9c17d003b250f2e883c693e2fca581303566a5a6bd"
+    },
+    {
+      "path": "configs/models/m02_soft_composite.yaml",
+      "sha256": "0d03335fa2c71ff3564bc9c626f15bdea28ea86e86ee7f1319e31917105cee34"
+    }
+  ],
+  "knowledge_cutoff": "2026-07-20",
+  "mapping_definition": {
+    "baseline_revision_horizon_months": 12,
+    "disagreement": "diagonal expanding mean of monthly delete-one-component jackknife variances",
+    "distribution": "bivariate_gaussian",
+    "omega_map": "omega_disagreement_plus_omega_revision",
+    "perturbation_mean": [
+      0.0,
+      0.0
+    ],
+    "revision": "expanding centered sample covariance in score units",
+    "sensitivity_revision_horizons_months": [
+      3
+    ],
+    "training_cutoff": "strictly_before_score_availability"
+  },
+  "model_id": "m02_soft_composite",
+  "processed_files": [
+    "data/processed/m02_soft_composite/probability_map/component_revision_errors.csv",
+    "data/processed/m02_soft_composite/probability_map/axis_revision_errors.csv",
+    "data/processed/m02_soft_composite/probability_map/component_disagreement.csv",
+    "data/processed/m02_soft_composite/probability_map/probability_map_all_specifications.csv"
+  ],
+  "provider_output": "exact fixed-horizon as-of level snapshots",
+  "provider_requested": "fred",
+  "provider_selected": "fred_api",
+  "providers_used": [
+    "fred_api"
+  ],
+  "published_files": [
+    "results/published/m02_soft_composite/probability_map/quadrant_probabilities.csv",
+    "results/published/m02_soft_composite/probability_map/revision_horizon_sensitivity.csv",
+    "results/published/m02_soft_composite/probability_map/latest_quadrant_probabilities.json",
+    "results/published/m02_soft_composite/probability_map/uncertainty_summary.json"
+  ],
+  "raw_files": [
+    {
+      "bytes": 12048,
+      "cache_origin": "existing_normalized_cache",
+      "first_vintage": "2005-11-05",
+      "last_vintage": "2026-07-03",
+      "path": "data/raw/fred_api/m02_probability_map/AHETPI_bd56bbaba6f6_exact_vintages.zip",
+      "provider": "fred_api",
+      "series_id": "AHETPI",
+      "sha256": "a3b0a88f39901773a2829a4036e9a554b5ca29a1d37ad01ccd95f1ab3ec48c9f",
+      "source_url": "https://fred.stlouisfed.org/series/AHETPI",
+      "vintage_count": 397
+    },
+    {
+      "bytes": 12128,
+      "cache_origin": "existing_normalized_cache",
+      "first_vintage": "2005-11-16",
+      "last_vintage": "2026-07-15",
+      "path": "data/raw/fred_api/m02_probability_map/CPILFESL_4a40ae5698ea_exact_vintages.zip",
+      "provider": "fred_api",
+      "series_id": "CPILFESL",
+      "sha256": "094003d9541128f2eb7a56c8addd26542d0dac8a10ffed0cfdc83ed43d04b552",
+      "source_url": "https://fred.stlouisfed.org/series/CPILFESL",
+      "vintage_count": 427
+    },
+    {
+      "bytes": 38267,
+      "cache_origin": "existing_normalized_cache",
+      "first_vintage": "2005-11-16",
+      "last_vintage": "2026-07-16",
+      "path": "data/raw/fred_api/m02_probability_map/INDPRO_c79b5c5c3909_exact_vintages.zip",
+      "provider": "fred_api",
+      "series_id": "INDPRO",
+      "sha256": "2ac7c2258e6c99e49472b22a4c1e86dfcf135a3f670f9dc28c1175d30b67f346",
+      "source_url": "https://fred.stlouisfed.org/series/INDPRO",
+      "vintage_count": 400
+    },
+    {
+      "bytes": 24235,
+      "cache_origin": "existing_normalized_cache",
+      "first_vintage": "2005-11-05",
+      "last_vintage": "2026-07-03",
+      "path": "data/raw/fred_api/m02_probability_map/PAYEMS_89596428eaa3_exact_vintages.zip",
+      "provider": "fred_api",
+      "series_id": "PAYEMS",
+      "sha256": "db785cd50c065f4ff6fd47ae0c469e168b6eb11f1ce3a6905c19bf190f9809d8",
+      "source_url": "https://fred.stlouisfed.org/series/PAYEMS",
+      "vintage_count": 397
+    },
+    {
+      "bytes": 21353,
+      "cache_origin": "existing_normalized_cache",
+      "first_vintage": "2005-12-01",
+      "last_vintage": "2026-07-09",
+      "path": "data/raw/fred_api/m02_probability_map/PCEC96_9b689afa374d_exact_vintages.zip",
+      "provider": "fred_api",
+      "series_id": "PCEC96",
+      "sha256": "4b3243cd520ac8b025c22bcc77ea8379152cc9f2e0234f38c608abd58ce3818a",
+      "source_url": "https://fred.stlouisfed.org/series/PCEC96",
+      "vintage_count": 433
+    },
+    {
+      "bytes": 22258,
+      "cache_origin": "existing_normalized_cache",
+      "first_vintage": "2005-12-01",
+      "last_vintage": "2026-07-09",
+      "path": "data/raw/fred_api/m02_probability_map/PCEPILFE_204e8687fd1a_exact_vintages.zip",
+      "provider": "fred_api",
+      "series_id": "PCEPILFE",
+      "sha256": "eadd9a7f0f98bbd557974e445643e57ec2257cccdae17e72eeed03fe9beb0124",
+      "source_url": "https://fred.stlouisfed.org/series/PCEPILFE",
+      "vintage_count": 433
+    },
+    {
+      "bytes": 5623,
+      "cache_origin": "existing_normalized_cache",
+      "first_vintage": "2005-11-17",
+      "last_vintage": "2017-01-15",
+      "path": "data/raw/fred_api/m02_probability_map/PPILFE_b3f64d63a9e1_exact_vintages.zip",
+      "provider": "fred_api",
+      "series_id": "PPILFE",
+      "sha256": "17f9d4bf760e34bc05c49c452902432d642a20b6f4f1a0c2db5eb5e00a799e65",
+      "source_url": "https://fred.stlouisfed.org/series/PPILFE",
+      "vintage_count": 228
+    },
+    {
+      "bytes": 6809,
+      "cache_origin": "existing_normalized_cache",
+      "first_vintage": "2005-11-05",
+      "last_vintage": "2026-07-03",
+      "path": "data/raw/fred_api/m02_probability_map/UNRATE_b76bc7b1a15a_exact_vintages.zip",
+      "provider": "fred_api",
+      "series_id": "UNRATE",
+      "sha256": "87398b3a7d69d8effc8a9c3af8954754d0793e91010dda823dae3aa46e2f6be3",
+      "source_url": "https://fred.stlouisfed.org/series/UNRATE",
+      "vintage_count": 397
+    },
+    {
+      "bytes": 7487,
+      "cache_origin": "existing_normalized_cache",
+      "first_vintage": "2016-05-17",
+      "last_vintage": "2026-07-16",
+      "path": "data/raw/fred_api/m02_probability_map/WPSFD4131_dbfa1b615048_exact_vintages.zip",
+      "provider": "fred_api",
+      "series_id": "WPSFD4131",
+      "sha256": "957e9a8850f7d95af50179fe08410648aaa3c0d0d71edb06a74e7bdfa6ad79e3",
+      "source_url": "https://fred.stlouisfed.org/series/WPSFD4131",
+      "vintage_count": 212
+    }
+  ],
+  "runtime": {
+    "packages": {
+      "PyYAML": "6.0.3",
+      "numpy": "2.3.5",
+      "pandas": "3.0.1",
+      "scikit-learn": "1.9.0",
+      "scipy": "1.18.0"
+    },
+    "python": "3.12.13"
+  },
+  "schema_version": 1,
+  "score_manifest": "data/manifests/m02_soft_composite.json",
+  "score_manifest_sha256": "c4781cb3230393241063b61c456b3a8f0bfd5b0fc0f731b3c3a9b7704d66ed14",
+  "stage_id": "m02_probability_map"
+}

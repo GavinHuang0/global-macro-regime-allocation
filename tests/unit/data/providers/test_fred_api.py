@@ -385,6 +385,43 @@ def test_output_type_two_zip_is_normalized_and_chunk_cache_is_reused_and_refresh
     assert "api_key" not in date_cache["query"]
 
 
+def test_explicit_vintage_matrix_uses_requested_as_of_dates_without_discovery(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Fixed-horizon snapshots must not be replaced by release-calendar dates."""
+
+    vintages = (date(2024, 2, 15), date(2024, 3, 15))
+    client = FredApiDownloadClient(
+        VALID_KEY,
+        max_vintages_per_request=2,
+        request_pause_seconds=0,
+    )
+
+    def fail_discovery(*_: object, **__: object) -> tuple[date, ...]:
+        raise AssertionError("explicit as-of retrieval must not discover release dates")
+
+    def fake_request_bytes(endpoint: str, params: dict[str, object]) -> bytes:
+        assert endpoint == "series/observations"
+        assert params["vintage_dates"] == "2024-02-15,2024-03-15"
+        assert params["output_type"] == 2
+        return _official_vintage_zip("PAYEMS", vintages)
+
+    monkeypatch.setattr(client, "list_initial_release_dates", fail_discovery)
+    monkeypatch.setattr(client, "_request_bytes", fake_request_bytes)
+    artifact = client.download_level_matrix_at_vintages(
+        "PAYEMS",
+        observation_start=date(2023, 12, 1),
+        observation_end=date(2024, 1, 1),
+        vintage_dates=vintages,
+    )
+
+    assert artifact.selected_vintage_dates == vintages
+    assert list(load_vintage_matrix(artifact.content, "PAYEMS").columns) == [
+        "PAYEMS_20240215",
+        "PAYEMS_20240315",
+    ]
+
+
 def test_transport_failure_suppresses_the_credential_bearing_http_error(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

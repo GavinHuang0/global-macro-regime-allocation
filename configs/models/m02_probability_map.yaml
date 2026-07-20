@@ -1,0 +1,56 @@
+schema_version: 1
+model_id: m02_soft_composite
+stage_id: m02_probability_map
+description: >-
+  Causal Gaussian mapping from deterministic growth/inflation scores to four
+  quadrant weights. Mapping covariance adds pooled component-disagreement
+  variance to one fixed-horizon covariance of score-scale data revisions.
+
+inputs:
+  score_manifest: data/manifests/m02_soft_composite.json
+  first_release_components: >-
+    data/processed/m02_soft_composite/first_release_components_long.csv
+  score_features: data/processed/m02_soft_composite/composite_scores.csv
+
+data:
+  knowledge_cutoff: 2026-07-20
+  revision_raw_dir: data/raw/alfred/m02_probability_map
+
+mapping:
+  distribution: bivariate_gaussian
+  perturbation_mean: [0.0, 0.0]
+  revision_horizons_months: [3, 12]
+  baseline_revision_horizon_months: 12
+  training_cutoff: strictly_before_score_availability
+
+  disagreement:
+    estimator: expanding_mean_delete_one_component_jackknife_variance
+    covariance_structure: diagonal
+    minimum_complete_months: 24
+
+  revision:
+    estimator: expanding_centered_sample_covariance
+    comparison: later_minus_first_release
+    standardization: frozen_first_release_expanding_scale
+    minimum_complete_months: 24
+
+  expected_coverage:
+    - revision_horizon_months: 3
+      complete_revision_errors: 246
+      first_revision_error_month: 2005-07-01
+      latest_revision_error_month: 2026-02-01
+      available_probability_months: 223
+      first_probability_month: 2007-09-01
+      latest_probability_month: 2026-05-01
+    - revision_horizon_months: 12
+      complete_revision_errors: 239
+      first_revision_error_month: 2005-07-01
+      latest_revision_error_month: 2025-05-01
+      available_probability_months: 214
+      first_probability_month: 2008-06-01
+      latest_probability_month: 2026-05-01
+
+outputs:
+  processed_dir: data/processed/m02_soft_composite/probability_map
+  manifest: data/manifests/m02_probability_map.json
+  published_dir: results/published/m02_soft_composite/probability_map
