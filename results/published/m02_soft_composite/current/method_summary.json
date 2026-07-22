@@ -1,0 +1,44 @@
+{
+  "archived_sensitivity_stage_count": 4,
+  "baseline_mechanics": {
+    "causal_fit_cutoff": "strictly before each scored release",
+    "joint_state_months": 4,
+    "non_defining_emission": "fixed Student-t with 7 degrees of freedom",
+    "partial_defining_releases": true,
+    "transition": "OLS VAR(1)"
+  },
+  "baseline_observation_models": [
+    "business_activity_pipeline_joint",
+    "consumer_real_implicit_joint",
+    "weekly_labor_stress"
+  ],
+  "comparison_count": 4,
+  "credential_policy": "offline; no environment credential is read",
+  "current_sensitivities": [
+    "student_t_7_reduced_core_with_expectations"
+  ],
+  "engine_major_benchmarks": [
+    "transition_only",
+    "partial_only"
+  ],
+  "frozen_control_invariance_checks": 216,
+  "frozen_control_invariance_passed": true,
+  "historical_sensitivity_count": 23,
+  "latest_as_of_date": "2026-07-20",
+  "model_id": "m02_soft_composite",
+  "predecessor_baseline": "student_t_7_combined",
+  "publication_benchmarks": [
+    "transition_only",
+    "partial_only",
+    "student_t_7_combined"
+  ],
+  "replay_end": "2026-07-20",
+  "replay_start": "2010-09-01",
+  "schema_version": 1,
+  "selected_baseline": "student_t_7_reduced_core",
+  "selection_rationale": "The reduced core keeps the three evidence models supported by the locked component experiments: initial claims, the joint real-retail/implicit-price consumer response, and the joint capital-goods activity/pipeline response. It excludes JOLTS, aggregate housing, both legacy input costs and import prices, vehicle sales, and continued claims. Inflation expectations is retained only as a named sensitivity because the historical real-time feed produced too few applied updates to establish its incremental value.",
+  "selection_status": "declared_current_baseline_after_same_history_feature_revision",
+  "stage_id": "current_baseline",
+  "validation_scope": "operational promotion after same-history development; not a fresh out-of-sample validation",
+  "variant_count": 5
+}

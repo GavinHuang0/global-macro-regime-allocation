@@ -157,6 +157,34 @@ def test_paired_bootstrap_constant_difference_reports_degenerate_interval() -> N
     assert np.isnan(row["information_ratio"])
 
 
+def test_paired_bootstrap_supports_52_period_annualization() -> None:
+    baseline = np.array([0.010, 0.020, -0.005, 0.015, 0.000, 0.025])
+    comparator = np.array([0.005, 0.010, 0.000, 0.010, -0.005, 0.015])
+    simulation = _monthly_methods(
+        {"posterior": baseline.tolist(), "equal_weight": comparator.tolist()}
+    )
+
+    row = paired_circular_block_bootstrap(
+        simulation,
+        baseline_method="posterior",
+        comparator_methods=("equal_weight",),
+        block_length=2,
+        n_resamples=500,
+        seed=17,
+        periods_per_year=52,
+    ).iloc[0]
+
+    differences = baseline - comparator
+    period_std = np.std(differences, ddof=1)
+    expected_mean = float(np.mean(differences) * 52)
+    expected_tracking_error = float(period_std * np.sqrt(52))
+    assert row["annualized_mean_difference"] == pytest.approx(expected_mean)
+    assert row["annualized_tracking_error"] == pytest.approx(expected_tracking_error)
+    assert row["information_ratio"] == pytest.approx(
+        expected_mean / expected_tracking_error
+    )
+
+
 @pytest.mark.parametrize("problem", ["missing", "reordered", "duplicate"])
 def test_paired_bootstrap_requires_identical_ordered_unique_months(problem: str) -> None:
     simulation = _monthly_methods(
@@ -204,6 +232,9 @@ def test_paired_bootstrap_requires_identical_ordered_unique_months(problem: str)
         ({"confidence_level": 1.0}, "strictly between"),
         ({"seed": -1}, "non-negative"),
         ({"seed": 1.5}, "must be an integer"),
+        ({"periods_per_year": 0}, "strictly positive"),
+        ({"periods_per_year": 52.5}, "must be an integer"),
+        ({"periods_per_year": True}, "must be an integer"),
     ],
 )
 def test_paired_bootstrap_validates_configuration(

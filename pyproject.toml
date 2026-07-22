@@ -32,6 +32,9 @@ build-m02-inference-sensitivities = "regime_allocation.cli.build_m02_inference_s
 build-m02-evidence-experiments = "regime_allocation.cli.build_m02_evidence_experiments:main"
 build-m02-evidence-experiment-inference = "regime_allocation.cli.build_m02_evidence_experiment_inference:main"
 build-m02-existing-block-attribution = "regime_allocation.cli.build_m02_existing_block_attribution:main"
+build-m02-feature-revision = "regime_allocation.cli.build_m02_feature_revision:main"
+build-m02-current-baseline = "regime_allocation.cli.build_m02_current_baseline:main"
+build-m02-backtest = "regime_allocation.cli.build_m02_backtest:main"
 
 [project.optional-dependencies]
 dev = [

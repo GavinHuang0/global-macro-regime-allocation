@@ -1,0 +1,207 @@
+schema_version: 1
+model_id: m02_soft_composite
+stage_id: weekly_posterior_regime_allocation_backtest
+description: >-
+  Causal weekly portfolio allocation using the promoted
+  student_t_7_reduced_core Model 02 posterior, the frozen Model 01 portfolio
+  construction policy, first-common-session weekly execution, and explicit
+  trading costs.
+
+sources:
+  current_baseline_config: configs/models/m02_current_baseline.yaml
+  current_baseline_manifest: data/manifests/m02_current_baseline.json
+  model01_allocation_template: configs/models/m01_regime_allocation_backtest.yaml
+  etf_daily_prices: >-
+    data/processed/us_cross_asset_etf_universe_v1/etf_daily_prices_long.csv
+
+upstream_model:
+  selected_baseline: student_t_7_reduced_core
+  decision_anchor: calendar_week_monday_before_same_day_releases
+  target_marginal: newest_current_month
+  probability_mapping_cutoff: strictly_before_signal_date
+  holiday_execution_policy: retain_monday_signal_until_first_common_session
+
+universe:
+  strategy_assets:
+    - SPY
+    - IEF
+    - TIP
+    - HYG
+    - BIL
+    - GLD
+    - LQD
+  benchmark_only_assets:
+    - AGG
+  currency: USD
+
+signal:
+  variant_id: student_t_7_reduced_core
+  probability_sum_tolerance: 1.0e-10
+  regime_order:
+    - growth_up_inflation_up
+    - growth_down_inflation_up
+    - growth_up_inflation_down
+    - growth_down_inflation_down
+
+timing:
+  target_period: calendar_week_monday
+  signal_phase: after_month_roll_before_same_day_releases
+  execution: first_common_us_session_adjusted_open_in_signal_week
+  holding_period: first_weekly_session_open_to_next_weekly_session_open
+  estimation_return_cutoff: holding_period_end_on_or_before_prior_day
+  regime_label_cutoff: score_available_on_or_before_prior_day
+  formal_backtest_start: 2018-01-01
+  formal_backtest_end: latest_complete_open_to_open_week
+  incomplete_latest_week_policy: publish_target_but_exclude_from_performance
+
+estimation:
+  return_frequency: monthly_open_to_open
+  minimum_labeled_months: 60
+  regime_labels:
+    source: model02_completed_composite_scores
+    rule: sign_of_exact_growth_and_inflation_scores
+    availability: score_available_at
+  regime_means:
+    estimator: pooled_mean_pseudo_month_shrinkage
+    pseudo_months: 24.0
+    formula: (n_r * regime_mean + kappa * pooled_mean) / (n_r + kappa)
+    empty_regime_policy: pooled_mean
+  covariance:
+    estimator: ledoit_wolf
+    input: residuals_from_unshrunk_regime_sample_means
+    assume_centered: true
+    pooling: one_shared_within_regime_matrix
+  posterior_mixture:
+    expected_mean: probability_weighted_shrunk_regime_means
+    covariance: shared_within_regime_plus_between_regime_mean_covariance
+
+optimization:
+  objective: maximize_one_month_expected_return_net_of_estimated_trading_cost
+  long_only: true
+  fully_invested: true
+  annualized_volatility_cap: 0.10
+  covariance_annualization_factor: 12.0
+  per_asset_transaction_cost:
+    SPY: 0.0005
+    IEF: 0.0005
+    TIP: 0.0005
+    HYG: 0.0005
+    BIL: 0.0005
+    GLD: 0.0005
+    LQD: 0.0005
+  asset_caps:
+    SPY: 0.35
+    IEF: 0.50
+    TIP: 0.40
+    HYG: 0.25
+    BIL: 1.00
+    GLD: 0.25
+    LQD: 0.40
+  group_caps:
+    equity_and_high_yield:
+      assets: [SPY, HYG]
+      maximum: 0.50
+    corporate_credit:
+      assets: [HYG, LQD]
+      maximum: 0.50
+    rate_sensitive:
+      assets: [IEF, TIP, LQD]
+      maximum: 0.75
+  solver:
+    method: SLSQP
+    tolerance: 1.0e-12
+    maximum_iterations: 2000
+    feasibility_tolerance: 1.0e-7
+  fallback_order:
+    - hold_pretrade_if_feasible
+    - constrained_minimum_variance
+    - all_BIL
+
+benchmarks:
+  pooled_mean_optimizer:
+    method_id: pooled_mean_optimizer
+    current_regime_posterior_used: false
+    expected_return: expanding_causal_pooled_mean
+    covariance: >-
+      shared_within_regime_plus_historical_frequency_between_regime_covariance
+    constraints_and_costs: same_as_baseline
+  equal_weight:
+    method_id: equal_weight
+    assets: [SPY, IEF, TIP, HYG, BIL, GLD, LQD]
+    rebalance: weekly_first_common_session_open
+  legacy_sharpe_map:
+    method_id: legacy_sharpe_map
+    map_regime_from_posterior: true
+    use_causally_known_historical_month_labels: true
+    return_frequency: daily
+    minimum_same_regime_daily_observations: 60
+    annualization_factor: 252
+    shift_constant: 0.1
+    insufficient_history_fallback: equal_weight
+  static_60_40:
+    method_id: static_60_spy_40_agg
+    equity_asset: SPY
+    equity_weight: 0.60
+    bond_asset: AGG
+    bond_weight: 0.40
+    rebalance: weekly_first_common_session_open
+  apply_same_realized_transaction_costs: true
+
+sensitivity:
+  design: one_parameter_at_a_time
+  same_backtest_dates: true
+  select_baseline_after_results: false
+  parameters:
+    regime_mean_pseudo_months: [0.0, 12.0, 24.0, 48.0, 96.0]
+    annualized_volatility_cap: [0.08, 0.10, 0.12]
+    per_asset_transaction_cost: [0.0, 0.0005, 0.0010]
+    concentration_cap_multiplier: [0.8, 1.0, 1.2]
+
+evaluation:
+  periods_per_year: 52
+  zero_rate_sharpe: true
+  bil_excess_sharpe: true
+  daily_nav_drawdown: true
+  metrics:
+    - total_return
+    - cagr
+    - annualized_volatility
+    - sharpe_zero_rate
+    - sharpe_excess_bil
+    - sortino_zero_rate
+    - maximum_drawdown
+    - calmar_ratio
+    - worst_week
+    - positive_week_fraction
+    - annualized_one_way_turnover
+    - annualized_cost_drag
+  uncertainty:
+    method: paired_circular_block_bootstrap_weekly_mean
+    baseline_method: posterior_optimized
+    block_length_weeks: 26
+    resamples: 10000
+    confidence_level: 0.95
+    random_seed: 20260718
+
+outputs:
+  processed_dir: data/processed/m02_regime_allocation_backtest
+  signal_table: signal_table.csv
+  weekly_holding_period_returns: weekly_holding_period_returns.csv
+  regime_estimate_audit: regime_estimate_audit.csv
+  optimizer_audit: optimizer_audit.csv
+  weekly_weights: weekly_weights.csv
+  weekly_strategy_returns: weekly_strategy_returns.csv
+  daily_nav: daily_nav.csv.gz
+  performance_metrics: performance_metrics.csv
+  comparison_uncertainty: comparison_uncertainty.csv
+  sensitivity_metrics: sensitivity_metrics.csv
+  legacy_sharpe_audit: legacy_sharpe_audit.csv
+  manifest: data/manifests/m02_regime_allocation_backtest.json
+  published_dir: results/published/m02_regime_allocation_backtest
+  latest_allocation: latest_allocation.json
+  backtest_summary: backtest_summary.json
+  published_performance: performance_summary.csv
+  published_uncertainty: comparison_uncertainty.csv
+  published_weekly_returns: weekly_returns.csv
+  published_weekly_weights: weekly_weights.csv
+  published_sensitivity: sensitivity_metrics.csv

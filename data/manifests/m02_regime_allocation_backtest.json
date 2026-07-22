@@ -1,0 +1,299 @@
+{
+  "allocation_specification_count": 11,
+  "benchmark_count": 4,
+  "configuration": "configs/models/m02_regime_allocation_backtest.yaml",
+  "configuration_sha256": "cd8ab00fd82c7b271986638c28d10661970c90140a3c5b857e804a7b460bdf96",
+  "credential_policy": "This stage consumes credential-free processed files and never reads environment credentials or downloads data.",
+  "formal_backtest_end": "2026-07-06T00:00:00",
+  "formal_backtest_start": "2018-01-01T00:00:00",
+  "generated_at_utc": "2026-07-22T15:39:51.326369+00:00",
+  "implementation_files": [
+    {
+      "bytes": 40890,
+      "path": "src/regime_allocation/cli/build_m02_current_baseline.py",
+      "sha256": "eae0f522d0566b6854c0621b687d2c786316563b5500543e93b4ad6317e1293e"
+    },
+    {
+      "bytes": 50407,
+      "path": "src/regime_allocation/cli/build_m02_evidence_experiment_inference.py",
+      "sha256": "07cabfe937d9aabce74e5dfa4144af3992394bdf7f81fc1ed8ad2a8edd7d30dc"
+    },
+    {
+      "bytes": 50403,
+      "path": "src/regime_allocation/cli/build_m02_existing_block_attribution.py",
+      "sha256": "8ba941207703dee822df91a863d0e71369c0c3d3a8b9a0b3b7d298985eb4d485"
+    },
+    {
+      "bytes": 38307,
+      "path": "src/regime_allocation/cli/build_m02_inference_sensitivities.py",
+      "sha256": "fd81e4916668d936e595d3fd198f87762eb69ccfc3f0d36ee2b021fd64896452"
+    },
+    {
+      "bytes": 36696,
+      "path": "src/regime_allocation/models/m02_soft_composite/gaussian_emissions.py",
+      "sha256": "b5daffcae367bea6502044a6ad62a837af01a55bfb62fadedf259af9e61bd327"
+    },
+    {
+      "bytes": 70969,
+      "path": "src/regime_allocation/models/m02_soft_composite/inference_sensitivities.py",
+      "sha256": "addd892a0b3a5420a49692f4d7da9c6fa2b440ea1a877faff5576b7584b56ca3"
+    },
+    {
+      "bytes": 26211,
+      "path": "src/regime_allocation/models/m02_soft_composite/joint_filter.py",
+      "sha256": "48034b98deebe45eb08217d30c2c26e50dae5d9a949141cfbb4e552d1040691b"
+    },
+    {
+      "bytes": 31724,
+      "path": "src/regime_allocation/models/m02_soft_composite/partial_defining.py",
+      "sha256": "82b42c0e6b515e4c98786b3a9fcd36ec6d1e6a8e5ad92a2eb530efb40084c78b"
+    },
+    {
+      "bytes": 46555,
+      "path": "src/regime_allocation/models/m02_soft_composite/robust_emissions.py",
+      "sha256": "29367c9b0533b46ddb7e9d51a65b2117b94bfe8a5abc4ed79235cb550fc3b308"
+    },
+    {
+      "bytes": 23677,
+      "path": "src/regime_allocation/models/m02_soft_composite/var_transition.py",
+      "sha256": "50dd56230efba353035f14e5dc2e8ddf56ccc03bea6bee82277c6a62a08f1c3e"
+    },
+    {
+      "bytes": 65905,
+      "path": "src/regime_allocation/models/m02_soft_composite/walkforward.py",
+      "sha256": "33035a986315b7bb47d543a2b984791b02e870be944af5aa68e22e628c891d3d"
+    },
+    {
+      "bytes": 49677,
+      "path": "src/regime_allocation/portfolio/m02_pipeline.py",
+      "sha256": "cc86457ffe6d28120c7267df3449758a6dea7a594a18ad8749835acf0623a14c"
+    },
+    {
+      "bytes": 15290,
+      "path": "src/regime_allocation/portfolio/m02_weekly.py",
+      "sha256": "d86e23fe51bedb282d8ef7591539ad246f48bed4c436594a3a2cb044e5fa00c1"
+    },
+    {
+      "bytes": 50396,
+      "path": "src/regime_allocation/models/m02_soft_composite/weekly_decision_replay.py",
+      "sha256": "16435f8029409bfb0a430fad8ba875d5551f3b2920dd1f954133256ecb632048"
+    },
+    {
+      "bytes": 15813,
+      "path": "src/regime_allocation/models/m02_soft_composite/probability_map.py",
+      "sha256": "fe0224d7c049bed3b5ffb8e64e676d786cec3e041a58d4b5918902cf86d8d13e"
+    },
+    {
+      "bytes": 23521,
+      "path": "src/regime_allocation/models/m02_soft_composite/robust_var.py",
+      "sha256": "ac9ed8571ec3daa4f2bdd525d4149fc5c941c48daa65be0feb7909055007da50"
+    },
+    {
+      "bytes": 1161,
+      "path": "src/regime_allocation/backtest/__init__.py",
+      "sha256": "941e0b2c79789d0d487625ce0aa6747f6c0bc06013239d4de2f205aa0c0f22cb"
+    },
+    {
+      "bytes": 28425,
+      "path": "src/regime_allocation/backtest/engine.py",
+      "sha256": "92661e784249017827e4ae6ae3f972a08f20817b957f02aa82c52fb94e4ec2a3"
+    },
+    {
+      "bytes": 14575,
+      "path": "src/regime_allocation/backtest/metrics.py",
+      "sha256": "5bb992afc4cb7fc01b8d0404b5715fa488f22b611fe73de59073360d5027e293"
+    },
+    {
+      "bytes": 45668,
+      "path": "src/regime_allocation/portfolio/pipeline.py",
+      "sha256": "0ff0070f94bd28ef0ae54a33b3d4497cfd9a5e5864d241af45cc02d04da131d8"
+    },
+    {
+      "bytes": 24333,
+      "path": "src/regime_allocation/portfolio/estimation.py",
+      "sha256": "8d3b777b17428b4cf35f9d057d3fb8b0fc52e714a0a63d15e4e83d921729095b"
+    },
+    {
+      "bytes": 27155,
+      "path": "src/regime_allocation/portfolio/optimization.py",
+      "sha256": "32de0de85ad972be945e31d20ad5f0cb2c02696e04a0eb435aa44974e5fa457a"
+    },
+    {
+      "bytes": 12971,
+      "path": "src/regime_allocation/portfolio/baselines.py",
+      "sha256": "a8f65eae53d29af7736a9b071f733b5075ed1452b4b77afb076000dfa58eab3d"
+    },
+    {
+      "bytes": 1063,
+      "path": "src/regime_allocation/cli/build_m02_backtest.py",
+      "sha256": "bfb5775af8caedac0f57589df4f98452fbac87f1e51bbd384c1dc92bd4ac3cc2"
+    }
+  ],
+  "inputs": [
+    {
+      "bytes": 6054,
+      "path": "configs/models/m01_regime_allocation_backtest.yaml",
+      "sha256": "108023494eeb657e2ea341f77d6af3f9415f9f839b2661d22613a8fdf4348a13"
+    },
+    {
+      "bytes": 10573889,
+      "path": "data/processed/us_cross_asset_etf_universe_v1/etf_daily_prices_long.csv",
+      "sha256": "7cbd321c5af2662065edfc3a5c3c1cdb6101bda10de7862bc09c09041bdcb7f1"
+    },
+    {
+      "bytes": 12848,
+      "path": "configs/models/m02_current_baseline.yaml",
+      "sha256": "1aed9c12a09046e69e3b60969a29d1e4fdf882104b54adaf9733c1e5629f124f"
+    },
+    {
+      "bytes": 10133,
+      "path": "data/manifests/m02_current_baseline.json",
+      "sha256": "8f2bee5798a8b549080859961ddf1151d7a79d90024570f2acfcee8ec49587dc"
+    },
+    {
+      "bytes": 9172,
+      "path": "configs/models/m02_event_driven_bayesian_filter.yaml",
+      "sha256": "4357da3e904491b06bdf687ae9abdff797695d81e91d0beb4aff278ba201686d"
+    },
+    {
+      "bytes": 10127,
+      "path": "configs/models/m02_inference_sensitivities.yaml",
+      "sha256": "63ca9a2b1edecd587c892a9bf23ae343fec509dd6e393fff4b6c586d51947a52"
+    },
+    {
+      "bytes": 28272,
+      "path": "configs/models/m02_feature_revision.yaml",
+      "sha256": "dbc240bd14d92c110e8c9c34fdc45b660106e242a70005d45027a1e5aa390757"
+    },
+    {
+      "bytes": 14430,
+      "path": "data/manifests/m02_feature_revision.json",
+      "sha256": "f8b4bcb2a826cf4c1ab8668a8b329ed1e384790f18deab42ef0d382511ea585b"
+    },
+    {
+      "bytes": 126386,
+      "path": "data/processed/m02_soft_composite/composite_scores.csv",
+      "sha256": "e49033e74d711a886267d195cf01f03778bed00534d02f47e96cea91d73eb1eb"
+    },
+    {
+      "bytes": 433809,
+      "path": "data/processed/m02_soft_composite/first_release_components_long.csv",
+      "sha256": "ed4b718677bc7c97e25da6aa3a54391cf3be4dc836067db212feceb86c6cdf5d"
+    },
+    {
+      "bytes": 124817,
+      "path": "results/published/m02_soft_composite/probability_map/quadrant_probabilities.csv",
+      "sha256": "52edf3a438ad812ca8b4e80cb852a76d6ec0e1a3a980bd1033b9880e94bdbadc"
+    },
+    {
+      "bytes": 4451301,
+      "path": "data/processed/m02_soft_composite/feature_revision/consolidated_candidate_event_universe.csv",
+      "sha256": "5c8647c5fd5382b8b2105afff07f0ac8164bb986768152f47b274ff179e0e5ea"
+    }
+  ],
+  "latest_live_target_week": "2026-07-13T00:00:00",
+  "model01_policy_template_sha256": "108023494eeb657e2ea341f77d6af3f9415f9f839b2661d22613a8fdf4348a13",
+  "model_id": "m02_soft_composite",
+  "model_variant": "student_t_7_reduced_core",
+  "output_files": [
+    {
+      "bytes": 182931,
+      "path": "data/processed/m02_regime_allocation_backtest/signal_table.csv",
+      "sha256": "8cb4d27056ec5b024ad5e2cbf4549429da98def25b8602e91275731e8046111f"
+    },
+    {
+      "bytes": 92784,
+      "path": "data/processed/m02_regime_allocation_backtest/weekly_holding_period_returns.csv",
+      "sha256": "1f1130ce0fb2adede855ffb085ef3a900722325e7a81333eb501ae42ceaa7f01"
+    },
+    {
+      "bytes": 34503310,
+      "path": "data/processed/m02_regime_allocation_backtest/regime_estimate_audit.csv",
+      "sha256": "21758c51a7e78ada4b53e812ce6ce8aa0eabb57090e4d463dfbde0feb3b233f7"
+    },
+    {
+      "bytes": 3077897,
+      "path": "data/processed/m02_regime_allocation_backtest/optimizer_audit.csv",
+      "sha256": "2a7eae11ec44ef6add47e561618ad6c9afe26c801e817f4d33d636fcfc5abb1b"
+    },
+    {
+      "bytes": 7201491,
+      "path": "data/processed/m02_regime_allocation_backtest/weekly_weights.csv",
+      "sha256": "e30db049cf8fcec83a6127bf55e07fb1eea3d86f0727ea945fb53edc9ba631fd"
+    },
+    {
+      "bytes": 1354110,
+      "path": "data/processed/m02_regime_allocation_backtest/weekly_strategy_returns.csv",
+      "sha256": "ad4d489f740d5906b2c105cf014e7620993f56dcd113c46ee0a4545847c106d0"
+    },
+    {
+      "bytes": 620360,
+      "path": "data/processed/m02_regime_allocation_backtest/daily_nav.csv.gz",
+      "sha256": "148da1c5b62d473c785a3da1fb45b91e647bd5eeab0a8bbda5b4976e94e28899"
+    },
+    {
+      "bytes": 6005,
+      "path": "data/processed/m02_regime_allocation_backtest/performance_metrics.csv",
+      "sha256": "6f426e13d898472a772076de859485196ab2a3505f29a1b4bcd44da2e85a472f"
+    },
+    {
+      "bytes": 1378,
+      "path": "data/processed/m02_regime_allocation_backtest/comparison_uncertainty.csv",
+      "sha256": "51c58d4d6300a3fadc7b686339c32259eae76dd69d459f888e92c9fddd58c46f"
+    },
+    {
+      "bytes": 4884,
+      "path": "data/processed/m02_regime_allocation_backtest/sensitivity_metrics.csv",
+      "sha256": "587600e09e437c57b1ab627fd15dd629383721290785bb724d3697c4e0eb9370"
+    },
+    {
+      "bytes": 375550,
+      "path": "data/processed/m02_regime_allocation_backtest/legacy_sharpe_audit.csv",
+      "sha256": "2af837b324f01f61ed71342833001a64fef80c384d0a170e03dcd21f990b9bb5"
+    },
+    {
+      "bytes": 2063,
+      "path": "results/published/m02_regime_allocation_backtest/latest_allocation.json",
+      "sha256": "b5e9453adc09880f848042717e2fd0e5cc9a80fe8aef37de0407223e5da92c22"
+    },
+    {
+      "bytes": 9542,
+      "path": "results/published/m02_regime_allocation_backtest/backtest_summary.json",
+      "sha256": "9c831e9617e4012f395ed3697d1961f6f5448caf786f17694e8769f2bb78d9a8"
+    },
+    {
+      "bytes": 2221,
+      "path": "results/published/m02_regime_allocation_backtest/performance_summary.csv",
+      "sha256": "673d57dccde3fb0325e3bc9fdef51798e50324a75c0c046446d7cc303ebc4a35"
+    },
+    {
+      "bytes": 1378,
+      "path": "results/published/m02_regime_allocation_backtest/comparison_uncertainty.csv",
+      "sha256": "51c58d4d6300a3fadc7b686339c32259eae76dd69d459f888e92c9fddd58c46f"
+    },
+    {
+      "bytes": 440426,
+      "path": "results/published/m02_regime_allocation_backtest/weekly_returns.csv",
+      "sha256": "d74c1ea4c21a943fe8c22529d1eb449acb6a619fab673db9f77cb27e041e3796"
+    },
+    {
+      "bytes": 2204441,
+      "path": "results/published/m02_regime_allocation_backtest/weekly_weights.csv",
+      "sha256": "789c30664d5c4f7fb90439029bd4f3fa5d95a7bc795535ac656a6a7999010022"
+    },
+    {
+      "bytes": 4884,
+      "path": "results/published/m02_regime_allocation_backtest/sensitivity_metrics.csv",
+      "sha256": "587600e09e437c57b1ab627fd15dd629383721290785bb724d3697c4e0eb9370"
+    }
+  ],
+  "periods_per_year": 52,
+  "pooled_mean_ablation_included": true,
+  "schema_version": 1,
+  "stage_id": "weekly_posterior_regime_allocation_backtest",
+  "upstream_current_baseline_manifest": {
+    "path": "data/manifests/m02_current_baseline.json",
+    "sha256": "8f2bee5798a8b549080859961ddf1151d7a79d90024570f2acfcee8ec49587dc"
+  },
+  "weekly_observations": 445
+}

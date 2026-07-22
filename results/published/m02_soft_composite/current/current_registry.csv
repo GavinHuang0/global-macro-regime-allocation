@@ -1,0 +1,6 @@
+display_order,variant_id,engine_model_role,enabled,non_defining_evidence,partial_defining_releases,emission_family,var_method,retail_method,evidence_set_id,publication_role,source_stage
+0,transition_only,major_benchmark,True,False,False,gaussian,ols,baseline_nominal,legacy_baseline,major_benchmark,current_baseline
+1,partial_only,major_benchmark,True,False,True,gaussian,ols,baseline_nominal,legacy_baseline,major_benchmark,current_baseline
+2,student_t_7_combined,sensitivity,True,True,True,student_t_7,ols,baseline_nominal,legacy_baseline,major_benchmark,current_baseline
+3,student_t_7_reduced_core,baseline,True,True,True,student_t_7,ols,baseline_nominal,reduced_core,baseline,current_baseline
+4,student_t_7_reduced_core_with_expectations,sensitivity,True,True,True,student_t_7,ols,baseline_nominal,reduced_core_with_expectations,sensitivity,current_baseline

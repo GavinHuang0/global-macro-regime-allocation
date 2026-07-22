@@ -818,8 +818,9 @@ baseline selection does not eliminate visible model uncertainty.
 - Quadrant metrics use the exact-score soft map as the target. They therefore
   measure both score-center forecast error and the separate mapping convention;
   they are not observed economic ground truth.
-- Model 02 allocation and backtesting have not yet been implemented. These
-  inference results alone make no claim about portfolio performance.
+- This historical inference-selection stage did not implement allocation and
+  its results alone make no portfolio claim. The later promoted baseline now
+  has a separately versioned weekly allocation backtest.
 
 ## 12. Reproduction and artifacts
 

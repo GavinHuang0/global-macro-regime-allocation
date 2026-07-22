@@ -30,7 +30,7 @@ _MONTHLY_COLUMNS = {
 }
 _NAV_COLUMNS = {"method", "date", "phase_order", "nav"}
 _PAIRED_COMPARISON_COLUMNS = {"method", "reference_month", "net_return"}
-_MONTHS_PER_YEAR = 12
+_DEFAULT_PERIODS_PER_YEAR = 12
 
 
 def _geometric_annual_return(returns: np.ndarray, periods_per_year: int) -> float:
@@ -190,6 +190,7 @@ def paired_circular_block_bootstrap(
     n_resamples: int = 10_000,
     confidence_level: float = 0.95,
     seed: int,
+    periods_per_year: int = _DEFAULT_PERIODS_PER_YEAR,
 ) -> pd.DataFrame:
     """Compare a baseline with other methods using paired circular blocks.
 
@@ -240,6 +241,10 @@ def paired_circular_block_bootstrap(
         raise ValueError("seed must be an integer")
     if seed < 0:
         raise ValueError("seed must be non-negative")
+    if isinstance(periods_per_year, bool) or not isinstance(periods_per_year, Integral):
+        raise ValueError("periods_per_year must be an integer")
+    if periods_per_year <= 0:
+        raise ValueError("periods_per_year must be strictly positive")
 
     baseline_months, baseline_returns = _ordered_method_returns(
         monthly_simulation,
@@ -272,9 +277,9 @@ def paired_circular_block_bootstrap(
     for comparator in comparators:
         differences = baseline_returns - comparator_returns[comparator]
         mean_monthly_difference = float(np.mean(differences))
-        annualized_mean_difference = _MONTHS_PER_YEAR * mean_monthly_difference
+        annualized_mean_difference = periods_per_year * mean_monthly_difference
         bootstrap_annualized_means = (
-            differences[sample_indices].mean(axis=1) * _MONTHS_PER_YEAR
+            differences[sample_indices].mean(axis=1) * periods_per_year
         )
         lower, upper = np.quantile(
             bootstrap_annualized_means,
@@ -286,7 +291,7 @@ def paired_circular_block_bootstrap(
         )
         if monthly_tracking_error <= zero_dispersion_tolerance:
             monthly_tracking_error = 0.0
-        annualized_tracking_error = monthly_tracking_error * math.sqrt(_MONTHS_PER_YEAR)
+        annualized_tracking_error = monthly_tracking_error * math.sqrt(periods_per_year)
         if monthly_tracking_error > 0.0:
             naive_t = float(
                 mean_monthly_difference

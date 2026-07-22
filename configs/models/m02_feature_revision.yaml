@@ -1,0 +1,801 @@
+schema_version: 1
+model_id: m02_soft_composite
+stage_id: feature_revision
+experiment_id: m02_feature_revision_v1
+description: >-
+  Predeclared causal feature-revision experiment for Model 02. The experiment
+  removes aggregate housing and monthly JOLTS from every revised profile,
+  tests import prices as a direct replacement for intermediate-materials
+  input costs, attributes redesigned consumer and business responses through
+  add-one and leave-one-out arms, and tests continued claims conditionally on
+  same-publication initial claims. Frozen controls are replayed without
+  modification. No candidate is promoted merely because it is evaluated by
+  this development-stage experiment.
+
+model_selection:
+  selected_baseline: student_t_7_combined
+  frozen_controls: [transition_only, partial_only, student_t_7_combined]
+  predeclared_combined_candidate: all_revised_candidate
+  selection_status: development_experiment_no_automatic_promotion
+  structural_exclusions:
+    - monthly_labor_demand
+    - housing_activity
+  retained_legacy_models:
+    - inflation_expectations
+  rationale: >-
+    Aggregate housing and the lagged monthly-labor-demand likelihood are
+    excluded by design based on the preceding frozen attribution experiment.
+    Candidate selection below must use the predeclared proper-score rules and
+    remains development evidence because earlier full-sample results have
+    already been inspected.
+
+sources:
+  base_filter_config: configs/models/m02_event_driven_bayesian_filter.yaml
+  baseline_sensitivity_config: configs/models/m02_inference_sensitivities.yaml
+  evidence_experiment_config: configs/models/m02_evidence_block_inference.yaml
+  evidence_experiment_inference_manifest: data/manifests/m02_evidence_block_inference.json
+  score_manifest: data/manifests/m02_soft_composite.json
+  score_features: data/processed/m02_soft_composite/composite_scores.csv
+  defining_components: >-
+    data/processed/m02_soft_composite/first_release_components_long.csv
+  mapping_manifest: data/manifests/m02_probability_map.json
+  mapping_history: >-
+    results/published/m02_soft_composite/probability_map/quadrant_probabilities.csv
+  baseline_evidence_manifest: data/manifests/m02_release_evidence.json
+  baseline_evidence_events: >-
+    data/processed/m02_soft_composite/release_evidence/release_events.csv
+  extended_evidence_manifest: data/manifests/m02_evidence_block_experiments.json
+  extended_evidence_events: >-
+    data/processed/m02_soft_composite/evidence_block_experiments/extended_release_events.csv
+  retail_real_decomposition_manifest: data/manifests/m02_retail_sensitivity.json
+  retail_real_decomposition_events: >-
+    data/processed/m02_soft_composite/inference_sensitivities/retail_real_decomposition_events.csv
+  frozen_baseline_manifest: data/manifests/m02_inference_sensitivities.json
+  frozen_baseline_evaluation_rows: >-
+    data/processed/m02_soft_composite/inference_sensitivities/evaluation_rows.csv
+  frozen_baseline_event_update_audit: >-
+    data/processed/m02_soft_composite/inference_sensitivities/event_update_audit.csv.gz
+  frozen_baseline_partial_defining_audit: >-
+    data/processed/m02_soft_composite/inference_sensitivities/partial_defining_audit.csv.gz
+  frozen_baseline_exact_score_audit: >-
+    data/processed/m02_soft_composite/inference_sensitivities/exact_score_audit.csv
+  frozen_baseline_latest_marginals: >-
+    results/published/m02_soft_composite/inference_sensitivities/latest_marginals.csv
+
+experiment_contract:
+  non_defining_emission: student_t
+  degrees_of_freedom: 7.0
+  transition_estimator: ols_var1
+  partial_defining_releases: true
+  evidence_training_window: expanding
+  evidence_training_cutoff: strictly_before_scored_release
+  same_timestamp_validation: atomic_holdout
+  covariance_eigenvalue_floor: 1.0e-8
+  structural_exclusions_apply_to: all_noncontrol_variants
+  frozen_control_policy: semantic_artifact_invariance_with_float_tolerance
+  candidate_role: sensitivity
+
+reused_observation_models:
+  weekly_labor_stress:
+    source_config: configs/models/m02_event_driven_bayesian_filter.yaml
+  weekly_continued_claims:
+    source_config: configs/models/m02_evidence_block_inference.yaml
+    use: independent_claims_comparator_only
+  consumer_demand:
+    source_config: configs/models/m02_event_driven_bayesian_filter.yaml
+  business_investment:
+    source_config: configs/models/m02_event_driven_bayesian_filter.yaml
+  inflation_expectations:
+    source_config: configs/models/m02_event_driven_bayesian_filter.yaml
+  inflation_input_costs:
+    source_config: configs/models/m02_event_driven_bayesian_filter.yaml
+    use: direct_replacement_comparator_only
+
+candidate_observation_models:
+  inflation_import_prices:
+    economic_block: inflation_pressure
+    event_source: extended_evidence_events
+    event_block: inflation_import_prices
+    responses: [import_prices_ex_food_fuels_computers_12m_log_change]
+    controls: []
+    transform: same_vintage_log_change_12m
+    standardization: expanding_strictly_lagged
+    loading_penalties:
+      - [0.0, 1.0]
+    exact_zero_mask:
+      - [true, false]
+    minimum_training_samples: 24
+    validation_minimum_training_samples: 18
+    minimum_validation_observations: 12
+
+  consumer_real_implicit_joint:
+    economic_block: consumer_demand
+    event_source: retail_real_decomposition_events
+    event_block: consumer_demand_real_decomposition
+    responses:
+      - real_retail_and_food_services_log_change
+      - implicit_retail_price_log_change
+    controls: []
+    response_availability: max_first_release_date_of_required_sources
+    covariance: one_joint_residual_scale
+    loading_penalties:
+      - [1.0, 10.0]
+      - [10.0, 1.0]
+    exact_zero_mask:
+      - [false, false]
+      - [false, false]
+    minimum_training_samples: 60
+    validation_minimum_training_samples: 36
+    minimum_validation_observations: 24
+
+  consumer_real_only:
+    economic_block: consumer_demand
+    event_source: retail_real_decomposition_events
+    event_block: consumer_demand_real_decomposition
+    responses: [real_retail_and_food_services_log_change]
+    controls: []
+    loading_penalties:
+      - [1.0, 10.0]
+    exact_zero_mask:
+      - [false, false]
+    minimum_training_samples: 60
+    validation_minimum_training_samples: 36
+    minimum_validation_observations: 24
+
+  consumer_implicit_only:
+    economic_block: consumer_demand
+    event_source: retail_real_decomposition_events
+    event_block: consumer_demand_real_decomposition
+    responses: [implicit_retail_price_log_change]
+    controls: []
+    loading_penalties:
+      - [10.0, 1.0]
+    exact_zero_mask:
+      - [false, false]
+    minimum_training_samples: 60
+    validation_minimum_training_samples: 36
+    minimum_validation_observations: 24
+
+  consumer_vehicle_units:
+    economic_block: consumer_demand
+    event_source: extended_evidence_events
+    event_block: consumer_vehicle_units
+    responses: [total_vehicle_unit_sales_log_change]
+    controls: []
+    loading_penalties:
+      - [1.0, 0.0]
+    exact_zero_mask:
+      - [false, true]
+    minimum_training_samples: 24
+    validation_minimum_training_samples: 18
+    minimum_validation_observations: 12
+
+  business_activity_pipeline_joint:
+    economic_block: business_investment
+    event_source: derived_business_revision_events
+    event_block: business_investment_activity_pipeline
+    responses:
+      - core_capital_goods_shipments_log_change
+      - core_capital_goods_orders_shipments_gap_log_change
+    controls: []
+    covariance: one_joint_residual_scale
+    loading_penalties:
+      - [1.0, 10.0]
+      - [1.0, 0.0]
+    exact_zero_mask:
+      - [false, false]
+      - [false, true]
+    minimum_training_samples: 36
+    validation_minimum_training_samples: 24
+    minimum_validation_observations: 12
+
+  business_activity_only:
+    economic_block: business_investment
+    event_source: derived_business_revision_events
+    event_block: business_investment_activity_pipeline
+    responses: [core_capital_goods_shipments_log_change]
+    controls: []
+    loading_penalties:
+      - [1.0, 10.0]
+    exact_zero_mask:
+      - [false, false]
+    minimum_training_samples: 36
+    validation_minimum_training_samples: 24
+    minimum_validation_observations: 12
+
+  business_pipeline_only:
+    economic_block: business_investment
+    event_source: derived_business_revision_events
+    event_block: business_investment_activity_pipeline
+    responses: [core_capital_goods_orders_shipments_gap_log_change]
+    controls: []
+    loading_penalties:
+      - [1.0, 0.0]
+    exact_zero_mask:
+      - [false, true]
+    minimum_training_samples: 36
+    validation_minimum_training_samples: 24
+    minimum_validation_observations: 12
+
+  weekly_continued_claims_conditional:
+    economic_block: weekly_labor_stress
+    event_source: extended_evidence_events
+    event_block: weekly_continued_claims_conditional
+    responses: [continued_claims_innovation]
+    controls: [same_publication_initial_claims_innovation_control]
+    pairing:
+      left_event_block: weekly_labor_stress
+      left_feature: initial_claims_innovation
+      right_event_block: weekly_continued_claims
+      right_feature: continued_claims_innovation
+      keys: [release_date, exact_plus_7_day_reference_week]
+      target_reference_month: continued_claims_reference_month
+      control_source_reference_month: initial_claims_reference_month
+      match_policy: exact_same_publication_and_exact_week_offset_only
+      nearest_date_matching: false
+      cross_reference_month_retargeting: false
+      unmatched_continued_claims_policy: emit_for_explicit_missing_control_audit
+      control_information_role: observed_control_not_separate_likelihood
+    loading_penalties:
+      - [1.0, 0.0]
+    exact_zero_mask:
+      - [false, true]
+    minimum_training_samples: 104
+    validation_minimum_training_samples: 52
+    minimum_validation_observations: 52
+
+evidence_sets:
+  legacy_baseline:
+    observation_models:
+      - weekly_labor_stress
+      - monthly_labor_demand
+      - consumer_demand
+      - housing_activity
+      - business_investment
+      - inflation_expectations
+      - inflation_input_costs
+
+  structural_reduced_input:
+    observation_models:
+      - weekly_labor_stress
+      - consumer_demand
+      - business_investment
+      - inflation_expectations
+      - inflation_input_costs
+  structural_reduced_no_price:
+    observation_models:
+      - weekly_labor_stress
+      - consumer_demand
+      - business_investment
+      - inflation_expectations
+  price_import:
+    observation_models:
+      - weekly_labor_stress
+      - consumer_demand
+      - business_investment
+      - inflation_expectations
+      - inflation_import_prices
+
+  consumer_none:
+    observation_models:
+      - weekly_labor_stress
+      - business_investment
+      - inflation_expectations
+      - inflation_import_prices
+  consumer_legacy:
+    observation_models:
+      - weekly_labor_stress
+      - consumer_demand
+      - business_investment
+      - inflation_expectations
+      - inflation_import_prices
+  consumer_real_only:
+    observation_models:
+      - weekly_labor_stress
+      - consumer_real_only
+      - business_investment
+      - inflation_expectations
+      - inflation_import_prices
+  consumer_implicit_only:
+    observation_models:
+      - weekly_labor_stress
+      - consumer_implicit_only
+      - business_investment
+      - inflation_expectations
+      - inflation_import_prices
+  consumer_vehicle_only:
+    observation_models:
+      - weekly_labor_stress
+      - consumer_vehicle_units
+      - business_investment
+      - inflation_expectations
+      - inflation_import_prices
+  consumer_real_implicit_joint_only:
+    observation_models:
+      - weekly_labor_stress
+      - consumer_real_implicit_joint
+      - business_investment
+      - inflation_expectations
+      - inflation_import_prices
+  consumer_without_real:
+    observation_models:
+      - weekly_labor_stress
+      - consumer_implicit_only
+      - consumer_vehicle_units
+      - business_investment
+      - inflation_expectations
+      - inflation_import_prices
+  consumer_without_implicit:
+    observation_models:
+      - weekly_labor_stress
+      - consumer_real_only
+      - consumer_vehicle_units
+      - business_investment
+      - inflation_expectations
+      - inflation_import_prices
+  consumer_revised_full:
+    observation_models:
+      - weekly_labor_stress
+      - consumer_real_implicit_joint
+      - consumer_vehicle_units
+      - business_investment
+      - inflation_expectations
+      - inflation_import_prices
+
+  business_none:
+    observation_models:
+      - weekly_labor_stress
+      - consumer_demand
+      - inflation_expectations
+      - inflation_import_prices
+  business_legacy:
+    observation_models:
+      - weekly_labor_stress
+      - consumer_demand
+      - business_investment
+      - inflation_expectations
+      - inflation_import_prices
+  business_activity_only:
+    observation_models:
+      - weekly_labor_stress
+      - consumer_demand
+      - business_activity_only
+      - inflation_expectations
+      - inflation_import_prices
+  business_pipeline_only:
+    observation_models:
+      - weekly_labor_stress
+      - consumer_demand
+      - business_pipeline_only
+      - inflation_expectations
+      - inflation_import_prices
+  business_revised_joint:
+    observation_models:
+      - weekly_labor_stress
+      - consumer_demand
+      - business_activity_pipeline_joint
+      - inflation_expectations
+      - inflation_import_prices
+
+  claims_none:
+    observation_models:
+      - consumer_demand
+      - business_investment
+      - inflation_expectations
+      - inflation_import_prices
+  claims_icsa_only:
+    observation_models:
+      - weekly_labor_stress
+      - consumer_demand
+      - business_investment
+      - inflation_expectations
+      - inflation_import_prices
+  claims_ccsa_conditional_only:
+    observation_models:
+      - weekly_continued_claims_conditional
+      - consumer_demand
+      - business_investment
+      - inflation_expectations
+      - inflation_import_prices
+  claims_independent:
+    observation_models:
+      - weekly_labor_stress
+      - weekly_continued_claims
+      - consumer_demand
+      - business_investment
+      - inflation_expectations
+      - inflation_import_prices
+  claims_conditional_joint:
+    observation_models:
+      - weekly_labor_stress
+      - weekly_continued_claims_conditional
+      - consumer_demand
+      - business_investment
+      - inflation_expectations
+      - inflation_import_prices
+
+  all_revised_candidate:
+    observation_models:
+      - weekly_labor_stress
+      - weekly_continued_claims_conditional
+      - consumer_real_implicit_joint
+      - consumer_vehicle_units
+      - business_activity_pipeline_joint
+      - inflation_expectations
+      - inflation_import_prices
+
+variants:
+  - id: transition_only
+    model_role: major_benchmark
+    frozen_control: true
+    non_defining_evidence: false
+    partial_defining_releases: false
+    emission: gaussian
+    var: ols
+    evidence_set: legacy_baseline
+  - id: partial_only
+    model_role: major_benchmark
+    frozen_control: true
+    non_defining_evidence: false
+    partial_defining_releases: true
+    emission: gaussian
+    var: ols
+    evidence_set: legacy_baseline
+  - id: student_t_7_combined
+    model_role: baseline
+    frozen_control: true
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    evidence_set: legacy_baseline
+
+  - id: structural_reduced_input
+    family: price
+    evidence_set: structural_reduced_input
+  - id: structural_reduced_no_price
+    family: price
+    evidence_set: structural_reduced_no_price
+  - id: price_import
+    family: price
+    evidence_set: price_import
+
+  - id: consumer_none
+    family: consumer
+    evidence_set: consumer_none
+  - id: consumer_legacy
+    family: consumer
+    evidence_set: consumer_legacy
+  - id: consumer_real_only
+    family: consumer
+    evidence_set: consumer_real_only
+  - id: consumer_implicit_only
+    family: consumer
+    evidence_set: consumer_implicit_only
+  - id: consumer_vehicle_only
+    family: consumer
+    evidence_set: consumer_vehicle_only
+  - id: consumer_real_implicit_joint_only
+    family: consumer
+    evidence_set: consumer_real_implicit_joint_only
+  - id: consumer_without_real
+    family: consumer
+    evidence_set: consumer_without_real
+  - id: consumer_without_implicit
+    family: consumer
+    evidence_set: consumer_without_implicit
+  - id: consumer_revised_full
+    family: consumer
+    evidence_set: consumer_revised_full
+
+  - id: business_none
+    family: business
+    evidence_set: business_none
+  - id: business_legacy
+    family: business
+    evidence_set: business_legacy
+  - id: business_activity_only
+    family: business
+    evidence_set: business_activity_only
+  - id: business_pipeline_only
+    family: business
+    evidence_set: business_pipeline_only
+  - id: business_revised_joint
+    family: business
+    evidence_set: business_revised_joint
+
+  - id: claims_none
+    family: claims
+    evidence_set: claims_none
+  - id: claims_icsa_only
+    family: claims
+    evidence_set: claims_icsa_only
+  - id: claims_ccsa_conditional_only
+    family: claims
+    evidence_set: claims_ccsa_conditional_only
+  - id: claims_independent
+    family: claims
+    evidence_set: claims_independent
+  - id: claims_conditional_joint
+    family: claims
+    evidence_set: claims_conditional_joint
+
+  - id: all_revised_candidate
+    model_role: sensitivity
+    family: combined
+    evidence_set: all_revised_candidate
+
+variant_defaults:
+  model_role: sensitivity
+  frozen_control: false
+  non_defining_evidence: true
+  partial_defining_releases: true
+  emission: student_t_7
+  var: ols
+
+comparisons:
+  price:
+    - id: price_import__vs__structural_reduced_input
+      candidate_id: price_import
+      reference_id: structural_reduced_input
+      arm: direct_replacement
+    - id: price_import__vs__structural_reduced_no_price
+      candidate_id: price_import
+      reference_id: structural_reduced_no_price
+      arm: add_one
+    - id: structural_reduced_input__vs__structural_reduced_no_price
+      candidate_id: structural_reduced_input
+      reference_id: structural_reduced_no_price
+      arm: legacy_add_one
+
+  consumer:
+    - id: consumer_real_only__vs__consumer_none
+      candidate_id: consumer_real_only
+      reference_id: consumer_none
+      arm: add_one
+      response: real_retail_and_food_services_log_change
+    - id: consumer_implicit_only__vs__consumer_none
+      candidate_id: consumer_implicit_only
+      reference_id: consumer_none
+      arm: add_one
+      response: implicit_retail_price_log_change
+    - id: consumer_vehicle_only__vs__consumer_none
+      candidate_id: consumer_vehicle_only
+      reference_id: consumer_none
+      arm: add_one
+      response: total_vehicle_unit_sales_log_change
+    - id: consumer_without_real__vs__consumer_revised_full
+      candidate_id: consumer_without_real
+      reference_id: consumer_revised_full
+      arm: leave_one_out
+      response: real_retail_and_food_services_log_change
+    - id: consumer_without_implicit__vs__consumer_revised_full
+      candidate_id: consumer_without_implicit
+      reference_id: consumer_revised_full
+      arm: leave_one_out
+      response: implicit_retail_price_log_change
+    - id: consumer_real_implicit_joint_only__vs__consumer_revised_full
+      candidate_id: consumer_real_implicit_joint_only
+      reference_id: consumer_revised_full
+      arm: leave_one_out
+      response: total_vehicle_unit_sales_log_change
+    - id: consumer_revised_full__vs__consumer_legacy
+      candidate_id: consumer_revised_full
+      reference_id: consumer_legacy
+      arm: direct_replacement
+
+  business:
+    - id: business_activity_only__vs__business_none
+      candidate_id: business_activity_only
+      reference_id: business_none
+      arm: add_one
+      response: core_capital_goods_shipments_log_change
+      primary_atomic: true
+    - id: business_pipeline_only__vs__business_none
+      candidate_id: business_pipeline_only
+      reference_id: business_none
+      arm: add_one
+      response: core_capital_goods_orders_shipments_gap_log_change
+      primary_atomic: true
+    - id: business_pipeline_only__vs__business_revised_joint
+      candidate_id: business_pipeline_only
+      reference_id: business_revised_joint
+      arm: leave_one_out
+      response: core_capital_goods_shipments_log_change
+      primary_atomic: false
+    - id: business_activity_only__vs__business_revised_joint
+      candidate_id: business_activity_only
+      reference_id: business_revised_joint
+      arm: leave_one_out
+      response: core_capital_goods_orders_shipments_gap_log_change
+      primary_atomic: false
+    - id: business_revised_joint__vs__business_legacy
+      candidate_id: business_revised_joint
+      reference_id: business_legacy
+      arm: direct_replacement
+      primary_atomic: false
+
+  claims:
+    - id: claims_icsa_only__vs__claims_none
+      candidate_id: claims_icsa_only
+      reference_id: claims_none
+      arm: add_one
+      response: initial_claims_innovation
+    - id: claims_ccsa_conditional_only__vs__claims_none
+      candidate_id: claims_ccsa_conditional_only
+      reference_id: claims_none
+      arm: add_one
+      response: continued_claims_innovation
+    - id: claims_conditional_joint__vs__claims_icsa_only
+      candidate_id: claims_conditional_joint
+      reference_id: claims_icsa_only
+      arm: add_one
+      response: continued_claims_innovation
+    - id: claims_conditional_joint__vs__claims_ccsa_conditional_only
+      candidate_id: claims_conditional_joint
+      reference_id: claims_ccsa_conditional_only
+      arm: add_one
+      response: initial_claims_innovation
+    - id: claims_independent__vs__claims_icsa_only
+      candidate_id: claims_independent
+      reference_id: claims_icsa_only
+      arm: independent_add_one
+      response: continued_claims_innovation
+    - id: claims_conditional_joint__vs__claims_independent
+      candidate_id: claims_conditional_joint
+      reference_id: claims_independent
+      arm: dependence_treatment
+
+  combined:
+    - id: all_revised_candidate__vs__student_t_7_combined
+      candidate_id: all_revised_candidate
+      reference_id: student_t_7_combined
+      arm: developmental_combined_vs_selected_baseline
+    - id: all_revised_candidate__vs__partial_only
+      candidate_id: all_revised_candidate
+      reference_id: partial_only
+      arm: developmental_combined_vs_major_benchmark
+
+evaluation:
+  primary_checkpoint: before_any_defining_release
+  initialization_burn_in_months: 4
+  information_stage_checkpoints:
+    - before_any_defining_release
+    - after_employment_situation
+    - after_midmonth_defining_releases
+    - strict_pre_final_score_day
+  metrics:
+    primary:
+      quadrant_cross_entropy_to_exact_score_map: lower
+    confirmatory:
+      quadrant_brier_distance_to_exact_score_map: lower
+    secondary:
+      score_center_negative_log_predictive_density: lower
+    descriptive:
+      hard_quadrant_correct: higher
+  paired_samples:
+    - full_common_calendar
+  subperiods:
+    - full_sample
+    - excluding_2020_03_through_2020_05
+    - through_2022_12
+    - from_2023_01
+  subperiod_interpretation:
+    from_2023_01: stability_diagnostic_not_untouched_holdout
+  paired_block_bootstrap:
+    random_seed: 20260722
+    replications: 5000
+    resampling: segment_aware_circular
+    block_length_months: 12
+    confidence_level: 0.95
+    excluded_interval_policy: independently_resample_contiguous_calendar_segments
+  multiplicity:
+    method: holm
+    apply_separately_by_metric_and_family: true
+    families:
+      price:
+        - price_import__vs__structural_reduced_input
+        - price_import__vs__structural_reduced_no_price
+        - structural_reduced_input__vs__structural_reduced_no_price
+      consumer:
+        - consumer_real_only__vs__consumer_none
+        - consumer_implicit_only__vs__consumer_none
+        - consumer_vehicle_only__vs__consumer_none
+        - consumer_without_real__vs__consumer_revised_full
+        - consumer_without_implicit__vs__consumer_revised_full
+        - consumer_real_implicit_joint_only__vs__consumer_revised_full
+        - consumer_revised_full__vs__consumer_legacy
+      business:
+        - business_activity_only__vs__business_none
+        - business_pipeline_only__vs__business_none
+        - business_pipeline_only__vs__business_revised_joint
+        - business_activity_only__vs__business_revised_joint
+        - business_revised_joint__vs__business_legacy
+      claims:
+        - claims_icsa_only__vs__claims_none
+        - claims_ccsa_conditional_only__vs__claims_none
+        - claims_conditional_joint__vs__claims_icsa_only
+        - claims_conditional_joint__vs__claims_ccsa_conditional_only
+        - claims_independent__vs__claims_icsa_only
+        - claims_conditional_joint__vs__claims_independent
+    combined_comparisons: descriptive_no_multiplicity_claim
+
+promotion_rules:
+  structural_exclusions:
+    decision: fixed
+  inflation_import_prices:
+    provisional_replace_input_costs_if:
+      - direct_swap_mean_cross_entropy_improves
+      - direct_swap_mean_brier_improves
+      - no_material_harm_at_later_checkpoints
+    otherwise: use_no_price_block_not_legacy_input_costs
+  consumer_responses:
+    retain_if:
+      - nonnegative_cross_entropy_benefit_in_add_one_and_leave_one_out
+      - nonnegative_brier_benefit_in_add_one_and_leave_one_out
+    score_center_nlpd_role: secondary_diagnostic
+  business_responses:
+    retain_if:
+      - nonnegative_cross_entropy_benefit_in_add_one_and_leave_one_out
+      - nonnegative_brier_benefit_in_add_one_and_leave_one_out
+    score_center_nlpd_role: secondary_diagnostic
+  weekly_claims:
+    conditional_model_replaces_icsa_only_if:
+      - improves_cross_entropy_and_brier_vs_icsa_only
+      - no_worse_cross_entropy_and_brier_than_independent_claims
+  statistical_confidence:
+    strong_support: >-
+      holm_adjusted_p_value_below_0.05_and_unadjusted_percentile_interval_excludes_zero
+    otherwise: provisional_directional_evidence
+  final_candidate: >-
+    The predeclared all-revised candidate is a development sensitivity. Its
+    same-sample result cannot be described as an unbiased validation of an
+    adaptively selected production baseline.
+
+invariance:
+  frozen_variants:
+    - transition_only
+    - partial_only
+    - student_t_7_combined
+  compare:
+    - evaluation_rows
+    - event_update_audit_for_student_t_7_combined
+    - partial_defining_audit
+    - exact_score_audit
+    - latest_marginals
+
+outputs:
+  processed_dir: data/processed/m02_soft_composite/feature_revision
+  published_dir: results/published/m02_soft_composite/feature_revision
+  manifest: data/manifests/m02_feature_revision.json
+  revised_events: consolidated_candidate_event_universe.csv
+  claims_pairing_audit: claims_pairing_audit.csv
+  business_feature_audit: business_feature_audit.csv
+  profile_coverage: profile_coverage.csv
+  evaluation_rows: evaluation_rows.csv
+  evaluation_summary: evaluation_summary.csv
+  evaluation_subperiod_summary: evaluation_subperiod_summary.csv
+  paired_comparisons: paired_comparisons.csv
+  paired_block_bootstrap: paired_block_bootstrap.csv
+  feature_attribution_summary: feature_attribution_summary.csv
+  event_update_audit: event_update_audit.csv.gz
+  emission_fit_audit: emission_fit_audit.csv
+  event_weight_audit: event_weight_audit.csv.gz
+  partial_defining_audit: partial_defining_audit.csv.gz
+  exact_score_audit: exact_score_audit.csv
+  transition_fit_audit: transition_fit_audit.csv
+  latest_marginals: latest_marginals.csv
+  model_registry: model_registry.csv
+  baseline_invariance: baseline_invariance.csv
+  public_evaluation_summary: evaluation_summary.csv
+  public_evaluation_subperiod_summary: evaluation_subperiod_summary.csv
+  public_paired_comparisons: paired_comparisons.csv
+  public_paired_block_bootstrap: paired_block_bootstrap.csv
+  public_feature_attribution_summary: feature_attribution_summary.csv
+  public_claims_pairing_audit: claims_pairing_audit.csv
+  public_business_feature_audit: business_feature_audit.csv
+  public_profile_coverage: profile_coverage.csv
+  public_latest_marginals: latest_marginals.csv
+  public_model_registry: model_registry.csv
+  public_baseline_invariance: baseline_invariance.csv
+  public_method_summary: method_summary.json

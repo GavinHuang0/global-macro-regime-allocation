@@ -1,27 +1,118 @@
 # Global Macro Regime Detection and Allocation
 
-## Model 02: soft composite and robust event-driven inference
+## Model 02: current inference publication
 
 Model 02 is a deliberately modest revision of Model 01, kept in the separate
 `m02_soft_composite` configuration, package, data, manifest, documentation, and
-result namespaces. Its score, Gaussian quadrant map, and standalone VAR(1)
-transition artifacts are published. The release-evidence data and rolling
-Bayesian-filter implementation are complete, and the causal replay is published
-through 20 July 2026. The final inference-selection stage adds partial
-score-defining releases, Student-$t$ block emissions, robust VAR estimation,
-and retail-demand alternatives while preserving the earlier Gaussian replay as
-a frozen upstream artifact. Based on that comparison,
-`student_t_7_combined` is the current Model 02 inference baseline.
-`transition_only` and `partial_only`, both using OLS VAR(1) dynamics, are the two
-major benchmarks; every other enabled variant remains a named sensitivity.
-Model 02 allocation and backtesting have not yet been implemented. Model 01
-remains frozen below.
+result namespaces. Its current causal replay is published through 20 July 2026.
+The declared inference baseline is `student_t_7_reduced_core`.
 
-### Latest Model 02 existing-block attribution
+| Publication role | Model ID | Evidence and purpose |
+|---|---|---|
+| Current baseline | `student_t_7_reduced_core` | ICSA weekly labor stress, joint real-retail/implicit-price consumer evidence, and joint capital-goods activity/pipeline evidence |
+| Major benchmark | `transition_only` | OLS VAR(1) transition dynamics only |
+| Major benchmark | `partial_only` | Transition dynamics plus partial defining releases |
+| Frozen predecessor benchmark | `student_t_7_combined` | The baseline selected by the earlier inference-sensitivity stage, preserved unchanged |
+| Current sensitivity | `student_t_7_reduced_core_with_expectations` | Current baseline plus inflation expectations |
+
+The baseline retains a four-month joint Gaussian score state, OLS VAR(1)
+dynamics, sequential partial defining-release updates, exact end-of-day
+conditioning when a monthly composite is complete, and fixed-$\nu=7$
+Student-$t$ non-defining emissions. The [promotion report](docs/models/m02_soft_composite/baseline_promotion.md)
+contains the full model hierarchy, evidence definitions, evaluation, latest
+probabilities, limitations, and artifact contract.
+
+At the primary `before_any_defining_release` checkpoint, 183 common months are
+scored. The current baseline means are:
+
+| NLPD | Quadrant cross-entropy | Quadrant Brier distance | Hard-quadrant accuracy |
+|---:|---:|---:|---:|
+| 26.854150 | 1.535693 | 0.150466 | 0.377049 |
+
+Candidate-minus-reference deltas versus `transition_only` are $-0.067415$ NLPD,
+$+0.000418$ cross-entropy, $+0.000860$ Brier distance, and $+0.016393$
+accuracy. Against `partial_only`, they are $-0.066712$, $-0.001260$,
+$-0.000051$, and $+0.016393$; against the frozen predecessor they are
+$-0.000915$, $-0.000240$, $-0.000118$, and $+0.005464$. Lower is better for
+the three losses and higher is better for accuracy. Every corresponding
+12-month moving-block bootstrap interval includes zero, so none of these
+differences supports a statistical-significance claim.
+
+The graph was selected adaptively after inspecting the same causal history.
+There is no untouched holdout, and this operational promotion is not a
+confirmatory out-of-sample result. Inflation expectations remains a sensitivity:
+only three updates were estimable and its measured effects are negligible. The
+[current sensitivity catalog](results/published/m02_soft_composite/current/sensitivity_catalog.csv)
+retains that variant, 23 earlier feature variants, and links all four historical
+sensitivity namespaces.
+
+As of 20 July 2026, the current baseline reports:
+
+| Reference month | Growth up / inflation up | Growth down / inflation up | Growth up / inflation down | Growth down / inflation down |
+|---|---:|---:|---:|---:|
+| June 2026 | 0.177380 | 0.161240 | 0.354790 | 0.306591 |
+| July 2026 | 0.159020 | 0.306653 | 0.266124 | 0.268204 |
+
+The promoted baseline now has a weekly allocation and backtest in
+[`portfolio_allocation.md`](docs/models/m02_soft_composite/portfolio_allocation.md)
+and
+[`portfolio_backtest_results.md`](docs/models/m02_soft_composite/portfolio_backtest_results.md).
+The formal sample contains 445 complete weeks from January 2018 through the
+week of 6 July 2026. The posterior optimizer returned 108.79% in total, or
+8.98% annualized, versus 122.26% and 9.78% for the otherwise identical
+pooled-mean ablation. Their posterior-minus-pooled annualized mean difference
+is -0.761%, with a 95% 26-week block-bootstrap interval of
+[-2.321%, 0.144%]. The interval includes zero; the weekly result does not
+establish a reliable incremental posterior edge. Model 01 remains frozen
+below.
+
+### Historical Model 02 reduced-core feature revision
+
+A locked 26-variant, 23-comparison replay tested the first reduced-core
+revision without changing the then-selected `student_t_7_combined`. Every experimental arm
+removes the legacy JOLTS and aggregate-housing likelihoods while preserving
+their source data. The replay also tests import prices against both legacy
+input costs and no price block; replaces nominal consumer responses with real
+retail activity, an implicit retail-price coordinate, and vehicle units;
+rotates capital-goods data into shipments activity and the causally
+standardized forward-pipeline feature
+
+$$
+D_m=\operatorname{zscore}_{<t_e}
+\left[100\Delta\log\left(\frac{\text{orders}_m}{\text{shipments}_m}\right)\right];
+$$
+
+and implements the reference-month-safe claims factorization
+
+$$
+p(I_t,C_t\mid\boldsymbol Z)
+=p(I_t\mid G_{q_I(t)})
+ p(C_t\mid I_t,G_{q_C(t)}).
+$$
+
+All 216 frozen-control semantic invariance checks pass, and no predeclared
+feature contrast survives Holm correction. At the primary checkpoint, the
+all-revised development candidate improves mean quadrant cross-entropy by
+0.002669, Brier distance by 0.001012, continuous-score NLPD by 0.01549, and
+hard-quadrant accuracy by 2.73 percentage points relative to the then-selected
+baseline, but every relevant bootstrap interval crosses zero.
+
+Applying the locked component rules gives a narrower recommendation: retain
+real retail activity plus its implicit-price coordinate; omit vehicle units;
+retain shipments activity plus the orders/shipments pipeline; use no price
+block because import prices show mixed later-checkpoint effects; and retain
+ICSA alone until a dependence-aware CCSA equation can match the independently
+modeled pair. The import and both CCSA designs remain named sensitivities. This
+is same-history feature-selection evidence, not an untouched validation, so
+that stage did not change its selected baseline. Exact equations, coverage, paired tests,
+and limitations are in
+[`feature_revision.md`](docs/models/m02_soft_composite/feature_revision.md).
+
+### Historical Model 02 existing-block attribution
 
 The seven non-defining observation models in `student_t_7_combined` have now
 been tested in two causal arms: each block added alone to `partial_only`, and
-each block removed alone from the selected baseline. All 216 frozen-control
+each block removed alone from the then-selected baseline. All 216 frozen-control
 invariance checks pass. No full-sample atomic contrast survives Holm correction
 across the fourteen add/remove tests.
 
@@ -44,14 +135,14 @@ the lagged JOLTS likelihood and intermediate-materials input costs; park
 inflation expectations pending usable real-time history; and exclude aggregate
 housing. Separate locked arms should test single-family housing, joint
 initial/continued claims, an import-price replacement, and response-level
-consumer alternatives. The selected baseline is not changed on the same sample
+consumer alternatives. That stage did not change its baseline on the same sample
 used for feature selection. Exact mathematics, coverage, bootstrap results,
 direct replacement tests, and recommendations are in
 [`existing_block_attribution.md`](docs/models/m02_soft_composite/existing_block_attribution.md).
 
 ### Prior Model 02 evidence-block experiment
 
-Six evidence changes were tested without altering the selected inference
+Six evidence changes were tested without altering the then-selected inference
 architecture: regional manufacturing surveys, continued claims, cleaner
 consumer quantities, single-family housing, import prices, and a
 capital-goods backlog ratio. The frozen `student_t_7_combined` path passed 64
@@ -61,7 +152,7 @@ latest marginals.
 Continued claims produced the best isolated mean change at the primary
 pre-defining-release checkpoint: NLPD $-0.0170$, quadrant cross-entropy
 $-0.00253$, Brier distance $-0.000934$, and hard-quadrant accuracy
-$+2.19$ percentage points relative to the baseline. Its 12-month block-bootstrap
+$+2.19$ percentage points relative to the then-selected baseline. Its 12-month block-bootstrap
 intervals still cross zero, however, and none of the six priorities survives
 Holm correction. Combining all six worsens quadrant cross-entropy by $0.0516$
 and Brier distance by $0.0243$; both exploratory 95% intervals are strictly
@@ -70,7 +161,7 @@ above zero.
 The combined-candidate residual diagnostic also rejects the independent-block
 approximation broadly: 140 of 966 valid cross-model tests and 35 of 57 valid
 serial tests reject after Benjamini--Hochberg adjustment. Accordingly, no
-candidate is promoted and `student_t_7_combined` remains the Model 02 baseline.
+candidate was promoted, and `student_t_7_combined` remained the baseline at that stage.
 The exact feature definitions, causal data windows, bootstrap results, and
 dependence tests are documented in
 [`evidence_block_experiments.md`](docs/models/m02_soft_composite/evidence_block_experiments.md).
@@ -133,7 +224,7 @@ composite, exact score, VAR training pair, or evaluation target is fabricated.
 One diagnostic remains deliberately unresolved: the April 2020 payroll shock
 has an expanding z-score of $-103.0223$ and produces a
 growth score of $-51.8317$. The score is correct under the unbounded classical
-standardization specified here. The selected inference baseline preserves this rule,
+standardization specified here. The current inference baseline preserves this rule,
 while a later sensitivity should address crisis-outlier robustness.
 
 The observed score $\boldsymbol s_m=(G_m,I_m)^\top$ is mapped through the
@@ -229,8 +320,11 @@ $$
 $$
 
 It never uses
-$\widehat{\boldsymbol A}_m\boldsymbol\Omega_{\mathrm{map},m}
-\widehat{\boldsymbol A}_m^\top$.
+
+$$
+\widehat{\boldsymbol A}_m\boldsymbol\Omega_{\mathrm{map},m}
+\widehat{\boldsymbol A}_m^\top.
+$$
 
 The VAR is refitted at every eligible source cutoff after a 60-pair warm-up,
 using only exact consecutive monthly pairs then available. Coefficients may use
@@ -413,7 +507,7 @@ section reports the baseline-selection decision and the remaining robust-VAR
 and heavy-tailed-emission sensitivities;
 the defining-score standardization itself remains unchanged.
 
-### Partial defining releases, baseline selection, and robustness sensitivities
+### Historical partial-release baseline-selection and robustness stage
 
 The selection replay adds information from a score-defining component as
 soon as its first release arrives. If $\boldsymbol c_m$ is the eight-component
@@ -458,8 +552,8 @@ $$
 $$
 
 The event weight, its unfloored value, and its distance are audited. Same-day
-weights use a common pre-release-day state. The selected inference baseline
-fixes $\nu_b=7$; the selected-tail sensitivity chooses from
+weights use a common pre-release-day state. The predecessor baseline selected
+by this historical stage fixes $\nu_b=7$; the selected-tail sensitivity chooses from
 $\{4,5,7,10,\infty\}$ using calendar-year rolling origins, and a live year may
 use only completed validation folds from earlier years.
 
@@ -474,9 +568,9 @@ stress transform.
 The primary checkpoint is the start of the final score's release day. After a
 four-month burn-in, 183 months from January 2011 through May 2026 are scored:
 
-| Role | Variant | Mean NLPD | Growth RMSE | Inflation RMSE | Hard accuracy | Cross-entropy |
+| Stage role | Variant | Mean NLPD | Growth RMSE | Inflation RMSE | Hard accuracy | Cross-entropy |
 |---|---|---:|---:|---:|---:|---:|
-| Baseline | Fixed-$\nu=7$ combined | 5.721 | 1.411 | 0.495 | 76.0% | 1.302 |
+| Stage-selected baseline | Fixed-$\nu=7$ combined | 5.721 | 1.411 | 0.495 | 76.0% | 1.302 |
 | Major benchmark | Partial only, OLS VAR(1) | 5.836 | 1.447 | 0.487 | **82.5%** | 1.300 |
 | Major benchmark | Transition only, OLS VAR(1) | 26.919 | 4.295 | 0.738 | 35.0% | 1.537 |
 | Sensitivity | Selected-tail combined | **5.720** | 1.423 | 0.495 | 73.2% | 1.303 |
@@ -490,7 +584,7 @@ four-month burn-in, 183 months from January 2011 through May 2026 are scored:
 Most of the late-month gain is partial target revelation. Adding selected-tail
 non-defining evidence to partial releases lowers mean NLPD by only about 0.116
 and worsens several quadrant metrics. No variant dominates every metric.
-The fixed-$\nu=7$ combined model is selected as the baseline because it retains
+The fixed-$\nu=7$ combined model was selected as that stage's baseline because it retains
 the full event-driven architecture, has nearly the best mean NLPD, and avoids
 the additional annual tail-selection layer. This is a declared model-governance
 choice, not a claim that it wins every reported metric.
@@ -501,12 +595,12 @@ mean is 11.285. This reversal is a diagnostic, not permission to discard the
 shock: subperiod choice is post hoc, and the full sample contains only one
 pandemic. Neither ranking establishes a stable economic edge.
 
-After processing the six June defining components, the fixed-$\nu=7$/OLS-VAR
-baseline's 20 July readout for July 2026 has score means
+After processing the six June defining components, the stage-selected
+fixed-$\nu=7$/OLS-VAR predecessor's 20 July readout for July 2026 has score means
 $(-0.5097,0.0937)$ and quadrant probabilities 19.95%
 growth-up/inflation-up, 33.84% growth-down/inflation-up, 24.36%
 growth-up/inflation-down, and 21.84% growth-down/inflation-down. This is the
-selected Model 02 inference baseline readout; the benchmark and sensitivity
+historical stage-selected readout; the benchmark and sensitivity
 readouts remain published so that its model uncertainty is visible.
 
 The full baseline, benchmark, and sensitivity specification is in
@@ -572,7 +666,7 @@ small and statistically inconclusive.
 | ID | Architecture | Status |
 |---|---|---|
 | `m01_deterministic_composite` | Deterministic monthly target, event-driven Bayesian filter, posterior allocation | **Frozen** |
-| `m02_soft_composite` | Unsmoothed scores, soft quadrant map, partial defining updates, fixed-$\nu=7$ Student-$t$ evidence baseline, OLS/robust VAR sensitivities | **Inference baseline selected and published; allocation pending** |
+| `m02_soft_composite` | Unsmoothed scores, soft quadrant map, four-month Gaussian joint state, partial defining updates, reduced-core fixed-$\nu=7$ Student-$t$ evidence, OLS VAR(1), weekly posterior allocation | **`student_t_7_reduced_core` current; weekly allocation published** |
 | `m03_switching_state_space` | Regime-switching continuous state-space model | Planned |
 
 ## End-to-end architecture
@@ -1132,6 +1226,12 @@ Machine-readable outputs:
   [weights](results/published/m01_regime_allocation_backtest/monthly_weights.csv),
   [allocation sensitivities](results/published/m01_regime_allocation_backtest/sensitivity_metrics.csv),
   and [paired uncertainty](results/published/m01_regime_allocation_backtest/comparison_uncertainty.csv).
+- Model 02 [latest weekly allocation](results/published/m02_regime_allocation_backtest/latest_allocation.json),
+  [performance](results/published/m02_regime_allocation_backtest/performance_summary.csv),
+  [weekly returns](results/published/m02_regime_allocation_backtest/weekly_returns.csv),
+  [weekly weights](results/published/m02_regime_allocation_backtest/weekly_weights.csv),
+  [allocation sensitivities](results/published/m02_regime_allocation_backtest/sensitivity_metrics.csv),
+  and [paired uncertainty](results/published/m02_regime_allocation_backtest/comparison_uncertainty.csv).
 
 ## 9. Leakage and integrity controls
 
@@ -1223,6 +1323,8 @@ python scripts/download_etf_history.py `
   --manifest data/manifests/us_cross_asset_etf_universe_v1.json
 
 python -m regime_allocation.cli.build_m01_backtest
+python -m regime_allocation.cli.build_m02_current_baseline
+python -m regime_allocation.cli.build_m02_backtest
 python -m pytest
 ```
 

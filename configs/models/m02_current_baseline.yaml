@@ -1,0 +1,320 @@
+schema_version: 1
+model_id: m02_soft_composite
+stage_id: current_baseline
+release_id: m02_current_baseline_v1
+description: >-
+  Immutable publication contract for the declared current Model 02 inference
+  baseline. The stage promotes the reduced-core evidence graph selected after
+  the feature-revision experiments without modifying any historical
+  configuration, manifest, or result namespace. It retains fixed seven-degree-
+  of-freedom Student-t emissions, OLS VAR(1) dynamics, sequential partial
+  score-defining updates, and exact completed-score conditioning.
+
+model_selection:
+  baseline: student_t_7_reduced_core
+  engine_major_benchmarks: [transition_only, partial_only]
+  publication_benchmarks:
+    - transition_only
+    - partial_only
+    - student_t_7_combined
+  frozen_controls:
+    - transition_only
+    - partial_only
+    - student_t_7_combined
+  predecessor_baseline: student_t_7_combined
+  sensitivities: [student_t_7_reduced_core_with_expectations]
+  selection_status: declared_current_baseline_after_same_history_feature_revision
+  rationale: >-
+    The reduced core keeps the three evidence models supported by the locked
+    component experiments: initial claims, the joint real-retail/implicit-price
+    consumer response, and the joint capital-goods activity/pipeline response.
+    It excludes JOLTS, aggregate housing, both legacy input costs and import
+    prices, vehicle sales, and continued claims. Inflation expectations is
+    retained only as a named sensitivity because the historical real-time feed
+    produced too few applied updates to establish its incremental value.
+
+same_history_disclosure:
+  untouched_holdout: false
+  adaptive_feature_selection: true
+  statement: >-
+    The evidence graph was chosen after inspecting attribution and feature-
+    revision results on the same causal history used for the comparisons in
+    this stage. Declaring student_t_7_reduced_core as the current baseline is a
+    model-governance decision for prospective use, not an unbiased validation
+    result and not evidence that it will outperform the frozen predecessor or
+    either ablation benchmark out of sample.
+  required_interpretation: >-
+    All replay comparisons are descriptive same-history diagnostics. A future
+    untouched period or separately preregistered rolling evaluation is required
+    before making a confirmatory performance claim.
+
+immutability:
+  historical_configs: read_only
+  historical_manifests: read_only
+  historical_results: read_only
+  current_stage_policy: write_new_namespace_and_manifest_only
+
+sources:
+  base_filter_config: configs/models/m02_event_driven_bayesian_filter.yaml
+  frozen_sensitivity_config: configs/models/m02_inference_sensitivities.yaml
+  feature_revision_config: configs/models/m02_feature_revision.yaml
+  feature_revision_manifest: data/manifests/m02_feature_revision.json
+  score_features: data/processed/m02_soft_composite/composite_scores.csv
+  defining_components: >-
+    data/processed/m02_soft_composite/first_release_components_long.csv
+  mapping_history: >-
+    results/published/m02_soft_composite/probability_map/quadrant_probabilities.csv
+  consolidated_event_universe: >-
+    data/processed/m02_soft_composite/feature_revision/consolidated_candidate_event_universe.csv
+  frozen_evaluation_rows: >-
+    data/processed/m02_soft_composite/feature_revision/evaluation_rows.csv
+  frozen_event_update_audit: >-
+    data/processed/m02_soft_composite/feature_revision/event_update_audit.csv.gz
+  frozen_partial_defining_audit: >-
+    data/processed/m02_soft_composite/feature_revision/partial_defining_audit.csv.gz
+  frozen_exact_score_audit: >-
+    data/processed/m02_soft_composite/feature_revision/exact_score_audit.csv
+  frozen_latest_marginals: >-
+    data/processed/m02_soft_composite/feature_revision/latest_marginals.csv
+  feature_revision_registry: >-
+    results/published/m02_soft_composite/feature_revision/model_registry.csv
+  feature_revision_summary: >-
+    results/published/m02_soft_composite/feature_revision/feature_attribution_summary.csv
+
+source_integrity:
+  feature_revision_config_sha256: >-
+    dbc240bd14d92c110e8c9c34fdc45b660106e242a70005d45027a1e5aa390757
+  feature_revision_manifest_sha256: >-
+    f8b4bcb2a826cf4c1ab8668a8b329ed1e384790f18deab42ef0d382511ea585b
+  consolidated_event_universe_sha256: >-
+    5c8647c5fd5382b8b2105afff07f0ac8164bb986768152f47b274ff179e0e5ea
+  frozen_evaluation_rows_sha256: >-
+    f7278f29a9ac2af13b1f302c9d614dc4cf7098c4fc77b886897a3110b88c6779
+  frozen_event_update_audit_sha256: >-
+    b9cf87c9e6a69ed012ad0afef966c8eba7b5696946c15ad55035990e41b0646f
+  frozen_partial_defining_audit_sha256: >-
+    b35538fb3b3aa5791c1e7f26084d1a3778cb5613b598edcc9762e839464dd850
+  frozen_exact_score_audit_sha256: >-
+    6ec7b98b4810a988e3c6f571f1e5ae5050c79c7bc3b825326b7201cc1c16c950
+  frozen_latest_marginals_sha256: >-
+    4955d61446566f6402f2f0d8eb73c9cd559b683eb705db3970acdf2351851988
+  feature_revision_registry_sha256: >-
+    232651cc3dc775d5daf5c4fb0c697a563b299c0470f30555e5f10ffde22c0793
+  feature_revision_summary_sha256: >-
+    e8960fc6f3d7f7d78bec88ccd0a6e0429748b7a0423b32088f52c8bec03c7a17
+
+experiment_contract:
+  non_defining_emission: student_t
+  degrees_of_freedom: 7.0
+  transition_estimator: ols_var1
+  partial_defining_releases: true
+  evidence_training_window: expanding
+  evidence_training_cutoff: strictly_before_scored_release
+  same_timestamp_validation: atomic_holdout
+  covariance_eigenvalue_floor: 1.0e-8
+  frozen_control_policy: semantic_artifact_invariance_with_float_tolerance
+  completed_score_policy: exact_end_of_day_observation
+
+observation_model_sources:
+  weekly_labor_stress:
+    source_config: configs/models/m02_event_driven_bayesian_filter.yaml
+    source_section: observation_models.weekly_labor_stress
+    source_events: consolidated_event_universe
+  consumer_real_implicit_joint:
+    source_config: configs/models/m02_feature_revision.yaml
+    source_section: candidate_observation_models.consumer_real_implicit_joint
+    source_events: consolidated_event_universe
+  business_activity_pipeline_joint:
+    source_config: configs/models/m02_feature_revision.yaml
+    source_section: candidate_observation_models.business_activity_pipeline_joint
+    source_events: consolidated_event_universe
+  inflation_expectations:
+    source_config: configs/models/m02_event_driven_bayesian_filter.yaml
+    source_section: observation_models.inflation_expectations
+    source_events: consolidated_event_universe
+
+evidence_sets:
+  reduced_core:
+    observation_models:
+      - weekly_labor_stress
+      - consumer_real_implicit_joint
+      - business_activity_pipeline_joint
+  reduced_core_with_expectations:
+    observation_models:
+      - weekly_labor_stress
+      - consumer_real_implicit_joint
+      - business_activity_pipeline_joint
+      - inflation_expectations
+  legacy_baseline:
+    frozen: true
+    source_variant: student_t_7_combined
+    observation_models:
+      - weekly_labor_stress
+      - monthly_labor_demand
+      - consumer_demand
+      - housing_activity
+      - business_investment
+      - inflation_expectations
+      - inflation_input_costs
+
+variants:
+  - id: transition_only
+    model_role: major_benchmark
+    publication_role: major_benchmark
+    frozen_control: true
+    non_defining_evidence: false
+    partial_defining_releases: false
+    emission: gaussian
+    var: ols
+    evidence_set: legacy_baseline
+  - id: partial_only
+    model_role: major_benchmark
+    publication_role: major_benchmark
+    frozen_control: true
+    non_defining_evidence: false
+    partial_defining_releases: true
+    emission: gaussian
+    var: ols
+    evidence_set: legacy_baseline
+  - id: student_t_7_combined
+    model_role: sensitivity
+    publication_role: major_benchmark
+    frozen_control: true
+    predecessor_baseline: true
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    evidence_set: legacy_baseline
+  - id: student_t_7_reduced_core
+    model_role: baseline
+    publication_role: baseline
+    frozen_control: false
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    evidence_set: reduced_core
+  - id: student_t_7_reduced_core_with_expectations
+    model_role: sensitivity
+    publication_role: sensitivity
+    frozen_control: false
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    evidence_set: reduced_core_with_expectations
+
+variant_defaults:
+  model_role: sensitivity
+  publication_role: sensitivity
+  frozen_control: false
+  non_defining_evidence: true
+  partial_defining_releases: true
+  emission: student_t_7
+  var: ols
+
+comparisons:
+  - id: student_t_7_reduced_core__vs__transition_only
+    candidate_id: student_t_7_reduced_core
+    reference_id: transition_only
+    block_id: complete_reduced_core
+    experiment_arm: current_baseline_vs_transition_only
+    primary_atomic: false
+    family: baseline_declaration
+  - id: student_t_7_reduced_core__vs__partial_only
+    candidate_id: student_t_7_reduced_core
+    reference_id: partial_only
+    block_id: non_defining_reduced_core
+    experiment_arm: current_baseline_vs_partial_only
+    primary_atomic: false
+    family: baseline_declaration
+  - id: student_t_7_reduced_core__vs__student_t_7_combined
+    candidate_id: student_t_7_reduced_core
+    reference_id: student_t_7_combined
+    block_id: evidence_graph_revision
+    experiment_arm: current_baseline_vs_frozen_predecessor
+    primary_atomic: false
+    family: baseline_declaration
+  - id: student_t_7_reduced_core_with_expectations__vs__student_t_7_reduced_core
+    candidate_id: student_t_7_reduced_core_with_expectations
+    reference_id: student_t_7_reduced_core
+    block_id: inflation_expectations
+    experiment_arm: add_one
+    primary_atomic: true
+    family: expectations_sensitivity
+
+evaluation:
+  primary_checkpoint: before_any_defining_release
+  initialization_burn_in_months: 4
+  information_stage_checkpoints:
+    - before_any_defining_release
+    - after_employment_situation
+    - after_midmonth_defining_releases
+    - strict_pre_final_score_day
+  metrics:
+    score_center_negative_log_predictive_density: lower
+    quadrant_cross_entropy_to_exact_score_map: lower
+    quadrant_brier_distance_to_exact_score_map: lower
+    hard_quadrant_correct: higher
+  subperiods:
+    - full_sample
+    - excluding_2020_03_through_2020_05
+    - through_2022_12
+    - from_2023_01
+  subperiod_interpretation:
+    from_2023_01: stability_diagnostic_not_untouched_holdout
+  paired_block_bootstrap:
+    random_seed: 20260722
+    replications: 5000
+    resampling: segment_aware_circular
+    block_length_months: 12
+    confidence_level: 0.95
+    samples:
+      - full_sample
+      - excluding_2020_03_through_2020_05
+    holm_families: {}
+
+archived_sensitivity_namespaces:
+  inference_sensitivities:
+    config: configs/models/m02_inference_sensitivities.yaml
+    manifest: data/manifests/m02_inference_sensitivities.json
+    published_dir: >-
+      results/published/m02_soft_composite/inference_sensitivities
+  evidence_block_inference:
+    config: configs/models/m02_evidence_block_inference.yaml
+    manifest: data/manifests/m02_evidence_block_inference.json
+    published_dir: >-
+      results/published/m02_soft_composite/evidence_block_inference
+  existing_block_attribution:
+    config: configs/models/m02_existing_block_attribution.yaml
+    manifest: data/manifests/m02_existing_block_attribution.json
+    published_dir: >-
+      results/published/m02_soft_composite/existing_block_attribution
+  feature_revision:
+    config: configs/models/m02_feature_revision.yaml
+    manifest: data/manifests/m02_feature_revision.json
+    published_dir: results/published/m02_soft_composite/feature_revision
+
+outputs:
+  processed_dir: data/processed/m02_soft_composite/current_baseline
+  published_dir: results/published/m02_soft_composite/current
+  manifest: data/manifests/m02_current_baseline.json
+  evaluation_rows: evaluation_rows.csv
+  evaluation_summary: evaluation_summary.csv
+  evaluation_subperiod_summary: evaluation_subperiod_summary.csv
+  paired_comparisons: paired_comparisons.csv
+  paired_block_bootstrap: paired_block_bootstrap.csv
+  event_update_audit: event_update_audit.csv.gz
+  emission_fit_audit: emission_fit_audit.csv
+  partial_defining_audit: partial_defining_audit.csv.gz
+  exact_score_audit: exact_score_audit.csv
+  transition_fit_audit: transition_fit_audit.csv
+  latest_marginals: latest_marginals.csv
+  baseline_invariance: baseline_invariance.csv
+  engine_registry: engine_registry.csv
+  current_registry: current_registry.csv
+  sensitivity_catalog: sensitivity_catalog.csv
+  baseline_latest_marginals: baseline_latest_marginals.csv
+  benchmark_latest_marginals: benchmark_latest_marginals.csv
+  method_summary: method_summary.json

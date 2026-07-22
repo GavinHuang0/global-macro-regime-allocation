@@ -1,17 +1,21 @@
 """Public backtest accounting and evaluation interface.
 
-This package re-exports the functions used to turn monthly target weights and
-adjusted ETF prices into causal holding-period returns, transaction-cost-aware
-NAV paths, performance summaries, and paired bootstrap comparisons.  Execution
-timing is defined in :mod:`regime_allocation.backtest.engine`; callers should
-not reinterpret a target as tradable before its recorded decision cutoff.
+This package re-exports the functions used to turn monthly or weekly target
+weights and adjusted ETF prices into causal holding-period returns,
+transaction-cost-aware NAV paths, performance summaries, and paired bootstrap
+comparisons. Execution timing is defined in
+:mod:`regime_allocation.backtest.engine`; callers should not reinterpret a
+target as tradable before its recorded decision cutoff.
 """
 
 from regime_allocation.backtest.engine import (
     build_daily_nav,
     build_open_to_open_holding_returns,
+    build_weekly_daily_nav,
+    build_weekly_open_to_open_holding_returns,
     drift_weights,
     simulate_monthly_targets,
+    simulate_weekly_targets,
 )
 from regime_allocation.backtest.metrics import (
     compute_performance_metrics,
@@ -21,8 +25,11 @@ from regime_allocation.backtest.metrics import (
 __all__ = [
     "build_daily_nav",
     "build_open_to_open_holding_returns",
+    "build_weekly_daily_nav",
+    "build_weekly_open_to_open_holding_returns",
     "compute_performance_metrics",
     "drift_weights",
     "paired_circular_block_bootstrap",
     "simulate_monthly_targets",
+    "simulate_weekly_targets",
 ]
