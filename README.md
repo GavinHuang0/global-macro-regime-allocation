@@ -1,14 +1,17 @@
 # Global Macro Regime Detection and Allocation
 
-## Model 02: soft composite, event-driven Gaussian model
+## Model 02: soft composite and robust event-driven inference
 
 Model 02 is a deliberately modest revision of Model 01, kept in the separate
 `m02_soft_composite` configuration, package, data, manifest, documentation, and
 result namespaces. Its score, Gaussian quadrant map, and standalone VAR(1)
 transition artifacts are published. The release-evidence data and rolling
 Bayesian-filter implementation are complete, and the causal replay is published
-through 20 July 2026. Model 02 allocation and backtesting have not yet been
-implemented. Model 01 remains frozen below.
+through 20 July 2026. A separate sensitivity stage now adds partial
+score-defining releases, Student-$t$ block emissions, robust VAR estimation,
+and retail-demand alternatives without overwriting the Gaussian baseline.
+Model 02 allocation and backtesting have not yet been implemented. Model 01
+remains frozen below.
 
 The defining component set is unchanged: four first-release growth indicators
 and four first-release inflation indicators. Model 02 makes two score changes:
@@ -46,17 +49,24 @@ $$
 All four components are required on each axis; missing data never trigger
 dynamic reweighting. No hard quadrant label is assigned.
 
-The authenticated FRED build contains a gapless 317-row reference panel from
-January 2000 through May 2026 and 249 complete score pairs. Authenticated
-first-release core PCE begins in July 2000, so January-June 2000 are retained
-but cannot have a complete eight-component score. With the 60-observation
-causal warm-up, the first complete score pair is July 2005. The latest May 2026
-scores, available on 25 June 2026, are:
+The authenticated FRED build contains a gapless 318-row component panel from
+January 2000 through June 2026 and 249 complete score pairs through May 2026.
+Authenticated first-release core PCE begins in July 2000, so January-June 2000
+are retained but cannot have a complete eight-component score. With the
+60-observation causal warm-up, the first complete score pair is July 2005. The
+latest May 2026 scores, available on 25 June 2026, are:
 
 | Score | Value |
 |---|---:|
 | Growth | 0.027394 |
 | Inflation | 0.410476 |
+
+The component feed and completed-score feed have deliberately different
+cutoffs. As of 20 July, six June components had been released: payrolls,
+unemployment, earnings, core CPI, producer prices, and industrial production.
+They update the live June score distribution on their actual July publication
+dates even though real consumption and core PCE are still missing, so no June
+composite, exact score, VAR training pair, or evaluation target is fabricated.
 
 One diagnostic remains deliberately unresolved: the April 2020 payroll shock
 has an expanding z-score of $-103.0223$ and produces a
@@ -331,7 +341,106 @@ of $\log 4\approx1.386$.
 The baseline remains intentionally Gaussian and non-robust. The April 2020
 score outlier inflates VAR process variance and can affect Gaussian emission
 fits; robust scaling, robust VAR dynamics, and heavy-tailed observation errors
-belong in named sensitivities rather than being introduced silently.
+belong in named sensitivities rather than being introduced silently. The next
+section reports the implemented robust-VAR and heavy-tailed-emission tests;
+the defining-score standardization itself remains unchanged.
+
+### Partial defining releases and robustness sensitivities
+
+The sensitivity replay adds information from a score-defining component as
+soon as its first release arrives. If $\boldsymbol c_m$ is the eight-component
+vector and $\boldsymbol Z_m=\boldsymbol W\boldsymbol c_m$ is the exact
+two-score identity, a causal Ledoit--Wolf component Gaussian supplies
+
+$$
+p\!\left(
+\boldsymbol c_{B,m}\mid
+\boldsymbol Z_m,\boldsymbol c_{A,m}
+\right)
+$$
+
+for a newly released block $B$ conditional on previously released components
+$A$. Every fit uses at least 60 complete component months whose final score
+was available strictly before the event. Sequential conditioning prevents one
+component from being counted repeatedly. The final PCE block completes both
+scores; it is skipped as a partial likelihood and the completed score is
+conditioned exactly at the end of that day.
+
+The component-event feed may therefore extend beyond the last completed-score
+month. In the 20 July snapshot, June has six released components but lacks
+real consumption and core PCE. Those observations update the uncertain June
+state and, through the joint path covariance, the July state. June remains
+ineligible for exact conditioning, transition-model training, or forecast
+evaluation until all eight components make both scores observable.
+
+Non-defining release blocks can instead use robust Student-$t$ ridge fits. For
+event innovation Mahalanobis distance $\delta_e$, observed dimension $p_e$,
+and tail parameter $\nu_b$, the adaptive weight is
+
+$$
+w_e=\frac{\nu_b+p_e}{\nu_b+\delta_e},
+$$
+
+and the Gaussian moment approximation uses effective measurement scale
+
+$$
+\boldsymbol R_e^{\mathrm{eff}}
+=
+\frac{\boldsymbol R_b}{\max(w_e,10^{-6})}.
+$$
+
+The event weight, its unfloored value, and its distance are audited. Same-day
+weights use a common pre-release-day state. The initial robust emission fixes
+$\nu_b=7$; the selected-tail variant chooses from
+$\{4,5,7,10,\infty\}$ using calendar-year rolling origins, and a live year may
+use only completed validation folds from earlier years.
+
+Huber and Student-$t$ VAR sensitivities robustly reweight monthly bivariate
+innovations but retain the same joint Gaussian score state. Retail tests either
+shrink nominal retail's inflation loading ten times as strongly as its growth
+loading or decompose nominal growth into real-retail and implicit-price growth.
+The proposed claims-stress interaction is not fitted: only one of 242 aligned
+retail dates has positive support under the predeclared two-standard-deviation
+stress transform.
+
+The primary checkpoint is the start of the final score's release day. After a
+four-month burn-in, 183 months from January 2011 through May 2026 are scored:
+
+| Variant | Mean NLPD | Growth RMSE | Inflation RMSE | Hard accuracy | Cross-entropy |
+|---|---:|---:|---:|---:|---:|
+| Selected-tail combined | **5.720** | 1.423 | 0.495 | 73.2% | 1.303 |
+| Fixed-$\nu=7$ combined | 5.721 | 1.411 | 0.495 | 76.0% | 1.302 |
+| Partial only | 5.836 | 1.447 | 0.487 | **82.5%** | 1.300 |
+| Gaussian combined | 6.270 | **1.076** | 0.557 | 78.7% | 1.301 |
+| Real-retail combined | 10.387 | 1.959 | **0.448** | 72.7% | **1.297** |
+| Huber-VAR combined | 10.450 | 1.959 | 0.479 | 73.8% | 1.301 |
+| Student-$t$-VAR combined | 11.285 | 2.014 | 0.467 | 74.3% | 1.301 |
+| Transition only | 26.919 | 4.295 | 0.738 | 35.0% | 1.537 |
+| Gaussian non-defining only | 28.065 | 3.496 | 0.880 | 33.9% | 1.571 |
+
+Most of the late-month gain is partial target revelation. Adding selected-tail
+non-defining evidence to partial releases lowers mean NLPD by only about 0.116
+and worsens several quadrant metrics. No variant dominates every metric.
+
+March--May 2020 dominate the pooled mean. Excluding only those three months,
+Student-$t$ VAR has the lowest mean NLPD at $-0.148$, whereas its full-sample
+mean is 11.285. This reversal is a diagnostic, not permission to discard the
+shock: subperiod choice is post hoc, and the full sample contains only one
+pandemic. Neither ranking establishes a stable economic edge.
+
+After processing the six June defining components, the selected-tail/OLS-VAR
+variant's 20 July readout for July 2026 has score means
+$(-0.5751,0.0908)$ and quadrant probabilities 19.54%
+growth-up/inflation-up, 34.15% growth-down/inflation-up, 24.01%
+growth-up/inflation-down, and 22.31% growth-down/inflation-down. This is one
+named sensitivity, not a selected production forecast.
+
+The full sensitivity specification and interpretation are in
+[`inference_sensitivities.md`](docs/models/m02_soft_composite/inference_sensitivities.md).
+Public results are under
+[`results/published/m02_soft_composite/inference_sensitivities/`](results/published/m02_soft_composite/inference_sensitivities/),
+with provenance in
+[`data/manifests/m02_inference_sensitivities.json`](data/manifests/m02_inference_sensitivities.json).
 
 The complete mathematical definition, coverage limitations, and artifact
 contract are in
@@ -387,7 +496,7 @@ small and statistically inconclusive.
 | ID | Architecture | Status |
 |---|---|---|
 | `m01_deterministic_composite` | Deterministic monthly target, event-driven Bayesian filter, posterior allocation | **Frozen** |
-| `m02_soft_composite` | Unsmoothed scores, Gaussian quadrant mapping, expanding VAR(1), linear-Gaussian event filter | **Inference published; allocation pending** |
+| `m02_soft_composite` | Unsmoothed scores, soft quadrant map, partial defining updates, Gaussian/Student-$t$ evidence, OLS/robust VAR sensitivities | **Inference sensitivities published; allocation pending** |
 | `m03_switching_state_space` | Regime-switching continuous state-space model | Planned |
 
 ## End-to-end architecture

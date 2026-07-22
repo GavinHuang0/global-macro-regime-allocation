@@ -45,8 +45,8 @@ transition:
   force_stationarity: false
 
   expected_coverage:
-    score_history_rows: 317
-    candidate_adjacent_pairs: 316
+    score_history_rows: 318
+    candidate_adjacent_pairs: 317
     eligible_consecutive_pairs_at_latest_cutoff: 247
     baseline_mapping_months: 214
     available_prior_months: 189

@@ -168,6 +168,9 @@ def build_scores(
 
     reference_start = as_date(data_config["reference_start"])
     reference_end = as_date(data_config["reference_end"])
+    component_reference_end = as_date(
+        data_config.get("component_reference_end", reference_end)
+    )
     observation_start = as_date(data_config["observation_start"])
     vintage_start = as_date(data_config["vintage_start"])
     vintage_end = as_date(data_config["vintage_end"])
@@ -175,6 +178,10 @@ def build_scores(
     archive_start_latest_only = data_config.get("archive_start_latest_only", False)
     if not isinstance(archive_start_latest_only, bool):
         raise TypeError("data.archive_start_latest_only must be a boolean")
+    if component_reference_end < reference_end:
+        raise ValueError(
+            "data.component_reference_end cannot precede data.reference_end"
+        )
 
     legacy_raw_dir = project_root / output_config["raw_dir"]
     processed_dir = project_root / output_config["processed_dir"]
@@ -216,7 +223,7 @@ def build_scores(
                 raw_dir=raw_dir,
                 compatible_cache_dirs=compatible_cache_dirs,
                 observation_start=observation_start,
-                observation_end=reference_end,
+                observation_end=component_reference_end,
                 vintage_start=source_vintage_start,
                 vintage_end=source_vintage_end,
                 refresh=refresh,
@@ -277,7 +284,9 @@ def build_scores(
         index="reference_month", columns="component", values="release_date"
     )
     computation_start = min(transformed.index.min(), pd.Timestamp(reference_start))
-    full_index = pd.date_range(computation_start, pd.Timestamp(reference_end), freq="MS")
+    full_index = pd.date_range(
+        computation_start, pd.Timestamp(component_reference_end), freq="MS"
+    )
     transformed = transformed.reindex(full_index)
     releases = releases.reindex(full_index)
 
@@ -308,10 +317,18 @@ def build_scores(
     ).max(axis=1).where(scores_available)
 
     publication_index = pd.date_range(
-        reference_start, reference_end, freq="MS", name="reference_month"
+        reference_start,
+        component_reference_end,
+        freq="MS",
+        name="reference_month",
     )
     publication_panel = features.reindex(publication_index)
-    expected_months = int(data_config["expected_reference_months"])
+    expected_months = int(
+        data_config.get(
+            "expected_component_reference_months",
+            data_config["expected_reference_months"],
+        )
+    )
     if len(publication_panel) != expected_months:
         raise ValueError(
             f"publication range contains {len(publication_panel)} months, "
@@ -423,6 +440,12 @@ def build_scores(
         "data_snapshot_sha256": combined_hash.hexdigest(),
         "reference_start": reference_start.isoformat(),
         "reference_end": reference_end.isoformat(),
+        "component_reference_end": component_reference_end.isoformat(),
+        "latest_component_reference_month": pd.Timestamp(
+            long["reference_month"].max()
+        )
+        .date()
+        .isoformat(),
         "reference_months": len(publication_panel),
         "complete_score_months": len(complete_scores),
         "first_complete_score_month": complete_scores.index.min().date().isoformat(),

@@ -2,7 +2,7 @@
   "coverage": {
     "available_prior_months": 189,
     "baseline_mapping_months": 214,
-    "candidate_adjacent_pairs": 316,
+    "candidate_adjacent_pairs": 317,
     "eligible_consecutive_pairs_at_latest_cutoff": 247,
     "first_source_month": "2010-07-01",
     "first_target_month": "2010-08-01",
@@ -12,7 +12,7 @@
     "priors_available_after_target_end": 32,
     "priors_available_by_target_end": 157,
     "priors_available_by_target_start": 0,
-    "score_history_rows": 317,
+    "score_history_rows": 318,
     "unstable_prior_fits": 1
   },
   "covid_outlier_diagnostic": {
@@ -77,7 +77,7 @@
   "status_counts": {
     "available": 189,
     "insufficient_transition_history": 25,
-    "source_map_unavailable": 103
+    "source_map_unavailable": 104
   },
   "unstable_source_months": [
     "2020-04-01"

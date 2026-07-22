@@ -1,0 +1,70 @@
+{
+  "acquisitions": [
+    {
+      "bytes": 25511,
+      "cache_origin": "existing_normalized_cache",
+      "path": "data/raw/fred_api/m02_retail_sensitivity/RRSFS_c8a25a9637b1_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 9,
+      "series_id": "RRSFS",
+      "sha256": "b75052db4776a6f33db31c2ea4f0548a0f18459436e5c84b613011975d2dc1eb",
+      "source_url": "https://fred.stlouisfed.org/series/RRSFS"
+    },
+    {
+      "bytes": 22311,
+      "cache_origin": "existing_normalized_cache",
+      "path": "data/raw/fred_api/m02_retail_sensitivity/RSAFS_60fbd6f78230_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 9,
+      "series_id": "RSAFS",
+      "sha256": "2c730c787e7e777fa9696e67425b66688ad32fd8dacb099514999e15f2999318",
+      "source_url": "https://fred.stlouisfed.org/series/RSAFS"
+    }
+  ],
+  "aligned_information_date_count": 478,
+  "available_event_rows": 478,
+  "common_reference_count": 318,
+  "common_vintage_count": 122,
+  "configuration": "configs/models/m02_inference_sensitivities.yaml",
+  "configuration_sha256": "9931650fad4b6dc79ec3654fa80b0ceee1b3b61ba2981e5e2d84388cc76c4307",
+  "credential_policy": "FRED_API_KEY is read from the runtime environment only and is never serialized into artifacts, cache identities, or logs",
+  "cross_series_alignment_policy": "at each union information date, use each series' latest vintage dated no later than that date",
+  "event_rows": 598,
+  "feature_status_counts": {
+    "available": 478,
+    "standardization_warmup": 120
+  },
+  "first_release_extraction_diagnostics": {
+    "implicit_retail_price": {
+      "matrix_rows": 318,
+      "rows_excluded_archive_bootstrap": 17,
+      "rows_excluded_backfill_lag": 0,
+      "rows_excluded_missing_prior": 1,
+      "rows_excluded_negative_lag": 0,
+      "rows_retained": 299,
+      "rows_without_any_vintage": 1
+    },
+    "real_retail_and_food_services": {
+      "matrix_rows": 318,
+      "rows_excluded_archive_bootstrap": 17,
+      "rows_excluded_backfill_lag": 0,
+      "rows_excluded_missing_prior": 1,
+      "rows_excluded_negative_lag": 0,
+      "rows_retained": 299,
+      "rows_without_any_vintage": 1
+    }
+  },
+  "generated_at_utc": "2026-07-22T05:12:57.804535+00:00",
+  "generated_files": [
+    {
+      "bytes": 281788,
+      "path": "data/processed/m02_soft_composite/inference_sensitivities/retail_real_decomposition_events.csv",
+      "sha256": "31331a66d7c50f3f4fcaf953df7c91a48e2eb58e1d6bce0e0bc9a04e53aba463"
+    }
+  ],
+  "model_id": "m02_soft_composite",
+  "provider_requested": "fred_api",
+  "provider_selected": "fred_api",
+  "schema_version": 1,
+  "stage_id": "m02_retail_real_decomposition_sensitivity"
+}

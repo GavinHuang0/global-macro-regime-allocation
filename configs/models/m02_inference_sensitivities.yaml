@@ -1,0 +1,239 @@
+schema_version: 1
+model_id: m02_soft_composite
+stage_id: partial_defining_and_robustness_sensitivities
+description: >-
+  Named causal sensitivities built on the frozen Model 02 score, probability
+  map, release-evidence, and Gaussian-filter inputs. The frozen baseline is not
+  overwritten. Partial defining releases are exact observations of component
+  values, not exact observations of the unfinished composite score.
+
+sources:
+  base_filter_config: configs/models/m02_event_driven_bayesian_filter.yaml
+  score_manifest: data/manifests/m02_soft_composite.json
+  score_features: data/processed/m02_soft_composite/composite_scores.csv
+  defining_components: >-
+    data/processed/m02_soft_composite/first_release_components_long.csv
+  mapping_manifest: data/manifests/m02_probability_map.json
+  mapping_history: >-
+    results/published/m02_soft_composite/probability_map/quadrant_probabilities.csv
+  evidence_manifest: data/manifests/m02_release_evidence.json
+  evidence_events: >-
+    data/processed/m02_soft_composite/release_evidence/release_events.csv
+
+partial_defining_releases:
+  enabled: true
+  component_weight: 0.25
+  minimum_complete_training_months: 60
+  covariance_estimator: ledoit_wolf
+  covariance_eigenvalue_floor: 1.0e-8
+  training_cutoff: complete_score_available_strictly_before_release
+  event_value_policy: causally_standardized_first_release_component
+  sequential_likelihood: >-
+    conditional_new_component_block_given_score_and_previously_released_components
+  final_score_day_policy: >-
+    do_not_apply_a_partial_likelihood_when_the_new_block_completes_both_scores;
+    condition_the_released_score_exactly_at_end_of_day
+  blocks:
+    employment_situation:
+      components: [payrolls, unemployment_rate, average_hourly_earnings]
+    consumer_price_index:
+      components: [core_cpi]
+    producer_price_index:
+      components: [producer_prices]
+    industrial_production:
+      components: [industrial_production]
+    personal_income_and_outlays:
+      components: [consumer_activity, core_pce]
+
+student_t_emissions:
+  initial_degrees_of_freedom: 7.0
+  irls:
+    maximum_iterations: 100
+    relative_tolerance: 1.0e-8
+    minimum_weight: 1.0e-6
+  approximate_filter_update:
+    event_weight: "w_e = (nu_b + p_b) / (nu_b + delta_e)"
+    effective_measurement_covariance: R_b / w_e
+    gaussian_joint_state_retained: true
+  degrees_of_freedom_sensitivity:
+    candidates: [4.0, 5.0, 7.0, 10.0, .inf]
+    selection: calendar_year_grouped_causal_rolling_origin_predictive_log_likelihood
+    selection_refresh: annual_start
+    coefficient_refit: each_distinct_causal_training_signature
+    live_selection_rule: >-
+      parameters used in calendar year Y use only completed validation folds
+      whose validation year is strictly below Y
+    tie_rule: prefer_larger_degrees_of_freedom
+    minimum_predictive_events: 24
+
+robust_var:
+  gaussian_joint_state_retained: true
+  covariance_eigenvalue_floor: 1.0e-8
+  methods:
+    ols:
+      family: gaussian
+    huber:
+      family: multivariate_huber
+      mahalanobis_cutoff: 2.447746830680816
+      maximum_iterations: 100
+      relative_tolerance: 1.0e-8
+    student_t_7:
+      family: multivariate_student_t
+      degrees_of_freedom: 7.0
+      maximum_iterations: 100
+      relative_tolerance: 1.0e-8
+
+retail_sensitivities:
+  stronger_inflation_shrinkage:
+    loading_penalties:
+      retail_sales_ex_motor_vehicles_log_change: [1.0, 10.0]
+      motor_vehicle_sales_log_change: [1.0, 10.0]
+  real_decomposition:
+    series_id: RRSFS
+    release_id: 9
+    provider: fred_api
+    observation_start: 2000-01-01
+    vintage_start: 2001-06-01
+    transform: log_difference
+    minimum_standardization_history: 60
+    observation_end: 2026-07-20
+    vintage_end: 2026-07-20
+    archive_start_latest_only: true
+    maximum_release_lag_days: 92
+    responses:
+      - real_retail_and_food_services_log_change
+      - implicit_retail_price_log_change
+    note: >-
+      The implicit price coordinate is nominal RSAFS log change minus RRSFS
+      log change. Because their historical publication dates differ, each
+      coordinate uses the latest vintage of each series available at the event
+      date; it is never backfilled from a future publication.
+  stress_interaction:
+    enabled: false
+    status: not_estimable_under_declared_transform
+    stress_source: latest_available_initial_claims_innovation
+    stress_transform: positive_part_above_two_standard_deviations
+    state_interaction_axis: inflation_score
+    loading_penalty: 10.0
+    identification_audit: >-
+      Only one of 242 nominal retail release dates has a strictly prior claims
+      innovation above two standard deviations. A claims main effect and
+      inflation-by-stress loading cannot be identified responsibly, so this
+      optional sensitivity is recorded but not fitted.
+
+variants:
+  - id: transition_only
+    non_defining_evidence: false
+    partial_defining_releases: false
+    emission: gaussian
+    var: ols
+    retail: baseline_nominal
+  - id: gaussian_nondefining
+    non_defining_evidence: true
+    partial_defining_releases: false
+    emission: gaussian
+    var: ols
+    retail: baseline_nominal
+  - id: partial_only
+    non_defining_evidence: false
+    partial_defining_releases: true
+    emission: gaussian
+    var: ols
+    retail: baseline_nominal
+  - id: gaussian_combined
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: gaussian
+    var: ols
+    retail: baseline_nominal
+  - id: student_t_7_combined
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+  - id: selected_tail_combined
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: selected_student_t
+    var: ols
+    retail: baseline_nominal
+  - id: huber_var_combined
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: selected_student_t
+    var: huber
+    retail: baseline_nominal
+  - id: student_t_var_combined
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: selected_student_t
+    var: student_t_7
+    retail: baseline_nominal
+  - id: retail_shrinkage_combined
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: selected_student_t
+    var: huber
+    retail: stronger_inflation_shrinkage
+  - id: retail_real_decomposition_combined
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: selected_student_t
+    var: huber
+    retail: real_decomposition
+  - id: retail_stress_interaction_combined
+    enabled: false
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: selected_student_t
+    var: huber
+    retail: stress_interaction
+
+evaluation:
+  primary_checkpoint: strict_pre_final_score_day
+  initialization_burn_in_months: 4
+  metrics:
+    - score_center_negative_log_predictive_density
+    - growth_score_rmse
+    - inflation_score_rmse
+    - hard_quadrant_accuracy_diagnostic
+    - quadrant_cross_entropy_to_exact_score_map
+    - quadrant_brier_distance_to_exact_score_map
+    - quadrant_kl_divergence_to_exact_score_map
+  information_stage_checkpoints:
+    - before_any_defining_release
+    - after_employment_situation
+    - after_midmonth_defining_releases
+    - strict_pre_final_score_day
+
+outputs:
+  processed_dir: data/processed/m02_soft_composite/inference_sensitivities
+  published_dir: results/published/m02_soft_composite/inference_sensitivities
+  retail_raw_dir: data/raw/m02_retail_sensitivity
+  retail_events: >-
+    data/processed/m02_soft_composite/inference_sensitivities/retail_real_decomposition_events.csv
+  retail_manifest: data/manifests/m02_retail_sensitivity.json
+  manifest: data/manifests/m02_inference_sensitivities.json
+  evaluation_rows: evaluation_rows.csv
+  evaluation_summary: evaluation_summary.csv
+  evaluation_subperiod_summary: evaluation_subperiod_summary.csv
+  paired_comparisons: paired_comparisons.csv
+  event_update_audit: event_update_audit.csv.gz
+  partial_defining_audit: partial_defining_audit.csv.gz
+  partial_preparation_audit: partial_preparation_audit.csv.gz
+  exact_score_audit: exact_score_audit.csv
+  transition_fit_audit: transition_fit_audit.csv
+  transition_weight_audit: transition_weight_audit.csv.gz
+  emission_fit_audit: emission_fit_audit.csv
+  tail_fold_scores: tail_fold_scores.csv
+  tail_summary: tail_summary.csv
+  retail_stress_identification_audit: retail_stress_identification_audit.csv
+  hyperparameter_schedule: hyperparameter_schedule.csv
+  latest_marginals: latest_marginals.csv
+  public_evaluation_summary: evaluation_summary.csv
+  public_evaluation_subperiod_summary: evaluation_subperiod_summary.csv
+  public_paired_comparisons: paired_comparisons.csv
+  public_tail_summary: tail_summary.csv
+  public_latest_marginals: latest_marginals.csv
+  public_method_summary: method_summary.json

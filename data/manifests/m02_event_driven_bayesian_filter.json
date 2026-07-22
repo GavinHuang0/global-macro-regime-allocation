@@ -11,7 +11,7 @@
     "replay_start": "2010-09-01"
   },
   "credential_policy": "no network access and no credential read in inference stage",
-  "data_snapshot_sha256": "b8c5922bc88964069466d38b07187a6987c727e321cf8ed6322f639270c5195a",
+  "data_snapshot_sha256": "4c720418e9f2856188a072e32fbcc8c997f0a45a9705b2fa531e1575cf93deba",
   "dependence_diagnostics": {
     "correlation_p_q_values": "exploratory",
     "cross_block_lags": [
@@ -36,7 +36,7 @@
     "weekly_aggregation": "ICSA residual mean by reference month for cross-block correlations only; serial tests retain every weekly residual",
     "weekly_serial_lag_caveat": "calendar-week semantics require an observation_date column and contiguous seven-day observation spacing"
   },
-  "generated_at_utc": "2026-07-21T18:38:52.328378+00:00",
+  "generated_at_utc": "2026-07-22T06:13:11.974549+00:00",
   "generated_file_hashes": [
     {
       "bytes": 389593,
@@ -46,7 +46,7 @@
     {
       "bytes": 268327,
       "path": "data/processed/m02_soft_composite/bayesian_filter/joint_gaussian_checkpoints.csv.gz",
-      "sha256": "b5646fd927890d0f17f9646bdb03ee62bc7d8e503864fcd3115da5142ec86eaf"
+      "sha256": "b4a5a631804661310cca54063ab8f701f0f9194b4748ac81f23fdfee47ab4309"
     },
     {
       "bytes": 7348588,
@@ -56,7 +56,7 @@
     {
       "bytes": 1987489,
       "path": "data/processed/m02_soft_composite/bayesian_filter/joint_path_checkpoints.csv.gz",
-      "sha256": "ea8ba1065184cb6625c7b9667e5196ea62c798ec7462819daa7de966c96e8b01"
+      "sha256": "716c3b60f9a1f05a89351006ccf4a183e83549ab37e9944f9ed482bae9e36222"
     },
     {
       "bytes": 667733,
@@ -172,11 +172,11 @@
   "input_files": [
     {
       "path": "data/processed/m02_soft_composite/composite_scores.csv",
-      "sha256": "1af087293505536c3e65be9c17d003b250f2e883c693e2fca581303566a5a6bd"
+      "sha256": "e49033e74d711a886267d195cf01f03778bed00534d02f47e96cea91d73eb1eb"
     },
     {
       "path": "results/published/m02_soft_composite/probability_map/quadrant_probabilities.csv",
-      "sha256": "bd234853b48a3fc4f67c267a6470d33dbb469c03c0e10e15c6dbdba420d3a67d"
+      "sha256": "52edf3a438ad812ca8b4e80cb852a76d6ec0e1a3a980bd1033b9880e94bdbadc"
     },
     {
       "path": "data/processed/m02_soft_composite/release_evidence/release_events.csv",
@@ -227,11 +227,11 @@
   "upstream_manifests": [
     {
       "path": "data/manifests/m02_soft_composite.json",
-      "sha256": "c4781cb3230393241063b61c456b3a8f0bfd5b0fc0f731b3c3a9b7704d66ed14"
+      "sha256": "7250e4caf0f234cbdca865d2dd6a0434876001e86c159694b4f1e6b64271577c"
     },
     {
       "path": "data/manifests/m02_probability_map.json",
-      "sha256": "19cf4e4c68140dda9b5fde4ddabe1afd5986a8058612f6f2b9b04c6a87dff1cf"
+      "sha256": "ce4a7c37307bd64b837c5c688745f3c0e4dc4c2e6426ff85ecd7b974054119de"
     },
     {
       "path": "data/manifests/m02_release_evidence.json",

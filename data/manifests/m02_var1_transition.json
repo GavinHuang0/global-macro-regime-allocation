@@ -1,10 +1,10 @@
 {
   "configuration": "configs/models/m02_var1_transition.yaml",
-  "configuration_sha256": "53a66fcb64537e6242e18b89e34298867e539d5c4d3e75e16e9212808b81fe83",
+  "configuration_sha256": "6bf3fc7a575b05ea4a32297a85c95ff28ef3d8d09dc23af9dacce250591d054e",
   "coverage": {
     "available_prior_months": 189,
     "baseline_mapping_months": 214,
-    "candidate_adjacent_pairs": 316,
+    "candidate_adjacent_pairs": 317,
     "eligible_consecutive_pairs_at_latest_cutoff": 247,
     "first_source_month": "2010-07-01",
     "first_target_month": "2010-08-01",
@@ -14,21 +14,21 @@
     "priors_available_after_target_end": 32,
     "priors_available_by_target_end": 157,
     "priors_available_by_target_start": 0,
-    "score_history_rows": 317,
+    "score_history_rows": 318,
     "unstable_prior_fits": 1
   },
-  "data_snapshot_sha256": "eb4b1ad0b7a71e427d4dc44c4ac677c6210c52d651a0e9f407223e2935ab9f7d",
-  "generated_at_utc": "2026-07-21T18:44:46.614666+00:00",
+  "data_snapshot_sha256": "7efdc4c60c8a924d08a1666e1b843a31038b91fb0fbcf1a30c672a142960ce91",
+  "generated_at_utc": "2026-07-22T05:48:04.538312+00:00",
   "generated_file_hashes": [
     {
-      "bytes": 42564,
+      "bytes": 42660,
       "path": "data/processed/m02_soft_composite/var1_transition/pair_audit.csv",
-      "sha256": "335ba057c79640ded19bed10a522276caae34952cbb27b9498787792fb3e909a"
+      "sha256": "50ba1225edffbcf1ad878798c5066deef3d93a74a15c21a41f17044c49428b41"
     },
     {
-      "bytes": 203397,
+      "bytes": 203560,
       "path": "results/published/m02_soft_composite/transition/next_month_priors.csv",
-      "sha256": "ba7518b076d40564f5a70ffb03360a396743238c8545e2a2ba8da7721ed80aaa"
+      "sha256": "f38c6227d99a575ceb9e91a498f3e7a36d90f5050bb92ae213a07c2deccd3f9e"
     },
     {
       "bytes": 3876,
@@ -38,17 +38,17 @@
     {
       "bytes": 2593,
       "path": "results/published/m02_soft_composite/transition/transition_summary.json",
-      "sha256": "1cdddd85a0e23fd44d80a21bebe6ffd2dd062ab7edf291ce03c35920676487f1"
+      "sha256": "5ce1a7f670137e00c6d854f515f86c94efa8e18368e7aea9a72bb0075d885024"
     }
   ],
   "input_files": [
     {
       "path": "data/processed/m02_soft_composite/composite_scores.csv",
-      "sha256": "1af087293505536c3e65be9c17d003b250f2e883c693e2fca581303566a5a6bd"
+      "sha256": "e49033e74d711a886267d195cf01f03778bed00534d02f47e96cea91d73eb1eb"
     },
     {
       "path": "results/published/m02_soft_composite/probability_map/quadrant_probabilities.csv",
-      "sha256": "bd234853b48a3fc4f67c267a6470d33dbb469c03c0e10e15c6dbdba420d3a67d"
+      "sha256": "52edf3a438ad812ca8b4e80cb852a76d6ec0e1a3a980bd1033b9880e94bdbadc"
     }
   ],
   "model_id": "m02_soft_composite",
@@ -101,11 +101,11 @@
   "upstream_manifests": [
     {
       "path": "data/manifests/m02_soft_composite.json",
-      "sha256": "c4781cb3230393241063b61c456b3a8f0bfd5b0fc0f731b3c3a9b7704d66ed14"
+      "sha256": "7250e4caf0f234cbdca865d2dd6a0434876001e86c159694b4f1e6b64271577c"
     },
     {
       "path": "data/manifests/m02_probability_map.json",
-      "sha256": "19cf4e4c68140dda9b5fde4ddabe1afd5986a8058612f6f2b9b04c6a87dff1cf"
+      "sha256": "ce4a7c37307bd64b837c5c688745f3c0e4dc4c2e6426ff85ecd7b974054119de"
     }
   ]
 }

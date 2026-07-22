@@ -116,12 +116,17 @@ def _config() -> dict[str, object]:
         "data": {
             "reference_start": "2000-01-01",
             "reference_end": "2000-12-01",
+            "component_reference_end": "2001-01-01",
             "expected_reference_months": 12,
+            "expected_component_reference_months": 13,
             "observation_start": "1999-01-01",
             "vintage_start": "1999-01-01",
             "vintage_end": "2001-02-01",
             "max_release_lag_days": 92,
-            "expected_missing_component_months": {},
+            "expected_missing_component_months": {
+                "consumer_activity": ["2001-01-01"],
+                "core_pce": ["2001-01-01"],
+            },
         },
         "features": {
             "min_history_months": 3,
@@ -161,8 +166,14 @@ def test_build_scores_end_to_end_without_network(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    months = pd.date_range("1999-01-01", "2000-12-01", freq="MS")
-    payloads = {series_id: _vintage_zip(series_id, months) for series_id in SERIES_IDS}
+    months = pd.date_range("1999-01-01", "2001-01-01", freq="MS")
+    payloads = {
+        series_id: _vintage_zip(
+            series_id,
+            months[:-1] if series_id in {"PCEC96", "PCEPILFE"} else months,
+        )
+        for series_id in SERIES_IDS
+    }
     downloaded: list[str] = []
 
     def fake_download(
@@ -198,6 +209,7 @@ def test_build_scores_end_to_end_without_network(
     assert not list(tmp_path.rglob("*.tmp"))
 
     components = pd.read_csv(outputs["components"], parse_dates=["reference_month"])
+    assert components["reference_month"].max() == pd.Timestamp("2001-01-01")
     payroll = components.loc[components["component"] == "payrolls"].iloc[0]
     expected_payroll_growth = 100.0 * math.log(
         payroll["current_value"] / payroll["previous_value_as_of_release"]
@@ -206,11 +218,15 @@ def test_build_scores_end_to_end_without_network(
     assert payroll["transform"] == "log_difference"
 
     scores = pd.read_csv(outputs["scores"], parse_dates=["reference_month"])
+    assert scores["reference_month"].max() == pd.Timestamp("2001-01-01")
+    assert scores.iloc[-1]["data_status"] == "missing_component_feature"
     assert not any("smoothed" in column for column in scores)
     assert not any("regime" in column or "probability" in column for column in scores)
-    assert scores[["growth_score", "inflation_score"]].notna().all().all()
+    assert scores.iloc[:-1][["growth_score", "inflation_score"]].notna().all().all()
+    assert scores.iloc[-1][["growth_score", "inflation_score"]].isna().all()
 
     latest = json.loads(outputs["latest"].read_text(encoding="utf-8"))
+    assert latest["reference_month"] == "2000-12-01"
     assert latest["regime_probabilities_computed"] is False
     assert "regime_id" not in latest
 
@@ -221,6 +237,8 @@ def test_build_scores_end_to_end_without_network(
     assert manifest["provider_selected"] == "fred_api"
     assert manifest["providers_used"] == ["fred_api"]
     assert manifest["score_definition"]["trailing_smoothing"] is False
+    assert manifest["component_reference_end"] == "2001-01-01"
+    assert manifest["latest_component_reference_month"] == "2001-01-01"
     for record in manifest["generated_file_hashes"]:
         path = tmp_path / record["path"]
         assert record["sha256"] == hashlib.sha256(path.read_bytes()).hexdigest()

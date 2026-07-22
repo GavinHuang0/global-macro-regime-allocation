@@ -1,26 +1,27 @@
 {
   "archive_start_policy": "latest_reference_period_only",
   "complete_score_months": 249,
+  "component_reference_end": "2026-06-01",
   "configuration": "configs/models/m02_soft_composite.yaml",
-  "configuration_sha256": "0d03335fa2c71ff3564bc9c626f15bdea28ea86e86ee7f1319e31917105cee34",
-  "data_snapshot_sha256": "c61ea79869da798be0723cc8d47f3ab4ee5aa90ba8bab7ef51032ac538ed3243",
+  "configuration_sha256": "0a378c0a121633b2b560c1a452ab027f35b79d7ea4be4e3817b960bf3637f289",
+  "data_snapshot_sha256": "b506fe7eee8157834fd331cdc79bbfb2cefe59019b28a5fc2dbcc8d800ecc2ce",
   "first_complete_score_month": "2005-07-01",
-  "generated_at_utc": "2026-07-20T16:09:13.782151+00:00",
+  "generated_at_utc": "2026-07-22T05:39:43.624034+00:00",
   "generated_file_hashes": [
     {
-      "bytes": 432948,
+      "bytes": 433809,
       "path": "data/processed/m02_soft_composite/first_release_components_long.csv",
-      "sha256": "148c15f4e87e6806817499a6b50901d04d398944b4b7583d7f295815d372878d"
+      "sha256": "ed4b718677bc7c97e25da6aa3a54391cf3be4dc836067db212feceb86c6cdf5d"
     },
     {
-      "bytes": 126093,
+      "bytes": 126386,
       "path": "data/processed/m02_soft_composite/composite_scores.csv",
-      "sha256": "1af087293505536c3e65be9c17d003b250f2e883c693e2fca581303566a5a6bd"
+      "sha256": "e49033e74d711a886267d195cf01f03778bed00534d02f47e96cea91d73eb1eb"
     },
     {
-      "bytes": 30676,
+      "bytes": 30719,
       "path": "results/published/m02_soft_composite/score_history.csv",
-      "sha256": "29211567c3d964177b3e517b924280e284f388cf2e616d4c520069dfccd47466"
+      "sha256": "f26ce45c195f2b245e5ae9ab7e315d63a3d64414f661ad2f96d7c44c71f2d833"
     },
     {
       "bytes": 342,
@@ -29,6 +30,7 @@
     }
   ],
   "latest_complete_score_month": "2026-05-01",
+  "latest_component_reference_month": "2026-06-01",
   "model_id": "m02_soft_composite",
   "processed_files": [
     "data/processed/m02_soft_composite/first_release_components_long.csv",
@@ -48,43 +50,43 @@
   ],
   "raw_files": [
     {
-      "bytes": 28053,
+      "bytes": 28094,
       "cache_origin": "existing_normalized_cache",
       "extraction_diagnostics": {
-        "matrix_rows": 449,
+        "matrix_rows": 450,
         "rows_excluded_archive_bootstrap": 11,
         "rows_excluded_backfill_lag": 0,
         "rows_excluded_missing_prior": 0,
         "rows_excluded_negative_lag": 0,
-        "rows_retained": 438,
+        "rows_retained": 439,
         "rows_without_any_vintage": 0
       },
-      "path": "data/raw/fred_api/m02_soft_composite/PAYEMS_587f899363b5_levels_by_vintage.zip",
+      "path": "data/raw/fred_api/m02_soft_composite/PAYEMS_55c53e02bc56_levels_by_vintage.zip",
       "provider": "fred_api",
       "release_id": 50,
       "series_id": "PAYEMS",
-      "sha256": "553f18fa49b76724ac3476ac9f1f81f1ee99d3c7cd4c99ecca5dc2490e8f60c6",
+      "sha256": "d98d042ea6989736386a5c6c772aeff2ae84b8533538c0657e799e058ef28d77",
       "source_url": "https://fred.stlouisfed.org/series/PAYEMS",
       "vintage_end": "2026-07-20",
       "vintage_start": "1990-01-01"
     },
     {
-      "bytes": 46556,
+      "bytes": 46571,
       "cache_origin": "existing_normalized_cache",
       "extraction_diagnostics": {
-        "matrix_rows": 449,
+        "matrix_rows": 450,
         "rows_excluded_archive_bootstrap": 11,
         "rows_excluded_backfill_lag": 0,
         "rows_excluded_missing_prior": 0,
         "rows_excluded_negative_lag": 0,
-        "rows_retained": 438,
+        "rows_retained": 439,
         "rows_without_any_vintage": 0
       },
-      "path": "data/raw/fred_api/m02_soft_composite/INDPRO_287342b733c1_levels_by_vintage.zip",
+      "path": "data/raw/fred_api/m02_soft_composite/INDPRO_656de3e88d0d_levels_by_vintage.zip",
       "provider": "fred_api",
       "release_id": 13,
       "series_id": "INDPRO",
-      "sha256": "4cb5476a7935e85177e7963c5dc401cd5b3f04392874184a1249d7cb5ef0ab27",
+      "sha256": "7dbfd537bfece4f7243e42a82fa8c7c46dabcd1b494696f242573e73f0b44b40",
       "source_url": "https://fred.stlouisfed.org/series/INDPRO",
       "vintage_end": "2026-07-20",
       "vintage_start": "1990-01-01"
@@ -101,7 +103,7 @@
         "rows_retained": 438,
         "rows_without_any_vintage": 0
       },
-      "path": "data/raw/fred_api/m02_soft_composite/PCEC96_e54c7aef383c_levels_by_vintage.zip",
+      "path": "data/raw/fred_api/m02_soft_composite/PCEC96_fa839b5cdae1_levels_by_vintage.zip",
       "provider": "fred_api",
       "release_id": 54,
       "series_id": "PCEC96",
@@ -111,43 +113,43 @@
       "vintage_start": "1990-01-01"
     },
     {
-      "bytes": 8166,
+      "bytes": 8170,
       "cache_origin": "existing_normalized_cache",
       "extraction_diagnostics": {
-        "matrix_rows": 449,
+        "matrix_rows": 450,
         "rows_excluded_archive_bootstrap": 11,
         "rows_excluded_backfill_lag": 0,
         "rows_excluded_missing_prior": 1,
         "rows_excluded_negative_lag": 0,
-        "rows_retained": 436,
+        "rows_retained": 437,
         "rows_without_any_vintage": 1
       },
-      "path": "data/raw/fred_api/m02_soft_composite/UNRATE_da4e26503460_levels_by_vintage.zip",
+      "path": "data/raw/fred_api/m02_soft_composite/UNRATE_1cad5ef44ab6_levels_by_vintage.zip",
       "provider": "fred_api",
       "release_id": 50,
       "series_id": "UNRATE",
-      "sha256": "0e576a3575d6c0c09a79c59a87b5514983a5000b233c994ff2c19f38bfaa4a55",
+      "sha256": "f36ebb9f400695b9f2b5faf8c52a281468a0913d55e3ca3fb85899c028a21405",
       "source_url": "https://fred.stlouisfed.org/series/UNRATE",
       "vintage_end": "2026-07-20",
       "vintage_start": "1990-01-01"
     },
     {
-      "bytes": 12568,
+      "bytes": 12593,
       "cache_origin": "existing_normalized_cache",
       "extraction_diagnostics": {
-        "matrix_rows": 449,
+        "matrix_rows": 450,
         "rows_excluded_archive_bootstrap": 95,
         "rows_excluded_backfill_lag": 0,
         "rows_excluded_missing_prior": 1,
         "rows_excluded_negative_lag": 0,
-        "rows_retained": 352,
+        "rows_retained": 353,
         "rows_without_any_vintage": 1
       },
-      "path": "data/raw/fred_api/m02_soft_composite/CPILFESL_8d7dbecc0786_levels_by_vintage.zip",
+      "path": "data/raw/fred_api/m02_soft_composite/CPILFESL_29ed945f0381_levels_by_vintage.zip",
       "provider": "fred_api",
       "release_id": 10,
       "series_id": "CPILFESL",
-      "sha256": "84dd17cdfb532503366f7a840bd88d579eabf4b1b2b2bedf06fe3a308e4e9fb4",
+      "sha256": "9464667990c8cc0966aee433fc1a826e957c3d32a2ebc9c25f4ba059efc52f3c",
       "source_url": "https://fred.stlouisfed.org/series/CPILFESL",
       "vintage_end": "2026-07-20",
       "vintage_start": "1996-12-12"
@@ -164,7 +166,7 @@
         "rows_retained": 311,
         "rows_without_any_vintage": 0
       },
-      "path": "data/raw/fred_api/m02_soft_composite/PCEPILFE_c76ac124238f_levels_by_vintage.zip",
+      "path": "data/raw/fred_api/m02_soft_composite/PCEPILFE_6db407ad5650_levels_by_vintage.zip",
       "provider": "fred_api",
       "release_id": 54,
       "series_id": "PCEPILFE",
@@ -185,7 +187,7 @@
         "rows_retained": 229,
         "rows_without_any_vintage": 0
       },
-      "path": "data/raw/fred_api/m02_soft_composite/PPILFE_1f057f197457_levels_by_vintage.zip",
+      "path": "data/raw/fred_api/m02_soft_composite/PPILFE_ee73a4140499_levels_by_vintage.zip",
       "provider": "fred_api",
       "release_id": 46,
       "series_id": "PPILFE",
@@ -195,50 +197,50 @@
       "vintage_start": "1996-12-11"
     },
     {
-      "bytes": 6866,
+      "bytes": 6915,
       "cache_origin": "existing_normalized_cache",
       "extraction_diagnostics": {
-        "matrix_rows": 449,
+        "matrix_rows": 450,
         "rows_excluded_archive_bootstrap": 314,
         "rows_excluded_backfill_lag": 0,
         "rows_excluded_missing_prior": 0,
         "rows_excluded_negative_lag": 0,
-        "rows_retained": 135,
+        "rows_retained": 136,
         "rows_without_any_vintage": 0
       },
-      "path": "data/raw/fred_api/m02_soft_composite/WPSFD4131_9ac518acf4f4_levels_by_vintage.zip",
+      "path": "data/raw/fred_api/m02_soft_composite/WPSFD4131_39e74f98fc2b_levels_by_vintage.zip",
       "provider": "fred_api",
       "release_id": 46,
       "series_id": "WPSFD4131",
-      "sha256": "b52f7af8ace53f52a2a70d89a9555f41a2c5835373704c1338068e21b3e5d1a8",
+      "sha256": "785b9ce6332a3ddaa619d9484e397fe4d48e7bff1edbc241941549dabfa4329f",
       "source_url": "https://fred.stlouisfed.org/series/WPSFD4131",
       "vintage_end": "2026-07-20",
       "vintage_start": "2015-03-13"
     },
     {
-      "bytes": 12500,
+      "bytes": 12515,
       "cache_origin": "existing_normalized_cache",
       "extraction_diagnostics": {
-        "matrix_rows": 449,
+        "matrix_rows": 450,
         "rows_excluded_archive_bootstrap": 127,
         "rows_excluded_backfill_lag": 0,
         "rows_excluded_missing_prior": 0,
         "rows_excluded_negative_lag": 0,
-        "rows_retained": 322,
+        "rows_retained": 323,
         "rows_without_any_vintage": 0
       },
-      "path": "data/raw/fred_api/m02_soft_composite/AHETPI_ca61224d2522_levels_by_vintage.zip",
+      "path": "data/raw/fred_api/m02_soft_composite/AHETPI_c928dd1db06c_levels_by_vintage.zip",
       "provider": "fred_api",
       "release_id": 50,
       "series_id": "AHETPI",
-      "sha256": "4183e5a0635e0ae5bf474c77fca2726137b80e6b6ed75a00852c4544995cf2a3",
+      "sha256": "fc6e5787155677ecacbd1d4575725c37a6618fc14c7efcaaf2b83a2116291d16",
       "source_url": "https://fred.stlouisfed.org/series/AHETPI",
       "vintage_end": "2026-07-20",
       "vintage_start": "1999-08-06"
     }
   ],
   "reference_end": "2026-05-01",
-  "reference_months": 317,
+  "reference_months": 318,
   "reference_start": "2000-01-01",
   "schema_version": 1,
   "score_definition": {
@@ -523,6 +525,10 @@
     {
       "data_status": "missing_component_feature",
       "reference_month": "2025-11-01"
+    },
+    {
+      "data_status": "missing_component_feature",
+      "reference_month": "2026-06-01"
     }
   ]
 }

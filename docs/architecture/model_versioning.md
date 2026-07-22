@@ -50,27 +50,32 @@ $\boldsymbol\Omega_{\mathrm{map}}$ when score distributions are integrated over
 quadrants. Source-month mapping covariance is never propagated as
 $\boldsymbol A\boldsymbol\Omega_{\mathrm{map}}\boldsymbol A^\top$.
 
-Model 02's next inference stage is implemented as a rolling four-month joint
-Gaussian over score centers. Point-in-time non-defining releases enter through
-structured ridge linear-Gaussian observation models with one Ledoit–Wolf
-residual covariance per jointly fitted model. Complete composite scores become
-exact end-of-day observations. The baseline preserves actual reference months,
-so a release for an already exact target is a predictive diagnostic rather than
-being silently retargeted. Quadrant mapping remains a readout layer; the
-four-month path approximation adds mapping covariances block-diagonally and
-therefore records cross-month mapping-error independence as an explicit
-approximation.
+Model 02's inference stage is implemented as a rolling four-month joint
+Gaussian over score centers. Point-in-time non-defining releases enter the
+frozen baseline through structured ridge linear-Gaussian observation models
+with one Ledoit–Wolf residual covariance per jointly fitted model. A separate,
+named sensitivity stage adds sequential partial score-defining releases,
+Student-$t$ block emissions, Huber and Student-$t$ VAR fits, and alternative
+retail specifications without overwriting the Gaussian baseline. Complete
+composite scores become exact end-of-day observations. The baseline preserves
+actual reference months, so a release for an already exact target is a
+predictive diagnostic rather than being silently retargeted. Quadrant mapping
+remains a readout layer; the four-month path approximation adds mapping
+covariances block-diagonally and therefore records cross-month mapping-error
+independence as an explicit approximation.
 
-The evidence data, filter implementation, and full causal replay through
-20 July 2026 are complete and published without altering Model 01 outputs.
-The evidence filter does not show a stable overall probability edge over the
-transition-only filter: results are mixed in ordinary months, highly sensitive
-to the 2020 crisis, and adverse on the full-sample mean proper scores. Residual
-diagnostics also reject the baseline conditional-independence approximation in
-the full sample, although most cross-model rejections disappear when 2020 is
-excluded. A future change from linear Gaussian emissions to heavy-tailed
-errors, from OLS VAR dynamics to robust or time-varying dynamics, or from
-independent cross-model event factors to a joint disturbance model must be
-recorded as a named Model 02 sensitivity or a new model ID, depending on
+The evidence data, baseline filter, robust sensitivity implementation, and full
+causal replay through 20 July 2026 are complete and published without altering
+Model 01 outputs. The component feed extends through June even though the last
+complete score is May, allowing six released June components to update the
+June/July joint posterior without inventing the two missing PCE components.
+Historically, partial defining releases account for most of the late-month
+improvement over transition-only. Heavy-tailed evidence adds a smaller,
+metric-dependent increment; robust VAR and retail alternatives do not dominate
+across all metrics and remain named sensitivities. Residual diagnostics reject
+the baseline conditional-independence approximation in the full sample,
+although most cross-model rejections disappear when 2020 is excluded. A future
+time-varying transition model or joint cross-block disturbance model must be
+recorded as another named Model 02 sensitivity or a new model ID, depending on
 whether the inference graph changes materially. Model 02 allocation and
 backtesting remain pending.

@@ -27,6 +27,8 @@ build-m02-probabilities = "regime_allocation.cli.build_m02_probability_map:main"
 build-m02-transition = "regime_allocation.cli.build_m02_transition:main"
 build-m02-evidence = "regime_allocation.cli.build_m02_evidence:main"
 build-m02-inference = "regime_allocation.cli.build_m02_inference:main"
+build-m02-retail-sensitivity = "regime_allocation.cli.build_m02_retail_sensitivity:main"
+build-m02-inference-sensitivities = "regime_allocation.cli.build_m02_inference_sensitivities:main"
 
 [project.optional-dependencies]
 dev = [

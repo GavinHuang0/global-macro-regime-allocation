@@ -11,7 +11,12 @@ data:
   # remain explicit and are never backfilled or dynamically reweighted.
   reference_start: 2000-01-01
   reference_end: 2026-05-01
+  # Keep the completed-score panel frozen at May while retaining first-release
+  # components for the still-incomplete June score.  Missing June PCE inputs
+  # are not imputed; they arrive later and will complete the score normally.
+  component_reference_end: 2026-06-01
   expected_reference_months: 317
+  expected_component_reference_months: 318
 
   # Earlier observations provide causal expanding-standardization history for
   # series whose real-time archives existed before the publication panel.
@@ -22,6 +27,8 @@ data:
   archive_start_latest_only: true
 
   expected_missing_component_months:
+    consumer_activity:
+      - 2026-06-01
     core_pce:
       - 2000-01-01
       - 2000-02-01
@@ -29,6 +36,7 @@ data:
       - 2000-04-01
       - 2000-05-01
       - 2000-06-01
+      - 2026-06-01
     unemployment_rate:
       - 2025-10-01
       - 2025-11-01
