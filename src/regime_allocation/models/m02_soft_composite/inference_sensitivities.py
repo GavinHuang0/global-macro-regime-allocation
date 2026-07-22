@@ -1,8 +1,8 @@
-"""Run Model 02 partial-release and robustness sensitivity replays.
+"""Run the selected Model 02 baseline, benchmarks, and sensitivity replays.
 
 This module is intentionally separate from :mod:`walkforward`, which remains
-the frozen Model 02 Gaussian baseline.  It adds four research changes without
-altering the baseline artifacts:
+the frozen predecessor Gaussian replay. It selects a robust baseline and adds
+four research changes without altering those historical artifacts:
 
 * score-defining components update the four-month state when they are first
   released, while the final two-component PCE event is replaced by the exact
@@ -91,18 +91,22 @@ from regime_allocation.models.m02_soft_composite.walkforward import (
 
 
 STATE_NAMES = ("growth_score", "inflation_score")
+MODEL_ROLES = ("baseline", "major_benchmark", "sensitivity")
 
 
 @dataclass(frozen=True)
 class SensitivityVariant:
-    """One fully declared filter variant."""
+    """One fully declared filter variant and its publication role."""
 
     variant_id: str
+    model_role: str
     non_defining_evidence: bool
     partial_defining_releases: bool
     emission_family: str
     var_method: str
     retail_method: str
+    evidence_set_id: str = "all_configured"
+    observation_model_ids: frozenset[str] | None = None
 
 
 @dataclass(frozen=True)
@@ -128,6 +132,7 @@ class InferenceSensitivityResult:
     emission_fit_audit: pd.DataFrame
     tail_fold_scores: pd.DataFrame
     hyperparameter_schedule: pd.DataFrame
+    dependence_residuals: pd.DataFrame
     latest_marginals: pd.DataFrame
     latest_states: Mapping[str, JointGaussianState]
     initial_date: pd.Timestamp
@@ -153,20 +158,18 @@ def _finite_degrees(values: Sequence[object]) -> tuple[float, ...]:
 
 
 def variants_from_config(config: Mapping[str, Any]) -> tuple[SensitivityVariant, ...]:
-    """Validate and return runnable variants from the sensitivity contract."""
+    """Validate and return runnable variants from the inference contract."""
 
+    declarations = _validated_variant_declarations(config)
+    evidence_sets = _validated_evidence_sets(config)
     records: list[SensitivityVariant] = []
-    seen: set[str] = set()
-    for raw in config.get("variants", ()):
-        variant_id = str(raw["id"])
-        if variant_id in seen:
-            raise ValueError(f"duplicate sensitivity variant: {variant_id}")
-        seen.add(variant_id)
-        if raw.get("enabled", True) is False:
+    for raw in declarations:
+        variant_id = str(raw["variant_id"])
+        if not bool(raw["enabled"]):
             continue
-        emission = str(raw["emission"])
-        var_method = str(raw["var"])
-        retail = str(raw["retail"])
+        emission = str(raw["emission_family"])
+        var_method = str(raw["var_method"])
+        retail = str(raw["retail_method"])
         if emission not in {"gaussian", "student_t_7", "selected_student_t"}:
             raise ValueError(f"unsupported emission family: {emission}")
         if var_method not in {"ols", "huber", "student_t_7"}:
@@ -180,16 +183,152 @@ def variants_from_config(config: Mapping[str, Any]) -> tuple[SensitivityVariant,
         records.append(
             SensitivityVariant(
                 variant_id=variant_id,
+                model_role=str(raw["model_role"]),
                 non_defining_evidence=bool(raw["non_defining_evidence"]),
                 partial_defining_releases=bool(raw["partial_defining_releases"]),
                 emission_family=emission,
                 var_method=var_method,
                 retail_method=retail,
+                evidence_set_id=str(raw["evidence_set_id"]),
+                observation_model_ids=evidence_sets[str(raw["evidence_set_id"])],
             )
         )
     if not records:
         raise ValueError("no enabled sensitivity variants")
     return tuple(records)
+
+
+def _validated_evidence_sets(
+    config: Mapping[str, Any],
+) -> dict[str, frozenset[str] | None]:
+    """Return explicit per-variant observation-model allowlists.
+
+    Historical sensitivity configurations omit ``evidence_sets`` and retain
+    their original behavior through the ``all_configured`` sentinel. New
+    evidence experiments must declare concrete model IDs so appending candidate
+    event rows cannot silently alter the selected baseline.
+    """
+
+    raw = config.get("evidence_sets")
+    if raw is None:
+        return {"all_configured": None}
+    if not isinstance(raw, Mapping) or not raw:
+        raise ValueError("evidence_sets must be a nonempty mapping")
+    result: dict[str, frozenset[str] | None] = {}
+    for raw_id, declaration in raw.items():
+        set_id = str(raw_id).strip()
+        if not set_id:
+            raise ValueError("evidence-set id cannot be empty")
+        if not isinstance(declaration, Mapping):
+            raise ValueError(f"evidence set {set_id} must be a mapping")
+        models = declaration.get("observation_models")
+        if not isinstance(models, Sequence) or isinstance(models, (str, bytes)):
+            raise ValueError(
+                f"evidence set {set_id} observation_models must be a sequence"
+            )
+        normalized = tuple(str(value).strip() for value in models)
+        if any(not value for value in normalized) or len(normalized) != len(
+            set(normalized)
+        ):
+            raise ValueError(f"evidence set {set_id} contains invalid model IDs")
+        result[set_id] = frozenset(normalized)
+    return result
+
+
+def _validated_variant_declarations(
+    config: Mapping[str, Any],
+) -> tuple[dict[str, object], ...]:
+    """Normalize and validate the complete enabled/disabled role partition."""
+
+    selection = config.get("model_selection")
+    if not isinstance(selection, Mapping):
+        raise ValueError("inference config requires model_selection")
+    selected_baseline = str(selection.get("baseline", ""))
+    major_benchmarks = tuple(
+        str(value) for value in selection.get("major_benchmarks", ())
+    )
+    if not selected_baseline:
+        raise ValueError("model_selection requires one baseline")
+    if len(major_benchmarks) != 2 or len(set(major_benchmarks)) != 2:
+        raise ValueError("model_selection requires two distinct major benchmarks")
+    vocabulary = tuple(str(value) for value in selection.get("role_vocabulary", ()))
+    if set(vocabulary) != set(MODEL_ROLES):
+        raise ValueError("model_selection role_vocabulary is invalid")
+    evidence_sets = _validated_evidence_sets(config)
+
+    raw_variants = config.get("variants", ())
+    if not isinstance(raw_variants, Sequence) or isinstance(
+        raw_variants, (str, bytes)
+    ):
+        raise ValueError("inference config variants must be a sequence")
+    normalized: list[dict[str, object]] = []
+    seen: set[str] = set()
+    for position, raw in enumerate(raw_variants):
+        if not isinstance(raw, Mapping):
+            raise ValueError("each inference variant must be a mapping")
+        variant_id = str(raw.get("id", ""))
+        if not variant_id:
+            raise ValueError("inference variant id cannot be empty")
+        if variant_id in seen:
+            raise ValueError(f"duplicate sensitivity variant: {variant_id}")
+        seen.add(variant_id)
+        role = str(raw.get("model_role", ""))
+        if role not in MODEL_ROLES:
+            raise ValueError(f"unsupported model role for {variant_id}: {role}")
+        evidence_set_id = str(raw.get("evidence_set", "all_configured"))
+        if evidence_set_id not in evidence_sets:
+            raise ValueError(
+                f"variant {variant_id} uses unknown evidence set {evidence_set_id}"
+            )
+        normalized.append(
+            {
+                "display_order": position,
+                "variant_id": variant_id,
+                "model_role": role,
+                "enabled": bool(raw.get("enabled", True)),
+                "non_defining_evidence": bool(raw["non_defining_evidence"]),
+                "partial_defining_releases": bool(raw["partial_defining_releases"]),
+                "emission_family": str(raw["emission"]),
+                "var_method": str(raw["var"]),
+                "retail_method": str(raw["retail"]),
+                "evidence_set_id": evidence_set_id,
+            }
+        )
+
+    baseline_ids = {
+        str(row["variant_id"])
+        for row in normalized
+        if row["model_role"] == "baseline"
+    }
+    if baseline_ids != {selected_baseline}:
+        raise ValueError("variant roles do not match model_selection baseline")
+    benchmark_ids = {
+        str(row["variant_id"])
+        for row in normalized
+        if row["model_role"] == "major_benchmark"
+    }
+    if benchmark_ids != set(major_benchmarks):
+        raise ValueError("variant roles do not match model_selection benchmarks")
+    for row in normalized:
+        variant_id = str(row["variant_id"])
+        role = str(row["model_role"])
+        if role in {"baseline", "major_benchmark"} and not bool(row["enabled"]):
+            raise ValueError(f"{role} variant must be enabled: {variant_id}")
+        if role == "major_benchmark" and row["var_method"] != "ols":
+            raise ValueError(f"major benchmark must use OLS VAR(1): {variant_id}")
+        if (
+            variant_id not in {selected_baseline, *major_benchmarks}
+            and role != "sensitivity"
+        ):
+            raise ValueError(f"unselected variant must be a sensitivity: {variant_id}")
+    return tuple(normalized)
+
+
+def variant_registry_from_config(config: Mapping[str, Any]) -> pd.DataFrame:
+    """Return the complete machine-readable model-role registry."""
+
+    declarations = _validated_variant_declarations(config)
+    return pd.DataFrame.from_records(declarations)
 
 
 def stronger_retail_shrinkage_spec(
@@ -574,6 +713,16 @@ def _profile_for_event(
     variant: SensitivityVariant,
     observation_model_id: str,
 ) -> str | None:
+    allowlist_id = (
+        "consumer_demand"
+        if observation_model_id == "consumer_demand_real_decomposition"
+        else observation_model_id
+    )
+    if (
+        variant.observation_model_ids is not None
+        and allowlist_id not in variant.observation_model_ids
+    ):
+        return None
     if observation_model_id == "consumer_demand_real_decomposition":
         return "retail_real" if variant.retail_method == "real_decomposition" else None
     if observation_model_id == "consumer_demand":
@@ -616,6 +765,12 @@ def run_inference_sensitivities(
     partial_config = sensitivity_config["partial_defining_releases"]
     student_config = sensitivity_config["student_t_emissions"]
     irls_config = student_config["irls"]
+    dependence_config = sensitivity_config.get("dependence_diagnostics", {})
+    diagnostic_variant_id = str(dependence_config.get("variant_id", "")).strip()
+    if diagnostic_variant_id and diagnostic_variant_id not in {
+        variant.variant_id for variant in variants
+    }:
+        raise ValueError("dependence diagnostic names an unknown variant")
 
     profiles: dict[str, EmissionProfile] = {}
     for model_id, spec in prepared.specifications.items():
@@ -625,18 +780,22 @@ def run_inference_sensitivities(
             spec=spec,
             training=prepared.training_tables[model_id],
         )
-    consumer = prepared.specifications["consumer_demand"]
-    strong_config = sensitivity_config["retail_sensitivities"][
-        "stronger_inflation_shrinkage"
-    ]
-    profiles["retail_stronger"] = EmissionProfile(
-        profile_id="retail_stronger",
-        observation_model_id="consumer_demand",
-        spec=stronger_retail_shrinkage_spec(
-            consumer, strong_config["loading_penalties"]
-        ),
-        training=prepared.training_tables["consumer_demand"],
-    )
+    if any(
+        variant.retail_method == "stronger_inflation_shrinkage"
+        for variant in variants
+    ):
+        consumer = prepared.specifications["consumer_demand"]
+        strong_config = sensitivity_config["retail_sensitivities"][
+            "stronger_inflation_shrinkage"
+        ]
+        profiles["retail_stronger"] = EmissionProfile(
+            profile_id="retail_stronger",
+            observation_model_id="consumer_demand",
+            spec=stronger_retail_shrinkage_spec(
+                consumer, strong_config["loading_penalties"]
+            ),
+            training=prepared.training_tables["consumer_demand"],
+        )
     if any(variant.retail_method == "real_decomposition" for variant in variants):
         if real_retail_prepared is None:
             raise ValueError("real-decomposition variant requires prepared retail events")
@@ -648,19 +807,59 @@ def run_inference_sensitivities(
             training=real_retail_prepared.training_tables[real_model_id],
         )
 
+    for variant in variants:
+        if variant.observation_model_ids is None:
+            continue
+        unknown = set(variant.observation_model_ids).difference(
+            set(prepared.specifications)
+        )
+        if unknown:
+            raise ValueError(
+                f"variant {variant.variant_id} evidence set contains unknown models: "
+                + ", ".join(sorted(unknown))
+            )
+
     degrees_grid = _finite_degrees(
         student_config["degrees_of_freedom_sensitivity"]["candidates"]
     )
-    fold_parts = [
-        annual_rolling_origin_tail_scores(
-            profile,
-            degrees_of_freedom_grid=degrees_grid,
-            maximum_iterations=int(irls_config["maximum_iterations"]),
-            tolerance=float(irls_config["relative_tolerance"]),
-            minimum_weight=float(irls_config["minimum_weight"]),
+    families_by_profile: dict[str, set[str]] = {}
+    for profile_id, profile in profiles.items():
+        for variant in variants:
+            if not variant.non_defining_evidence:
+                continue
+            if _profile_for_event(variant, profile.observation_model_id) == profile_id:
+                families_by_profile.setdefault(profile_id, set()).add(
+                    variant.emission_family
+                )
+    used_profiles = {
+        profile_id: profile
+        for profile_id, profile in profiles.items()
+        if profile_id in families_by_profile
+    }
+    if not used_profiles:
+        raise ValueError("no evidence profile is enabled by any runnable variant")
+
+    fold_parts: list[pd.DataFrame] = []
+    for profile_id, profile in used_profiles.items():
+        families = families_by_profile[profile_id]
+        if "selected_student_t" in families:
+            profile_degrees = degrees_grid
+        else:
+            selected: list[float] = []
+            if "student_t_7" in families:
+                selected.append(7.0)
+            if "gaussian" in families:
+                selected.append(math.inf)
+            profile_degrees = tuple(selected)
+        fold_parts.append(
+            annual_rolling_origin_tail_scores(
+                profile,
+                degrees_of_freedom_grid=profile_degrees,
+                maximum_iterations=int(irls_config["maximum_iterations"]),
+                tolerance=float(irls_config["relative_tolerance"]),
+                minimum_weight=float(irls_config["minimum_weight"]),
+            )
         )
-        for profile in profiles.values()
-    ]
     fold_scores = pd.concat(fold_parts, ignore_index=True, sort=False)
 
     first_year = int(scores["score_available_at"].dt.year.min())
@@ -669,12 +868,14 @@ def run_inference_sensitivities(
         student_config["degrees_of_freedom_sensitivity"]["minimum_predictive_events"]
     )
     schedule_parts: list[pd.DataFrame] = []
-    for profile in profiles.values():
-        for family, allowed, fallback_degrees in (
-            ("gaussian", (math.inf,), math.inf),
-            ("student_t_7", (7.0,), 7.0),
-            ("selected_student_t", degrees_grid, 7.0),
-        ):
+    family_settings = {
+        "gaussian": ((math.inf,), math.inf),
+        "student_t_7": ((7.0,), 7.0),
+        "selected_student_t": (degrees_grid, 7.0),
+    }
+    for profile_id, profile in used_profiles.items():
+        for family in sorted(families_by_profile[profile_id]):
+            allowed, fallback_degrees = family_settings[family]
             schedule = causal_annual_hyperparameter_schedule(
                 fold_scores,
                 profile_id=profile.profile_id,
@@ -757,6 +958,7 @@ def run_inference_sensitivities(
     partial_records: list[dict[str, object]] = []
     exact_records: list[dict[str, object]] = []
     fit_records: list[dict[str, object]] = []
+    dependence_records: list[dict[str, object]] = []
     evaluation_records: list[dict[str, object]] = []
 
     def snapshot(stage: str, date: pd.Timestamp, month: pd.Timestamp, *, overwrite: bool) -> None:
@@ -979,6 +1181,51 @@ def run_inference_sensitivities(
                         "weight_state_cutoff": "shared_pre_release_day",
                     }
                 )
+                if variant.variant_id == diagnostic_variant_id:
+                    if reference_month in score_lookup.index:
+                        target = score_lookup.loc[reference_month]
+                        final_score = target.loc[list(STATE_NAMES)].to_numpy(dtype=float)
+                        residual = (
+                            system.adjusted_observation
+                            - system.state_loadings @ final_score
+                        )
+                        whitened = np.linalg.solve(
+                            np.linalg.cholesky(system.residual_scale), residual
+                        )
+                        marginal_scale = np.sqrt(np.diag(system.residual_scale))
+                        last_training = pd.Timestamp(fit.last_training_available_at)
+                        if not last_training < current_date:
+                            raise RuntimeError(
+                                "dependence residual fit is not strictly causal"
+                            )
+                        for position, response_id in enumerate(system.observed_names):
+                            dependence_records.append(
+                                {
+                                    "variant_id": variant.variant_id,
+                                    "block_id": str(row.economic_block),
+                                    "model_id": model_id,
+                                    "response_id": response_id,
+                                    "reference_month": reference_month,
+                                    "observation_date": pd.Timestamp(row.reference_date),
+                                    "validation_available_at": current_date,
+                                    "fit_cutoff": current_date,
+                                    "last_training_available_at": last_training,
+                                    "target_score_available_at": pd.Timestamp(
+                                        target["score_available_at"]
+                                    ),
+                                    "target_usage": (
+                                        "retrospective_completed_first_release_score_only"
+                                    ),
+                                    "raw_residual": float(residual[position]),
+                                    "marginal_standardized_residual": float(
+                                        residual[position] / marginal_scale[position]
+                                    ),
+                                    "standardized_residual": float(whitened[position]),
+                                    "event_weight_from_live_prior": float(
+                                        approximation.event_weight
+                                    ),
+                                }
+                            )
                 pending.append(
                     (
                         variant.variant_id,
@@ -1281,17 +1528,61 @@ def run_inference_sensitivities(
         if transition_weight_parts
         else pd.DataFrame()
     )
+
+    role_by_variant = {
+        variant.variant_id: variant.model_role for variant in variants
+    }
+
+    def with_model_role(
+        frame: pd.DataFrame,
+        *,
+        variant_column: str,
+    ) -> pd.DataFrame:
+        """Attach the validated publication role beside a variant identifier."""
+
+        if variant_column not in frame.columns:
+            return frame
+        result = frame.copy()
+        roles = result[variant_column].map(role_by_variant)
+        if roles.isna().any():
+            unknown = sorted(result.loc[roles.isna(), variant_column].astype(str).unique())
+            raise ValueError(f"output contains variants without model roles: {unknown}")
+        insert_at = result.columns.get_loc(variant_column) + 1
+        result.insert(insert_at, "model_role", roles)
+        return result
+
+    evaluations = with_model_role(
+        pd.DataFrame.from_records(evaluation_records),
+        variant_column="filter_variant",
+    )
+    event_audit = with_model_role(
+        pd.DataFrame.from_records(event_records),
+        variant_column="variant_id",
+    )
+    partial_defining_audit = with_model_role(
+        pd.DataFrame.from_records(partial_records),
+        variant_column="variant_id",
+    )
+    exact_score_audit = with_model_role(
+        pd.DataFrame.from_records(exact_records),
+        variant_column="variant_id",
+    )
+    latest_marginals = with_model_role(
+        pd.DataFrame.from_records(latest_records),
+        variant_column="variant_id",
+    )
     return InferenceSensitivityResult(
-        evaluations=pd.DataFrame.from_records(evaluation_records),
-        event_audit=pd.DataFrame.from_records(event_records),
-        partial_defining_audit=pd.DataFrame.from_records(partial_records),
-        exact_score_audit=pd.DataFrame.from_records(exact_records),
+        evaluations=evaluations,
+        event_audit=event_audit,
+        partial_defining_audit=partial_defining_audit,
+        exact_score_audit=exact_score_audit,
         transition_fit_audit=pd.DataFrame.from_records(transition_records),
         transition_weight_audit=transition_weights,
         emission_fit_audit=pd.DataFrame.from_records(fit_records),
         tail_fold_scores=fold_scores,
         hyperparameter_schedule=schedules,
-        latest_marginals=pd.DataFrame.from_records(latest_records),
+        dependence_residuals=pd.DataFrame.from_records(dependence_records),
+        latest_marginals=latest_marginals,
         latest_states=dict(states),
         initial_date=start,
         replay_end=end,
@@ -1301,11 +1592,13 @@ def run_inference_sensitivities(
 __all__ = [
     "EmissionProfile",
     "InferenceSensitivityResult",
+    "MODEL_ROLES",
     "SensitivityVariant",
     "annual_rolling_origin_tail_scores",
     "causal_annual_hyperparameter_schedule",
     "real_retail_spec",
     "run_inference_sensitivities",
     "stronger_retail_shrinkage_spec",
+    "variant_registry_from_config",
     "variants_from_config",
 ]

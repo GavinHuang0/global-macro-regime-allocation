@@ -1,0 +1,149 @@
+schema_version: 1
+model_id: m02_soft_composite
+stage_id: m02_evidence_block_experiments
+experiment_id: six_priority_evidence_test_v1
+description: >-
+  Additive point-in-time evidence artifact used to test six predeclared
+  improvements while preserving the selected student_t_7_combined evidence
+  set byte-for-byte as the comparison baseline. No candidate is promoted by
+  this configuration.
+
+sources:
+  baseline_evidence_manifest: data/manifests/m02_release_evidence.json
+  baseline_evidence_events: >-
+    data/processed/m02_soft_composite/release_evidence/release_events.csv
+  baseline_new_observations: >-
+    data/processed/m02_soft_composite/release_evidence/new_first_release_observations.csv
+  m01_evidence_manifest: data/manifests/m01_non_defining_release_evidence.json
+  m01_events: >-
+    data/processed/m01_non_defining_release_evidence/non_defining_release_events.csv
+
+provider_policy:
+  provider: fred_api
+  on_failure: stop_without_fallback
+  credentials: runtime_environment_only
+
+data:
+  feature_start: 2000-06-01
+  observation_start: 1994-01-01
+  observation_end: 2026-07-20
+  vintage_start: 1994-01-01
+  vintage_end: 2026-07-20
+  maximum_release_lag_days: 92
+  archive_start_latest_only: true
+  standard_deviation_ddof: 1
+
+priorities:
+  priority_01_manufacturing_surveys:
+    action: add
+    minimum_standardization_history: 24
+    sources:
+      - series_id: NOCDISA066MSFRBNY
+        release_id: 321
+        release_block: manufacturing_empire_state
+        feature_name: empire_current_new_orders_level
+        transform: contemporaneous_diffusion_index_level
+      - series_id: PPCDISA066MSFRBNY
+        release_id: 321
+        release_block: manufacturing_empire_state
+        feature_name: empire_current_prices_paid_level
+        transform: contemporaneous_diffusion_index_level
+      - series_id: NOCDFSA066MSFRBPHI
+        release_id: 351
+        release_block: manufacturing_philadelphia
+        feature_name: philadelphia_current_new_orders_level
+        transform: contemporaneous_diffusion_index_level
+      - series_id: PPCDFSA066MSFRBPHI
+        release_id: 351
+        release_block: manufacturing_philadelphia
+        feature_name: philadelphia_current_prices_paid_level
+        transform: contemporaneous_diffusion_index_level
+
+  priority_02_continuing_claims:
+    action: add_to_existing_initial_claims
+    source:
+      series_id: CCSA
+      release_id: 180
+      release_block: weekly_continued_claims
+      m01_release_block: weekly_claims
+      feature_name: continued_claims_innovation
+      transform: expanding_log_ar1_innovation
+    joint_model_status: >-
+      separate initial test because ICSA and CCSA have different reference
+      weeks; same-day dependence is measured and disclosed
+
+  priority_03_clean_consumer_quantities:
+    action: replace_consumer_demand
+    minimum_standardization_history: 24
+    sources:
+      - series_id: MARTSSM44W72USS
+        release_id: 9
+        release_block: consumer_retail_ex_auto_gas
+        feature_name: retail_ex_auto_gas_log_change
+        transform: log_difference
+      - series_id: TOTALSA
+        release_id: 93
+        release_block: consumer_vehicle_units
+        feature_name: total_vehicle_unit_sales_log_change
+        transform: log_difference
+
+  priority_04_single_family_housing:
+    action: replace_housing_activity
+    minimum_standardization_history: 24
+    sources:
+      - series_id: HOUST1F
+        release_id: 27
+        release_block: housing_single_family_construction
+        feature_name: single_family_housing_starts_log_change
+        transform: log_difference
+      - series_id: PERMIT1
+        release_id: 27
+        release_block: housing_single_family_construction
+        feature_name: single_family_building_permits_log_change
+        transform: log_difference
+      - series_id: HSN1F
+        release_id: 97
+        release_block: housing_new_home_sales
+        feature_name: new_single_family_home_sales_log_change
+        transform: log_difference
+    controls:
+      - mortgage_rate_monthly_average_level_control
+      - mortgage_rate_monthly_average_change_control
+      - mortgage_rate_post_2022_11_17_methodology
+
+  priority_05_import_price_pressure:
+    action: add
+    minimum_standardization_history: 24
+    source:
+      series_id: IREXPETCOM
+      release_id: 188
+      release_block: inflation_import_prices
+      feature_name: import_prices_ex_food_fuels_computers_12m_log_change
+      transform: same_vintage_log_change_12m
+      seasonality_policy: year_over_year_change_for_nonseasonally_adjusted_index
+
+  priority_06_capital_goods_backlog:
+    action: replace_business_investment
+    minimum_standardization_history: 24
+    sources:
+      - series_id: ANXAUO
+        release_id: 95
+      - series_id: ANXAVS
+        release_id: 95
+    reused_orders:
+      series_id: NEWORDER
+      baseline_release_block: business_investment
+      feature_name: core_capital_goods_orders_log_change
+    derived:
+      series_id: ANXAUO_DIV_ANXAVS
+      release_block: business_investment_backlog
+      feature_name: capital_goods_backlog_to_shipments_log_ratio_level
+      transform: same_vintage_log_ratio_level
+
+outputs:
+  raw_dir: data/raw/fred_api/m02_evidence_block_experiments
+  processed_dir: data/processed/m02_soft_composite/evidence_block_experiments
+  candidate_events: candidate_release_events.csv
+  extended_events: extended_release_events.csv
+  coverage: candidate_coverage.csv
+  manifest: data/manifests/m02_evidence_block_experiments.json

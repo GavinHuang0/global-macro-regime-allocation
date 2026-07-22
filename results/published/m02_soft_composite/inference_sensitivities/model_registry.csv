@@ -1,0 +1,12 @@
+display_order,variant_id,model_role,enabled,non_defining_evidence,partial_defining_releases,emission_family,var_method,retail_method,evidence_set_id
+0,transition_only,major_benchmark,True,False,False,gaussian,ols,baseline_nominal,all_configured
+1,gaussian_nondefining,sensitivity,True,True,False,gaussian,ols,baseline_nominal,all_configured
+2,partial_only,major_benchmark,True,False,True,gaussian,ols,baseline_nominal,all_configured
+3,gaussian_combined,sensitivity,True,True,True,gaussian,ols,baseline_nominal,all_configured
+4,student_t_7_combined,baseline,True,True,True,student_t_7,ols,baseline_nominal,all_configured
+5,selected_tail_combined,sensitivity,True,True,True,selected_student_t,ols,baseline_nominal,all_configured
+6,huber_var_combined,sensitivity,True,True,True,selected_student_t,huber,baseline_nominal,all_configured
+7,student_t_var_combined,sensitivity,True,True,True,selected_student_t,student_t_7,baseline_nominal,all_configured
+8,retail_shrinkage_combined,sensitivity,True,True,True,selected_student_t,huber,stronger_inflation_shrinkage,all_configured
+9,retail_real_decomposition_combined,sensitivity,True,True,True,selected_student_t,huber,real_decomposition,all_configured
+10,retail_stress_interaction_combined,sensitivity,False,True,True,selected_student_t,huber,stress_interaction,all_configured

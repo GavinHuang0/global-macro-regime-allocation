@@ -1,0 +1,9 @@
+block_id,observation_models,primary_atomic,audit_rows,applied_updates,active_reference_months,fit_error_rows,target_exact_predictive_only_rows,other_non_applied_rows,first_applied_release,last_applied_release,median_event_weight
+weekly_labor_stress,weekly_labor_stress,True,597,490,114,107,0,0,2017-03-02,2026-07-16,1.1039457751556432
+monthly_labor_demand,monthly_labor_demand,True,132,14,14,36,82,0,2019-02-12,2026-03-31,1.2345065766420977
+consumer_demand,consumer_demand,True,191,182,182,9,0,0,2011-06-14,2026-07-16,1.1429340700965953
+housing_activity,housing_activity,True,191,129,129,36,1,25,2015-08-18,2026-06-16,1.060047774533818
+business_investment,business_investment,True,190,82,82,105,3,0,2019-06-26,2026-06-25,1.0478599645663418
+inflation_expectations,inflation_expectations,True,29,3,3,26,0,0,2026-05-12,2026-07-14,0.8012230382363197
+inflation_input_costs,inflation_input_costs,True,76,40,40,36,0,0,2023-04-13,2026-07-15,1.0953738816692105
+inflation_pressure_pair,inflation_expectations|inflation_input_costs,False,105,43,41,62,0,0,2023-04-13,2026-07-15,1.0926559562339961

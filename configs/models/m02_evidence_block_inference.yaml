@@ -1,0 +1,525 @@
+schema_version: 1
+model_id: m02_soft_composite
+stage_id: m02_evidence_block_inference_experiments
+description: >-
+  Six isolated and one combined evidence-block experiments around the frozen
+  student_t_7_combined model. Every candidate retains fixed nu=7 Student-t
+  emissions, OLS VAR(1), partial defining releases, score construction, and
+  mapping uncertainty. The selected baseline consumes only the legacy v1
+  observation models even though candidate rows are present.
+
+model_selection:
+  baseline: student_t_7_combined
+  major_benchmarks: [transition_only, partial_only]
+  role_vocabulary: [baseline, major_benchmark, sensitivity]
+  selection_status: experiment_only_no_candidate_promoted
+  rationale: >-
+    Evidence-set gating holds the selected baseline fixed. Each priority is an
+    isolated sensitivity; candidate_all_six tests their joint effect. Promotion
+    requires causal out-of-sample evidence and is outside this experiment.
+
+sources:
+  base_filter_config: configs/models/m02_event_driven_bayesian_filter.yaml
+  score_manifest: data/manifests/m02_soft_composite.json
+  score_features: data/processed/m02_soft_composite/composite_scores.csv
+  defining_components: >-
+    data/processed/m02_soft_composite/first_release_components_long.csv
+  mapping_manifest: data/manifests/m02_probability_map.json
+  mapping_history: >-
+    results/published/m02_soft_composite/probability_map/quadrant_probabilities.csv
+  evidence_manifest: data/manifests/m02_evidence_block_experiments.json
+  evidence_events: >-
+    data/processed/m02_soft_composite/evidence_block_experiments/extended_release_events.csv
+  baseline_sensitivity_manifest: data/manifests/m02_inference_sensitivities.json
+  baseline_evaluation_rows: >-
+    data/processed/m02_soft_composite/inference_sensitivities/evaluation_rows.csv
+  baseline_event_update_audit: >-
+    data/processed/m02_soft_composite/inference_sensitivities/event_update_audit.csv.gz
+  baseline_latest_marginals: >-
+    results/published/m02_soft_composite/inference_sensitivities/latest_marginals.csv
+
+candidate_observation_models:
+  manufacturing_empire_state:
+    economic_block: manufacturing_surveys
+    event_block: manufacturing_empire_state
+    responses:
+      - empire_current_new_orders_level
+      - empire_current_prices_paid_level
+    controls: []
+    loading_penalties:
+      - [1.0, 10.0]
+      - [10.0, 1.0]
+    exact_zero_mask:
+      - [false, false]
+      - [false, false]
+    minimum_training_samples: 24
+    validation_minimum_training_samples: 18
+    minimum_validation_observations: 12
+
+  manufacturing_philadelphia:
+    economic_block: manufacturing_surveys
+    event_block: manufacturing_philadelphia
+    responses:
+      - philadelphia_current_new_orders_level
+      - philadelphia_current_prices_paid_level
+    controls: []
+    loading_penalties:
+      - [1.0, 10.0]
+      - [10.0, 1.0]
+    exact_zero_mask:
+      - [false, false]
+      - [false, false]
+    minimum_training_samples: 24
+    validation_minimum_training_samples: 18
+    minimum_validation_observations: 12
+
+  weekly_continued_claims:
+    economic_block: weekly_labor_stress
+    event_block: weekly_continued_claims
+    responses: [continued_claims_innovation]
+    controls: []
+    loading_penalties:
+      - [1.0, 0.0]
+    exact_zero_mask:
+      - [false, true]
+    minimum_training_samples: 104
+    validation_minimum_training_samples: 52
+    minimum_validation_observations: 52
+
+  consumer_retail_ex_auto_gas:
+    economic_block: consumer_demand
+    event_block: consumer_retail_ex_auto_gas
+    responses: [retail_ex_auto_gas_log_change]
+    controls: []
+    loading_penalties:
+      - [1.0, 10.0]
+    exact_zero_mask:
+      - [false, false]
+    minimum_training_samples: 24
+    validation_minimum_training_samples: 18
+    minimum_validation_observations: 12
+
+  consumer_vehicle_units:
+    economic_block: consumer_demand
+    event_block: consumer_vehicle_units
+    responses: [total_vehicle_unit_sales_log_change]
+    controls: []
+    loading_penalties:
+      - [1.0, 0.0]
+    exact_zero_mask:
+      - [false, true]
+    minimum_training_samples: 24
+    validation_minimum_training_samples: 18
+    minimum_validation_observations: 12
+
+  housing_single_family_construction:
+    economic_block: housing_activity
+    event_block: housing_single_family_construction
+    responses:
+      - single_family_housing_starts_log_change
+      - single_family_building_permits_log_change
+    controls:
+      - mortgage_rate_monthly_average_level_control
+      - mortgage_rate_monthly_average_change_control
+      - mortgage_rate_post_2022_11_17_methodology
+    loading_penalties:
+      - [1.0, 10.0]
+      - [1.0, 10.0]
+    exact_zero_mask:
+      - [false, false]
+      - [false, false]
+    minimum_training_samples: 36
+    validation_minimum_training_samples: 24
+    minimum_validation_observations: 12
+
+  housing_new_home_sales:
+    economic_block: housing_activity
+    event_block: housing_new_home_sales
+    responses: [new_single_family_home_sales_log_change]
+    controls:
+      - mortgage_rate_monthly_average_level_control
+      - mortgage_rate_monthly_average_change_control
+      - mortgage_rate_post_2022_11_17_methodology
+    loading_penalties:
+      - [1.0, 10.0]
+    exact_zero_mask:
+      - [false, false]
+    minimum_training_samples: 36
+    validation_minimum_training_samples: 24
+    minimum_validation_observations: 12
+
+  inflation_import_prices:
+    economic_block: inflation_pressure
+    event_block: inflation_import_prices
+    responses: [import_prices_ex_food_fuels_computers_12m_log_change]
+    controls: []
+    loading_penalties:
+      - [0.0, 1.0]
+    exact_zero_mask:
+      - [true, false]
+    minimum_training_samples: 24
+    validation_minimum_training_samples: 18
+    minimum_validation_observations: 12
+
+  business_investment_backlog:
+    economic_block: business_investment
+    event_block: business_investment_backlog
+    responses:
+      - core_capital_goods_orders_log_change
+      - capital_goods_backlog_to_shipments_log_ratio_level
+    controls: []
+    loading_penalties:
+      - [1.0, 10.0]
+      - [1.0, 10.0]
+    exact_zero_mask:
+      - [false, false]
+      - [false, false]
+    minimum_training_samples: 24
+    validation_minimum_training_samples: 18
+    minimum_validation_observations: 12
+
+evidence_sets:
+  legacy_baseline:
+    observation_models:
+      - weekly_labor_stress
+      - monthly_labor_demand
+      - consumer_demand
+      - housing_activity
+      - business_investment
+      - inflation_expectations
+      - inflation_input_costs
+  priority_01_empire_only:
+    observation_models:
+      - weekly_labor_stress
+      - monthly_labor_demand
+      - consumer_demand
+      - housing_activity
+      - business_investment
+      - inflation_expectations
+      - inflation_input_costs
+      - manufacturing_empire_state
+  priority_01_philadelphia_only:
+    observation_models:
+      - weekly_labor_stress
+      - monthly_labor_demand
+      - consumer_demand
+      - housing_activity
+      - business_investment
+      - inflation_expectations
+      - inflation_input_costs
+      - manufacturing_philadelphia
+  priority_01_surveys:
+    observation_models:
+      - weekly_labor_stress
+      - monthly_labor_demand
+      - consumer_demand
+      - housing_activity
+      - business_investment
+      - inflation_expectations
+      - inflation_input_costs
+      - manufacturing_empire_state
+      - manufacturing_philadelphia
+  priority_02_claims:
+    observation_models:
+      - weekly_labor_stress
+      - weekly_continued_claims
+      - monthly_labor_demand
+      - consumer_demand
+      - housing_activity
+      - business_investment
+      - inflation_expectations
+      - inflation_input_costs
+  priority_03_consumer:
+    observation_models:
+      - weekly_labor_stress
+      - monthly_labor_demand
+      - consumer_retail_ex_auto_gas
+      - consumer_vehicle_units
+      - housing_activity
+      - business_investment
+      - inflation_expectations
+      - inflation_input_costs
+  priority_04_housing:
+    observation_models:
+      - weekly_labor_stress
+      - monthly_labor_demand
+      - consumer_demand
+      - housing_single_family_construction
+      - housing_new_home_sales
+      - business_investment
+      - inflation_expectations
+      - inflation_input_costs
+  priority_05_import_prices:
+    observation_models:
+      - weekly_labor_stress
+      - monthly_labor_demand
+      - consumer_demand
+      - housing_activity
+      - business_investment
+      - inflation_expectations
+      - inflation_input_costs
+      - inflation_import_prices
+  priority_06_backlog:
+    observation_models:
+      - weekly_labor_stress
+      - monthly_labor_demand
+      - consumer_demand
+      - housing_activity
+      - business_investment_backlog
+      - inflation_expectations
+      - inflation_input_costs
+  candidate_all_six:
+    observation_models:
+      - weekly_labor_stress
+      - weekly_continued_claims
+      - monthly_labor_demand
+      - consumer_retail_ex_auto_gas
+      - consumer_vehicle_units
+      - housing_single_family_construction
+      - housing_new_home_sales
+      - business_investment_backlog
+      - inflation_expectations
+      - inflation_input_costs
+      - manufacturing_empire_state
+      - manufacturing_philadelphia
+      - inflation_import_prices
+
+partial_defining_releases:
+  enabled: true
+  component_weight: 0.25
+  minimum_complete_training_months: 60
+  covariance_estimator: ledoit_wolf
+  covariance_eigenvalue_floor: 1.0e-8
+  training_cutoff: complete_score_available_strictly_before_release
+  event_value_policy: causally_standardized_first_release_component
+  blocks:
+    employment_situation:
+      components: [payrolls, unemployment_rate, average_hourly_earnings]
+    consumer_price_index:
+      components: [core_cpi]
+    producer_price_index:
+      components: [producer_prices]
+    industrial_production:
+      components: [industrial_production]
+    personal_income_and_outlays:
+      components: [consumer_activity, core_pce]
+
+student_t_emissions:
+  initial_degrees_of_freedom: 7.0
+  irls:
+    maximum_iterations: 100
+    relative_tolerance: 1.0e-8
+    minimum_weight: 1.0e-6
+  degrees_of_freedom_sensitivity:
+    candidates: [7.0]
+    selection: fixed_nu_7_with_causal_rolling_origin_ridge_selection
+    selection_refresh: annual_start
+    minimum_predictive_events: 24
+
+robust_var:
+  gaussian_joint_state_retained: true
+  covariance_eigenvalue_floor: 1.0e-8
+  methods:
+    ols:
+      family: gaussian
+
+retail_sensitivities:
+  stronger_inflation_shrinkage:
+    loading_penalties:
+      retail_sales_ex_motor_vehicles_log_change: [1.0, 10.0]
+      motor_vehicle_sales_log_change: [1.0, 10.0]
+  stress_interaction:
+    enabled: false
+    status: not_part_of_evidence_block_experiment
+    identification_audit: not_evaluated_in_this_stage
+
+dependence_diagnostics:
+  variant_id: candidate_all_six
+  target_usage: >-
+    causal-fit retrospective diagnostic using the subsequently completed
+    first-release score; never used for live filtering or fit selection
+  weekly_response_ids:
+    - initial_claims_innovation
+    - continued_claims_innovation
+  cross_block_lags: [-1, 0, 1]
+  minimum_pair_observations: 12
+  serial_significance_level: 0.05
+  exact_same_publication_pair:
+    left_model_id: weekly_labor_stress
+    left_response_id: initial_claims_innovation
+    right_model_id: weekly_continued_claims
+    right_response_id: continued_claims_innovation
+
+variants:
+  - id: transition_only
+    model_role: major_benchmark
+    non_defining_evidence: false
+    partial_defining_releases: false
+    emission: gaussian
+    var: ols
+    retail: baseline_nominal
+    evidence_set: legacy_baseline
+  - id: partial_only
+    model_role: major_benchmark
+    non_defining_evidence: false
+    partial_defining_releases: true
+    emission: gaussian
+    var: ols
+    retail: baseline_nominal
+    evidence_set: legacy_baseline
+  - id: student_t_7_combined
+    model_role: baseline
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: legacy_baseline
+  - id: priority_01_empire_only
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: priority_01_empire_only
+  - id: priority_01_philadelphia_only
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: priority_01_philadelphia_only
+  - id: priority_01_surveys
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: priority_01_surveys
+  - id: priority_02_claims
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: priority_02_claims
+  - id: priority_03_consumer
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: priority_03_consumer
+  - id: priority_04_housing
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: priority_04_housing
+  - id: priority_05_import_prices
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: priority_05_import_prices
+  - id: priority_06_backlog
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: priority_06_backlog
+  - id: candidate_all_six
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: candidate_all_six
+
+evaluation:
+  primary_checkpoint: before_any_defining_release
+  initialization_burn_in_months: 4
+  information_stage_checkpoints:
+    - before_any_defining_release
+    - after_employment_situation
+    - after_midmonth_defining_releases
+    - strict_pre_final_score_day
+  paired_block_bootstrap:
+    random_seed: 20260722
+    replications: 5000
+    block_length_months: 12
+    confidence_level: 0.95
+    samples:
+      - full_sample
+      - excluding_2020_03_through_2020_05
+    variants:
+      - priority_01_surveys
+      - priority_02_claims
+      - priority_03_consumer
+      - priority_04_housing
+      - priority_05_import_prices
+      - priority_06_backlog
+      - candidate_all_six
+    holm_family:
+      - priority_01_surveys
+      - priority_02_claims
+      - priority_03_consumer
+      - priority_04_housing
+      - priority_05_import_prices
+      - priority_06_backlog
+    metrics:
+      score_center_negative_log_predictive_density: lower
+      quadrant_cross_entropy_to_exact_score_map: lower
+      quadrant_brier_distance_to_exact_score_map: lower
+      hard_quadrant_correct: higher
+
+outputs:
+  processed_dir: data/processed/m02_soft_composite/evidence_block_inference
+  published_dir: results/published/m02_soft_composite/evidence_block_inference
+  manifest: data/manifests/m02_evidence_block_inference.json
+  evaluation_rows: evaluation_rows.csv
+  evaluation_summary: evaluation_summary.csv
+  evaluation_subperiod_summary: evaluation_subperiod_summary.csv
+  paired_comparisons: paired_comparisons.csv
+  paired_block_bootstrap: paired_block_bootstrap.csv
+  dependence_residuals: dependence_residuals.csv.gz
+  dependence_monthly_residuals: dependence_monthly_residuals.csv
+  dependence_pairwise: dependence_pairwise.csv
+  dependence_serial: dependence_serial.csv
+  dependence_same_publication: dependence_same_publication.csv
+  event_update_audit: event_update_audit.csv.gz
+  partial_defining_audit: partial_defining_audit.csv.gz
+  exact_score_audit: exact_score_audit.csv
+  transition_fit_audit: transition_fit_audit.csv
+  transition_weight_audit: transition_weight_audit.csv.gz
+  emission_fit_audit: emission_fit_audit.csv
+  tail_fold_scores: tail_fold_scores.csv
+  hyperparameter_schedule: hyperparameter_schedule.csv
+  latest_marginals: latest_marginals.csv
+  model_registry: model_registry.csv
+  profile_coverage: profile_coverage.csv
+  baseline_invariance: baseline_invariance.csv
+  public_evaluation_summary: evaluation_summary.csv
+  public_evaluation_subperiod_summary: evaluation_subperiod_summary.csv
+  public_paired_comparisons: paired_comparisons.csv
+  public_paired_block_bootstrap: paired_block_bootstrap.csv
+  public_dependence_pairwise: dependence_pairwise.csv
+  public_dependence_serial: dependence_serial.csv
+  public_dependence_same_publication: dependence_same_publication.csv
+  public_dependence_summary: dependence_summary.json
+  public_profile_coverage: profile_coverage.csv
+  public_baseline_invariance: baseline_invariance.csv
+  public_model_registry: model_registry.csv
+  public_method_summary: method_summary.json

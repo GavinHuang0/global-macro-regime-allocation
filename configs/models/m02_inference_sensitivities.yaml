@@ -2,10 +2,26 @@ schema_version: 1
 model_id: m02_soft_composite
 stage_id: partial_defining_and_robustness_sensitivities
 description: >-
-  Named causal sensitivities built on the frozen Model 02 score, probability
-  map, release-evidence, and Gaussian-filter inputs. The frozen baseline is not
-  overwritten. Partial defining releases are exact observations of component
-  values, not exact observations of the unfinished composite score.
+  Selected Model 02 inference baseline, two major ablation benchmarks, and
+  named causal sensitivities built on the frozen score, probability-map,
+  release-evidence, and predecessor Gaussian-filter inputs. Historical
+  upstream artifacts are preserved. Partial defining releases are exact
+  observations of component values, not exact observations of the unfinished
+  composite score.
+
+model_selection:
+  baseline: student_t_7_combined
+  major_benchmarks: [transition_only, partial_only]
+  role_vocabulary: [baseline, major_benchmark, sensitivity]
+  selection_status: selected_model_02_inference_baseline
+  rationale: >-
+    Fixed seven-degree-of-freedom Student-t release emissions provide robust
+    event updates without the instability and small full-history gain of
+    annually selecting the tail parameter. OLS VAR(1) remains the transition
+    estimator so the baseline changes only the observation treatment relative
+    to the Gaussian predecessor. Transition-only isolates transition dynamics;
+    partial-only isolates score-defining releases. Every other variant is
+    retained as a sensitivity rather than an alternative baseline.
 
 sources:
   base_filter_config: configs/models/m02_event_driven_bayesian_filter.yaml
@@ -123,66 +139,77 @@ retail_sensitivities:
 
 variants:
   - id: transition_only
+    model_role: major_benchmark
     non_defining_evidence: false
     partial_defining_releases: false
     emission: gaussian
     var: ols
     retail: baseline_nominal
   - id: gaussian_nondefining
+    model_role: sensitivity
     non_defining_evidence: true
     partial_defining_releases: false
     emission: gaussian
     var: ols
     retail: baseline_nominal
   - id: partial_only
+    model_role: major_benchmark
     non_defining_evidence: false
     partial_defining_releases: true
     emission: gaussian
     var: ols
     retail: baseline_nominal
   - id: gaussian_combined
+    model_role: sensitivity
     non_defining_evidence: true
     partial_defining_releases: true
     emission: gaussian
     var: ols
     retail: baseline_nominal
   - id: student_t_7_combined
+    model_role: baseline
     non_defining_evidence: true
     partial_defining_releases: true
     emission: student_t_7
     var: ols
     retail: baseline_nominal
   - id: selected_tail_combined
+    model_role: sensitivity
     non_defining_evidence: true
     partial_defining_releases: true
     emission: selected_student_t
     var: ols
     retail: baseline_nominal
   - id: huber_var_combined
+    model_role: sensitivity
     non_defining_evidence: true
     partial_defining_releases: true
     emission: selected_student_t
     var: huber
     retail: baseline_nominal
   - id: student_t_var_combined
+    model_role: sensitivity
     non_defining_evidence: true
     partial_defining_releases: true
     emission: selected_student_t
     var: student_t_7
     retail: baseline_nominal
   - id: retail_shrinkage_combined
+    model_role: sensitivity
     non_defining_evidence: true
     partial_defining_releases: true
     emission: selected_student_t
     var: huber
     retail: stronger_inflation_shrinkage
   - id: retail_real_decomposition_combined
+    model_role: sensitivity
     non_defining_evidence: true
     partial_defining_releases: true
     emission: selected_student_t
     var: huber
     retail: real_decomposition
   - id: retail_stress_interaction_combined
+    model_role: sensitivity
     enabled: false
     non_defining_evidence: true
     partial_defining_releases: true
@@ -231,9 +258,11 @@ outputs:
   retail_stress_identification_audit: retail_stress_identification_audit.csv
   hyperparameter_schedule: hyperparameter_schedule.csv
   latest_marginals: latest_marginals.csv
+  model_registry: model_registry.csv
   public_evaluation_summary: evaluation_summary.csv
   public_evaluation_subperiod_summary: evaluation_subperiod_summary.csv
   public_paired_comparisons: paired_comparisons.csv
   public_tail_summary: tail_summary.csv
   public_latest_marginals: latest_marginals.csv
+  public_model_registry: model_registry.csv
   public_method_summary: method_summary.json

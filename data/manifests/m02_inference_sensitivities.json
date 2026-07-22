@@ -2,7 +2,7 @@
   "base_configuration": "configs/models/m02_event_driven_bayesian_filter.yaml",
   "base_configuration_sha256": "4357da3e904491b06bdf687ae9abdff797695d81e91d0beb4aff278ba201686d",
   "configuration": "configs/models/m02_inference_sensitivities.yaml",
-  "configuration_sha256": "9931650fad4b6dc79ec3654fa80b0ceee1b3b61ba2981e5e2d84388cc76c4307",
+  "configuration_sha256": "63ca9a2b1edecd587c892a9bf23ae343fec509dd6e393fff4b6c586d51947a52",
   "coverage": {
     "emission_fits": 2052,
     "evaluation_rows": 7520,
@@ -13,48 +13,48 @@
     "transition_fits": 573
   },
   "credential_policy": "no network access and no credential read in inference sensitivity stage",
-  "data_snapshot_sha256": "e13f3bc3e78a871b62fa81df069d18a713908257e4361c3225b89aa09c3dc3ae",
-  "generated_at_utc": "2026-07-22T05:44:40.947874+00:00",
+  "data_snapshot_sha256": "d495f8b5d1e47ed4b7199568223e929a2334b57e45b6ab64e7e657d986d5a767",
+  "generated_at_utc": "2026-07-22T10:28:06.994862+00:00",
   "generated_file_hashes": [
     {
-      "bytes": 3631547,
+      "bytes": 3725558,
       "path": "data/processed/m02_soft_composite/inference_sensitivities/evaluation_rows.csv",
-      "sha256": "2efd2f88c0fe70e4ec225d86269871c6f82763eaa8d324b2b74c195194a8676f"
+      "sha256": "20820fbb9b017f89fe2a8c0152a0ffee18f2a50a195be30b3bd8b26cb20d86b8"
     },
     {
-      "bytes": 8602,
+      "bytes": 9113,
       "path": "data/processed/m02_soft_composite/inference_sensitivities/evaluation_summary.csv",
-      "sha256": "384051cec29fb2a64a3397b8f2aefc72fa91d839f2fe32fe622164128a673678"
+      "sha256": "b43bd489be440a3944aa03f0a7139e5474807ffb481f5d83207ca21625363d26"
     },
     {
-      "bytes": 38043,
+      "bytes": 40054,
       "path": "data/processed/m02_soft_composite/inference_sensitivities/evaluation_subperiod_summary.csv",
-      "sha256": "b34727a04cc04fef75aee6185745730427bc8dea04eeae5d02a0e6b19f2a10ed"
+      "sha256": "d96085ef173317a6d82d4bc8ba0a58a050181c7670850693b5e80237e479474a"
     },
     {
-      "bytes": 12274,
+      "bytes": 13685,
       "path": "data/processed/m02_soft_composite/inference_sensitivities/paired_comparisons.csv",
-      "sha256": "fa7c7d02ad8cbb6ecf6fdf1c63858e4d0ccc13532b0ef20828133927c114cae6"
+      "sha256": "115f7fb6426c4a32b36f713068d265c4e605d02652cc06d5149527ff86a7830b"
     },
     {
-      "bytes": 426045,
+      "bytes": 430148,
       "path": "data/processed/m02_soft_composite/inference_sensitivities/event_update_audit.csv.gz",
-      "sha256": "34810dbbd88c32bddc8f3e57c5eefe4523a88c41f09b67645e65857b0ff1a79d"
+      "sha256": "bb9a25ebe132d8ded19f1b6028666a742fc7b45f5a6a743c282548af6d529ffd"
     },
     {
-      "bytes": 109469,
+      "bytes": 109814,
       "path": "data/processed/m02_soft_composite/inference_sensitivities/partial_defining_audit.csv.gz",
-      "sha256": "aaa254d22b1a4a9fcd381218c0cbbda728d4f9eb46bdc70e69358453e8d59ad9"
+      "sha256": "2ebbb5aa171de81c31aec92f18eb0413a8f11138343bf013a0e1fa82a6d72427"
     },
     {
-      "bytes": 111680,
+      "bytes": 113649,
       "path": "data/processed/m02_soft_composite/inference_sensitivities/partial_preparation_audit.csv.gz",
-      "sha256": "fd580d6fa1ec3b914f46ae382cd413838b1351d0aa08b01568dfd1e97237e022"
+      "sha256": "dda654b8428ea5a779633af6f107e24a5b0bf41f2469d3775b7682ad619e9cdf"
     },
     {
-      "bytes": 121313,
+      "bytes": 144824,
       "path": "data/processed/m02_soft_composite/inference_sensitivities/exact_score_audit.csv",
-      "sha256": "59c681a388f8f79de21494de1c184ad4159cb45672cb09c8bd71668efac95af7"
+      "sha256": "84a3783ad7ab9e9dc0a299bd119db77f8b4495de631a109159722a3c6302f629"
     },
     {
       "bytes": 174718,
@@ -64,7 +64,7 @@
     {
       "bytes": 7559517,
       "path": "data/processed/m02_soft_composite/inference_sensitivities/transition_weight_audit.csv.gz",
-      "sha256": "35aedc48ffc865b56fdc30817b4da0f9f666b12113e10278fbb897e1dedce271"
+      "sha256": "be1a6fa22d0b0abd99bdcd63b239b25481692312fcd5e906f96ca5a567fe1bb3"
     },
     {
       "bytes": 487825,
@@ -87,29 +87,34 @@
       "sha256": "d1bdf9f48066e4d14ea0e6314f23ccdad6876149aabc955e7696f9a86aec579c"
     },
     {
-      "bytes": 55101,
+      "bytes": 47317,
       "path": "data/processed/m02_soft_composite/inference_sensitivities/hyperparameter_schedule.csv",
-      "sha256": "3dab4dc30e06fe5021832e611fcec29f621414ea6bbfca27083aff3814d61d0e"
+      "sha256": "bdf7585794ead624f58dce8fb4e5b5a5e390b393dedffb51ef055ab11d080e6a"
     },
     {
-      "bytes": 8574,
+      "bytes": 9085,
       "path": "data/processed/m02_soft_composite/inference_sensitivities/latest_marginals.csv",
-      "sha256": "d19476bcba73497b2ca0bf5e5317ab952a51e7cbe5644163a9d6e65ca62bc664"
+      "sha256": "b7877d477301143a059c6336073b66562a04690c4ecbb438c9cc8fda7b592288"
     },
     {
-      "bytes": 8602,
+      "bytes": 1331,
+      "path": "data/processed/m02_soft_composite/inference_sensitivities/model_registry.csv",
+      "sha256": "ac32de39cb9b6623fee70937aa3c708a73d2d933afcaca5977247a2951a69e47"
+    },
+    {
+      "bytes": 9113,
       "path": "results/published/m02_soft_composite/inference_sensitivities/evaluation_summary.csv",
-      "sha256": "384051cec29fb2a64a3397b8f2aefc72fa91d839f2fe32fe622164128a673678"
+      "sha256": "b43bd489be440a3944aa03f0a7139e5474807ffb481f5d83207ca21625363d26"
     },
     {
-      "bytes": 38043,
+      "bytes": 40054,
       "path": "results/published/m02_soft_composite/inference_sensitivities/evaluation_subperiod_summary.csv",
-      "sha256": "b34727a04cc04fef75aee6185745730427bc8dea04eeae5d02a0e6b19f2a10ed"
+      "sha256": "d96085ef173317a6d82d4bc8ba0a58a050181c7670850693b5e80237e479474a"
     },
     {
-      "bytes": 12274,
+      "bytes": 13685,
       "path": "results/published/m02_soft_composite/inference_sensitivities/paired_comparisons.csv",
-      "sha256": "fa7c7d02ad8cbb6ecf6fdf1c63858e4d0ccc13532b0ef20828133927c114cae6"
+      "sha256": "115f7fb6426c4a32b36f713068d265c4e605d02652cc06d5149527ff86a7830b"
     },
     {
       "bytes": 8442,
@@ -117,21 +122,26 @@
       "sha256": "785a5cde33800ee14c70a7f07afd305c2e25b9c1171c5a727e11cdd7432808c4"
     },
     {
-      "bytes": 8574,
+      "bytes": 9085,
       "path": "results/published/m02_soft_composite/inference_sensitivities/latest_marginals.csv",
-      "sha256": "d19476bcba73497b2ca0bf5e5317ab952a51e7cbe5644163a9d6e65ca62bc664"
+      "sha256": "b7877d477301143a059c6336073b66562a04690c4ecbb438c9cc8fda7b592288"
     },
     {
-      "bytes": 21886,
+      "bytes": 1331,
+      "path": "results/published/m02_soft_composite/inference_sensitivities/model_registry.csv",
+      "sha256": "ac32de39cb9b6623fee70937aa3c708a73d2d933afcaca5977247a2951a69e47"
+    },
+    {
+      "bytes": 23579,
       "path": "results/published/m02_soft_composite/inference_sensitivities/method_summary.json",
-      "sha256": "7abf3f4d63e7e46e4ee0596eed18a39f2efdeb751785edcea4b929ecb3f3c07f"
+      "sha256": "850691d3cf6b3c91c01d826f2492bb554070fec2308576bf4b86d6fc1f39c923"
     }
   ],
   "implementation_file_hashes": [
     {
-      "bytes": 34255,
+      "bytes": 38307,
       "path": "src/regime_allocation/cli/build_m02_inference_sensitivities.py",
-      "sha256": "fa0d3409d0f78aaa0a53e83a25c0107445b0c67dbc4bd06398faaa79fc6cbfea"
+      "sha256": "fd81e4916668d936e595d3fd198f87762eb69ccfc3f0d36ee2b021fd64896452"
     },
     {
       "bytes": 24476,
@@ -159,9 +169,9 @@
       "sha256": "b5daffcae367bea6502044a6ad62a837af01a55bfb62fadedf259af9e61bd327"
     },
     {
-      "bytes": 57811,
+      "bytes": 70969,
       "path": "src/regime_allocation/models/m02_soft_composite/inference_sensitivities.py",
-      "sha256": "9f9322502ede582c14f392aa57d8fe04c4ce7abb7c1407ce7c048ed7b76c8f38"
+      "sha256": "addd892a0b3a5420a49692f4d7da9c6fa2b440ea1a877faff5576b7584b56ca3"
     },
     {
       "bytes": 26211,
@@ -218,6 +228,40 @@
     "transition_cutoff": "pair_available_at_strictly_before_month_roll"
   },
   "model_id": "m02_soft_composite",
+  "model_selection": {
+    "baseline": "student_t_7_combined",
+    "disabled_sensitivities": [
+      "retail_stress_interaction_combined"
+    ],
+    "major_benchmarks": [
+      "transition_only",
+      "partial_only"
+    ],
+    "selection_status": "selected_model_02_inference_baseline",
+    "sensitivities": [
+      "gaussian_nondefining",
+      "gaussian_combined",
+      "selected_tail_combined",
+      "huber_var_combined",
+      "student_t_var_combined",
+      "retail_shrinkage_combined",
+      "retail_real_decomposition_combined",
+      "retail_stress_interaction_combined"
+    ],
+    "variant_roles": {
+      "gaussian_combined": "sensitivity",
+      "gaussian_nondefining": "sensitivity",
+      "huber_var_combined": "sensitivity",
+      "partial_only": "major_benchmark",
+      "retail_real_decomposition_combined": "sensitivity",
+      "retail_shrinkage_combined": "sensitivity",
+      "retail_stress_interaction_combined": "sensitivity",
+      "selected_tail_combined": "sensitivity",
+      "student_t_7_combined": "baseline",
+      "student_t_var_combined": "sensitivity",
+      "transition_only": "major_benchmark"
+    }
+  },
   "schema_version": 1,
   "stage_id": "partial_defining_and_robustness_sensitivities",
   "upstream_manifests": [
@@ -231,7 +275,7 @@
     },
     {
       "path": "data/manifests/m02_retail_sensitivity.json",
-      "sha256": "7d8ee361fc33248baa060e66deb48f9013d61107840075fdf7d25ae95d9da5dd"
+      "sha256": "7ec064ebc378d4cb2e20d521e161f1e520dd7213de7940b314a20e18da79c560"
     },
     {
       "path": "data/manifests/m02_soft_composite.json",

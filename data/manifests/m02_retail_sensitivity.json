@@ -26,7 +26,7 @@
   "common_reference_count": 318,
   "common_vintage_count": 122,
   "configuration": "configs/models/m02_inference_sensitivities.yaml",
-  "configuration_sha256": "9931650fad4b6dc79ec3654fa80b0ceee1b3b61ba2981e5e2d84388cc76c4307",
+  "configuration_sha256": "63ca9a2b1edecd587c892a9bf23ae343fec509dd6e393fff4b6c586d51947a52",
   "credential_policy": "FRED_API_KEY is read from the runtime environment only and is never serialized into artifacts, cache identities, or logs",
   "cross_series_alignment_policy": "at each union information date, use each series' latest vintage dated no later than that date",
   "event_rows": 598,
@@ -54,7 +54,7 @@
       "rows_without_any_vintage": 1
     }
   },
-  "generated_at_utc": "2026-07-22T05:12:57.804535+00:00",
+  "generated_at_utc": "2026-07-22T08:52:09.267716+00:00",
   "generated_files": [
     {
       "bytes": 281788,

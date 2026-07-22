@@ -1,0 +1,13 @@
+display_order,variant_id,model_role,enabled,non_defining_evidence,partial_defining_releases,emission_family,var_method,retail_method,evidence_set_id
+0,transition_only,major_benchmark,True,False,False,gaussian,ols,baseline_nominal,legacy_baseline
+1,partial_only,major_benchmark,True,False,True,gaussian,ols,baseline_nominal,legacy_baseline
+2,student_t_7_combined,baseline,True,True,True,student_t_7,ols,baseline_nominal,legacy_baseline
+3,priority_01_empire_only,sensitivity,True,True,True,student_t_7,ols,baseline_nominal,priority_01_empire_only
+4,priority_01_philadelphia_only,sensitivity,True,True,True,student_t_7,ols,baseline_nominal,priority_01_philadelphia_only
+5,priority_01_surveys,sensitivity,True,True,True,student_t_7,ols,baseline_nominal,priority_01_surveys
+6,priority_02_claims,sensitivity,True,True,True,student_t_7,ols,baseline_nominal,priority_02_claims
+7,priority_03_consumer,sensitivity,True,True,True,student_t_7,ols,baseline_nominal,priority_03_consumer
+8,priority_04_housing,sensitivity,True,True,True,student_t_7,ols,baseline_nominal,priority_04_housing
+9,priority_05_import_prices,sensitivity,True,True,True,student_t_7,ols,baseline_nominal,priority_05_import_prices
+10,priority_06_backlog,sensitivity,True,True,True,student_t_7,ols,baseline_nominal,priority_06_backlog
+11,candidate_all_six,sensitivity,True,True,True,student_t_7,ols,baseline_nominal,candidate_all_six

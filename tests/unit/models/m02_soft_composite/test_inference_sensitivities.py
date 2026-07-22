@@ -7,14 +7,17 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 import yaml
 
 from regime_allocation.models.m02_soft_composite.gaussian_emissions import (
     LinearGaussianEmissionSpec,
 )
 from regime_allocation.models.m02_soft_composite.inference_sensitivities import (
+    _profile_for_event,
     causal_annual_hyperparameter_schedule,
     stronger_retail_shrinkage_spec,
+    variant_registry_from_config,
     variants_from_config,
 )
 from regime_allocation.models.m02_soft_composite.joint_filter import (
@@ -41,6 +44,123 @@ def test_disabled_unidentified_stress_variant_is_not_run() -> None:
     assert "retail_stress_interaction_combined" not in identifiers
     assert "student_t_7_combined" in identifiers
     assert "partial_only" in identifiers
+
+
+def test_model_roles_form_the_declared_baseline_benchmark_partition() -> None:
+    config = yaml.safe_load(
+        (ROOT / "configs/models/m02_inference_sensitivities.yaml").read_text(
+            encoding="utf-8"
+        )
+    )
+    registry = variant_registry_from_config(config).set_index("variant_id")
+
+    assert registry.loc["student_t_7_combined", "model_role"] == "baseline"
+    benchmarks = registry.index[
+        registry["model_role"].eq("major_benchmark")
+    ].tolist()
+    assert set(benchmarks) == {"transition_only", "partial_only"}
+    assert registry.loc[benchmarks, "var_method"].eq("ols").all()
+    assert registry.loc["retail_stress_interaction_combined", "model_role"] == (
+        "sensitivity"
+    )
+    assert not bool(registry.loc["retail_stress_interaction_combined", "enabled"])
+    selected = {"student_t_7_combined", *benchmarks}
+    assert registry.loc[~registry.index.isin(selected), "model_role"].eq(
+        "sensitivity"
+    ).all()
+
+
+def test_explicit_evidence_sets_gate_candidate_models() -> None:
+    config = {
+        "model_selection": {
+            "baseline": "baseline",
+            "major_benchmarks": ["transition", "partial"],
+            "role_vocabulary": ["baseline", "major_benchmark", "sensitivity"],
+        },
+        "evidence_sets": {
+            "legacy": {"observation_models": ["consumer_demand", "claims"]},
+            "candidate": {
+                "observation_models": ["consumer_demand", "claims", "survey"]
+            },
+        },
+        "variants": [
+            {
+                "id": "baseline",
+                "model_role": "baseline",
+                "non_defining_evidence": True,
+                "partial_defining_releases": True,
+                "emission": "student_t_7",
+                "var": "ols",
+                "retail": "baseline_nominal",
+                "evidence_set": "legacy",
+            },
+            {
+                "id": "transition",
+                "model_role": "major_benchmark",
+                "non_defining_evidence": False,
+                "partial_defining_releases": False,
+                "emission": "gaussian",
+                "var": "ols",
+                "retail": "baseline_nominal",
+                "evidence_set": "legacy",
+            },
+            {
+                "id": "partial",
+                "model_role": "major_benchmark",
+                "non_defining_evidence": False,
+                "partial_defining_releases": True,
+                "emission": "gaussian",
+                "var": "ols",
+                "retail": "baseline_nominal",
+                "evidence_set": "legacy",
+            },
+            {
+                "id": "candidate",
+                "model_role": "sensitivity",
+                "non_defining_evidence": True,
+                "partial_defining_releases": True,
+                "emission": "student_t_7",
+                "var": "ols",
+                "retail": "baseline_nominal",
+                "evidence_set": "candidate",
+            },
+        ],
+    }
+    variants = {variant.variant_id: variant for variant in variants_from_config(config)}
+    assert _profile_for_event(variants["baseline"], "claims") == "base:claims"
+    assert _profile_for_event(variants["baseline"], "survey") is None
+    assert _profile_for_event(variants["candidate"], "survey") == "base:survey"
+    assert variants["baseline"].evidence_set_id == "legacy"
+
+
+def test_unknown_evidence_set_is_rejected() -> None:
+    config = {
+        "model_selection": {
+            "baseline": "baseline",
+            "major_benchmarks": ["transition", "partial"],
+            "role_vocabulary": ["baseline", "major_benchmark", "sensitivity"],
+        },
+        "evidence_sets": {"legacy": {"observation_models": ["claims"]}},
+        "variants": [
+            {
+                "id": identifier,
+                "model_role": role,
+                "non_defining_evidence": identifier == "baseline",
+                "partial_defining_releases": identifier != "transition",
+                "emission": "student_t_7" if identifier == "baseline" else "gaussian",
+                "var": "ols",
+                "retail": "baseline_nominal",
+                "evidence_set": "missing" if identifier == "baseline" else "legacy",
+            }
+            for identifier, role in (
+                ("baseline", "baseline"),
+                ("transition", "major_benchmark"),
+                ("partial", "major_benchmark"),
+            )
+        ],
+    }
+    with pytest.raises(ValueError, match="unknown evidence set"):
+        variants_from_config(config)
 
 
 def test_annual_schedule_never_uses_current_or_future_fold() -> None:

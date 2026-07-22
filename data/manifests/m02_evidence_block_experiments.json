@@ -1,0 +1,199 @@
+{
+  "acquisitions": [
+    {
+      "bytes": 17590,
+      "cache_origin": "existing_normalized_cache",
+      "path": "data/raw/fred_api/m02_evidence_block_experiments/ANXAUO_601126d507a6_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 95,
+      "series_id": "ANXAUO",
+      "sha256": "fc0c501bd4d64c482197ee4f44871297d194a2e6b362da0aa6a59ff93bfc4fda",
+      "source_url": "https://fred.stlouisfed.org/series/ANXAUO"
+    },
+    {
+      "bytes": 15935,
+      "cache_origin": "existing_normalized_cache",
+      "path": "data/raw/fred_api/m02_evidence_block_experiments/ANXAVS_c761c8ea20af_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 95,
+      "series_id": "ANXAVS",
+      "sha256": "0b5340a50367bd4c6f9d8046f744b0267b4738cc0544ae4abd154d75d45e42c6",
+      "source_url": "https://fred.stlouisfed.org/series/ANXAVS"
+    },
+    {
+      "bytes": 12322,
+      "cache_origin": "existing_normalized_cache",
+      "path": "data/raw/fred_api/m02_evidence_block_experiments/HOUST1F_1db9c0f8e4bc_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 27,
+      "series_id": "HOUST1F",
+      "sha256": "cebe95cb702b08c8f6420d1aa0c8ba3c38b87084b04e7dbc01acfc20f7f8c982",
+      "source_url": "https://fred.stlouisfed.org/series/HOUST1F"
+    },
+    {
+      "bytes": 11665,
+      "cache_origin": "existing_normalized_cache",
+      "path": "data/raw/fred_api/m02_evidence_block_experiments/HSN1F_7db065608f13_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 97,
+      "series_id": "HSN1F",
+      "sha256": "dcf8ba4ddb2444ab0eb9887d26e7f34db303f197b937ca8bda7e6d8c104bb57b",
+      "source_url": "https://fred.stlouisfed.org/series/HSN1F"
+    },
+    {
+      "bytes": 4779,
+      "cache_origin": "existing_normalized_cache",
+      "path": "data/raw/fred_api/m02_evidence_block_experiments/IREXPETCOM_3ae1e38a4b70_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 188,
+      "series_id": "IREXPETCOM",
+      "sha256": "8930f05e7dc53f843d08d1675f9a15b0f281305220e6ea58fa8743de3defab86",
+      "source_url": "https://fred.stlouisfed.org/series/IREXPETCOM"
+    },
+    {
+      "bytes": 11675,
+      "cache_origin": "existing_normalized_cache",
+      "path": "data/raw/fred_api/m02_evidence_block_experiments/MARTSSM44W72USS_5c72f686f98e_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 9,
+      "series_id": "MARTSSM44W72USS",
+      "sha256": "061217644caa3a7b1a3fcc30b76be8c2a5f8527935d56f1aec38f512fe7dad7a",
+      "source_url": "https://fred.stlouisfed.org/series/MARTSSM44W72USS"
+    },
+    {
+      "bytes": 10801,
+      "cache_origin": "existing_normalized_cache",
+      "path": "data/raw/fred_api/m02_evidence_block_experiments/NOCDFSA066MSFRBPHI_968670eafedb_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 351,
+      "series_id": "NOCDFSA066MSFRBPHI",
+      "sha256": "a26c2585fccf5e4fe4ac1c73b578db4c893fe299b5eed46bcd4a620f4098c77d",
+      "source_url": "https://fred.stlouisfed.org/series/NOCDFSA066MSFRBPHI"
+    },
+    {
+      "bytes": 7972,
+      "cache_origin": "existing_normalized_cache",
+      "path": "data/raw/fred_api/m02_evidence_block_experiments/NOCDISA066MSFRBNY_5b260cf6bbfd_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 321,
+      "series_id": "NOCDISA066MSFRBNY",
+      "sha256": "ed706c5551ce24f11a5a03f22d0a22f20919ae33642a8415cb261dd564b01402",
+      "source_url": "https://fred.stlouisfed.org/series/NOCDISA066MSFRBNY"
+    },
+    {
+      "bytes": 8492,
+      "cache_origin": "existing_normalized_cache",
+      "path": "data/raw/fred_api/m02_evidence_block_experiments/PERMIT1_9f6573c69e4b_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 27,
+      "series_id": "PERMIT1",
+      "sha256": "e00b8c0d6d6a23aa8374b5628940726523c6c900df48725101a7730d9d90e6ff",
+      "source_url": "https://fred.stlouisfed.org/series/PERMIT1"
+    },
+    {
+      "bytes": 8260,
+      "cache_origin": "existing_normalized_cache",
+      "path": "data/raw/fred_api/m02_evidence_block_experiments/PPCDFSA066MSFRBPHI_1acbdf4796f8_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 351,
+      "series_id": "PPCDFSA066MSFRBPHI",
+      "sha256": "49bfb13770a8741ccf7263d9ba0ff4c6ada141d881f0c64fd1642cd9643a2b74",
+      "source_url": "https://fred.stlouisfed.org/series/PPCDFSA066MSFRBPHI"
+    },
+    {
+      "bytes": 5382,
+      "cache_origin": "existing_normalized_cache",
+      "path": "data/raw/fred_api/m02_evidence_block_experiments/PPCDISA066MSFRBNY_73678aa56465_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 321,
+      "series_id": "PPCDISA066MSFRBNY",
+      "sha256": "cbd1529d8c66312e2b444505b852b04ade8055c974c7cb2d76351d02cd7d6554",
+      "source_url": "https://fred.stlouisfed.org/series/PPCDISA066MSFRBNY"
+    },
+    {
+      "bytes": 9752,
+      "cache_origin": "existing_normalized_cache",
+      "path": "data/raw/fred_api/m02_evidence_block_experiments/TOTALSA_dc56eafe6e46_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 93,
+      "series_id": "TOTALSA",
+      "sha256": "5efcc9fc37e3ecd063b4b219e790d7c6c380e6ab1bd4aa42464343da7b695906",
+      "source_url": "https://fred.stlouisfed.org/series/TOTALSA"
+    }
+  ],
+  "baseline_evidence": {
+    "events": "data/processed/m02_soft_composite/release_evidence/release_events.csv",
+    "events_sha256": "c3d5b32e437ac51edb4bc6ac673714723c8267b4ff3b4f1c262f2ab2931b2470",
+    "evidence_set_id": "m02_release_evidence_v1",
+    "manifest": "data/manifests/m02_release_evidence.json",
+    "manifest_sha256": "2c5f427243f5552f9e05e5a06754da88eb2a9c1611f611a85afb23ecf6f42a8f",
+    "rows": 3731
+  },
+  "candidate_available_rows": 3694,
+  "candidate_blocks": [
+    "business_investment_backlog",
+    "consumer_retail_ex_auto_gas",
+    "consumer_vehicle_units",
+    "housing_new_home_sales",
+    "housing_single_family_construction",
+    "inflation_import_prices",
+    "manufacturing_empire_state",
+    "manufacturing_philadelphia",
+    "weekly_continued_claims"
+  ],
+  "candidate_rows": 4150,
+  "candidate_series": [
+    "ANXAUO_DIV_ANXAVS",
+    "CCSA",
+    "HOUST1F",
+    "HSN1F",
+    "IREXPETCOM",
+    "MARTSSM44W72USS",
+    "MORTGAGE30US",
+    "MORTGAGE30US_METHOD_20221117",
+    "NEWORDER",
+    "NOCDFSA066MSFRBPHI",
+    "NOCDISA066MSFRBNY",
+    "PERMIT1",
+    "PPCDFSA066MSFRBPHI",
+    "PPCDISA066MSFRBNY",
+    "TOTALSA"
+  ],
+  "configuration": "configs/models/m02_evidence_block_experiments.yaml",
+  "configuration_sha256": "caf466d9cebbd93f78e3be532d6515f225fd0334d94d50c96167b2a92e6c6e95",
+  "coverage_caveat": "archive bootstrap histories are excluded; coverage begins only when a first-release vintage is actually observable",
+  "credential_policy": "FRED_API_KEY is read from runtime memory only and is never serialized into artifacts, paths, cache identities, or logs",
+  "experiment_id": "six_priority_evidence_test_v1",
+  "extended_rows": 7881,
+  "generated_at_utc": "2026-07-22T10:06:10.453204+00:00",
+  "generated_files": [
+    {
+      "bytes": 1726268,
+      "path": "data/processed/m02_soft_composite/evidence_block_experiments/candidate_release_events.csv",
+      "sha256": "ebe14335b619d204558c3457ec7f34b205487b107dc20335ee7e871588f4b163"
+    },
+    {
+      "bytes": 3137644,
+      "path": "data/processed/m02_soft_composite/evidence_block_experiments/extended_release_events.csv",
+      "sha256": "859be8d30a5d53d8242a74b9ff637ac408aac92019a33755e59cdae104e2f90c"
+    },
+    {
+      "bytes": 3322,
+      "path": "data/processed/m02_soft_composite/evidence_block_experiments/candidate_coverage.csv",
+      "sha256": "735564705fb0f02482309aa6b886106c452f58a8666a578e0bfd7305c5fdd455"
+    }
+  ],
+  "m01_lineage": {
+    "event_path": "data/processed/m01_non_defining_release_evidence/non_defining_release_events.csv",
+    "event_rows": 3968,
+    "event_sha256": "b9d1cd8d395a60d965a6851791c41368acc9c153c6dd23d1054d3cbb7c29ff05",
+    "manifest_path": "data/manifests/m01_non_defining_release_evidence.json",
+    "manifest_sha256": "dac7f457e52d2f12042f8380031690b24898ab4dae4a65df058e2434ac0acae2",
+    "provider_selected": "alfred_web"
+  },
+  "model_id": "m02_soft_composite",
+  "provider_requested": "fred",
+  "provider_selected": "fred_api",
+  "schema_version": 1,
+  "stage_id": "m02_evidence_block_experiments"
+}

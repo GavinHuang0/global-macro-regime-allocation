@@ -8,10 +8,50 @@ disagreement and revision uncertainty. A third stage uses an expanding VAR(1)
 to evolve the continuous score center. The inference stage adds point-in-time
 non-defining releases, structured linear-Gaussian observation models, and a
 rolling four-month joint Gaussian filter. The complete causal replay is
-published through 20 July 2026. A separate, non-destructive sensitivity stage
-now adds partial score-defining releases, Student-$t$ block emissions, robust
-VAR fits, and retail-demand alternatives. Allocation and a Model 02 backtest
-have not yet been implemented.
+published through 20 July 2026. The final inference-selection stage adds partial
+score-defining releases, Student-$t$ block emissions, robust VAR fits, and
+retail-demand alternatives while retaining the earlier Gaussian replay as a
+frozen upstream artifact. `student_t_7_combined` is the selected Model 02
+inference baseline. `transition_only` and `partial_only`, both with OLS VAR(1)
+dynamics, are the two major benchmarks; all other enabled variants are named
+sensitivities. Allocation and a Model 02 backtest have not yet been implemented.
+
+### Existing-block attribution status
+
+Every current non-defining observation model has been added alone to
+`partial_only` and removed alone from `student_t_7_combined`. The experiment
+preserves all transition, emission, partial-release, score, mapping, and date
+choices; 216 frozen-control invariance checks pass. No full-sample contrast is
+significant after Holm correction across the fourteen atomic tests.
+
+Initial claims is the dominant continuous-score contributor and remains
+significant for NLPD in a segment-aware sensitivity excluding March-May 2020
+(Holm-adjusted \(p=0.0028\) in both experiment arms), although the
+post-May-2020 segment drives that result and the full-sample contrasts are not
+significant. Consumer demand and legacy business investment are small but
+directionally positive in both experiment arms. The lagged monthly
+labor-demand likelihood and
+intermediate-materials input costs are negative in both arms; inflation
+expectations is unidentifiable with only three applied updates. Direct
+reduced-core comparisons favor further testing of the
+single-family housing replacement, reject the backlog replacement, and show a
+mixed continuous-versus-quadrant result for the alternative consumer block.
+No baseline is promoted. See
+[`existing_block_attribution.md`](existing_block_attribution.md) for the exact
+estimands, feature coverage, bootstrap inference, and keep/remove/modify/add
+recommendations.
+
+### Evidence-block experiment status
+
+Six additive or replacement evidence designs have now been evaluated around
+the frozen `student_t_7_combined` baseline. Continued claims is the strongest
+isolated mean result, but none of the six tests survives Holm correction at the
+primary checkpoint. The all-six candidate worsens both quadrant proper losses,
+and its causal-fit residuals retain substantial cross-block and serial
+dependence. No candidate is promoted. See
+[`evidence_block_experiments.md`](evidence_block_experiments.md) for the exact
+series, transformations, evidence sets, uncertainty intervals, dependence
+diagnostics, and artifact paths.
 
 ## 1. Information clock and first-release rule
 
@@ -208,7 +248,7 @@ The expanding z-scores are intentionally unbounded in this stage. The April
 2020 payroll observation has a z-score of $-103.0223$ and drives that month's
 growth composite to $-51.8317$. This is not a calculation error: it is the
 consequence of applying the frozen classical standardization rule to an
-extraordinary observation. The baseline probability map preserves this
+extraordinary observation. The 12-month probability-map specification preserves this
 unbounded score specification. A later sensitivity analysis should compare a
 robust scale, clipping rule, or heavy-tailed link because this observation can
 mechanically saturate its historical quadrant probabilities.
@@ -432,7 +472,7 @@ CDF, not Monte Carlo simulation.
 
 ## 9. Probability-map results
 
-With a 24-month causal warm-up, the 12-month baseline produces 214 monthly
+With a 24-month causal warm-up, the 12-month mapping specification produces 214 monthly
 probability vectors from June 2008 through May 2026. The 3-month sensitivity
 produces 223 vectors from September 2007 through May 2026. Exact revision-error
 coverage is:
@@ -473,7 +513,7 @@ $$
 \end{bmatrix}.
 $$
 
-The May 2026 baseline weights are:
+The May 2026 12-month-map weights are:
 
 | Quadrant | Probability |
 |---|---:|
@@ -591,7 +631,7 @@ $\boldsymbol Z_m$. Here $\boldsymbol A$ is a VAR dynamics coefficient matrix;
 unlike Model 01's Markov matrix, its entries need not be nonnegative and its
 rows do not sum to one.
 
-The baseline assumes first-order, time-homogeneous linear dynamics. It includes
+The OLS transition specification assumes first-order, time-homogeneous linear dynamics. It includes
 an intercept but no time trend, ridge penalty, stationarity projection, or
 parameter-uncertainty adjustment.
 
@@ -691,7 +731,7 @@ $$
 $$
 
 The target month's realized mapping covariance cannot be known at $T_m$.
-For this standalone one-step artifact, let $k(m)$ identify the latest baseline
+For this standalone one-step artifact, let $k(m)$ identify the latest 12-month-map
 mapping row whose reference month is no later than $m$ and whose availability
 date is no later than $T_m$. The stage uses
 
@@ -772,7 +812,7 @@ $$
 $$
 
 The fitted dynamics matrix has spectral radius $0.649807$. The latest causal
-mapping proxy is the May 2026 baseline covariance,
+mapping proxy is the May 2026 12-month-map covariance,
 
 $$
 \boldsymbol\Omega_{2026\text{-}06}^{\mathrm{proxy}}
@@ -841,7 +881,7 @@ $11.50$.
 
 This is not look-ahead leakage or a serialization error. It is the direct
 consequence of combining the frozen unbounded score definition with ordinary
-least squares. The baseline deliberately does not winsorize the shock, impose a
+least squares. The OLS transition specification deliberately does not winsorize the shock, impose a
 Student-$t$ innovation, apply robust regression, or rescale eigenvalues. Those
 alternatives should be implemented as named sensitivities.
 
@@ -1331,7 +1371,7 @@ classification uncertainty rather than uncertainty about the released number.
 ### 15.3 Joint quadrant paths
 
 The 256 four-month paths are approximated from the full eight-dimensional
-Gaussian rather than by multiplying four monthly marginals. The baseline uses
+Gaussian rather than by multiplying four monthly marginals. The implemented readout uses
 
 $$
 \boldsymbol P_d^{U}
@@ -1507,7 +1547,7 @@ but the discrepancy between linear and rank correlations shows that crisis
 observations and outliers drive much of the result. As an explicit diagnostic,
 excluding 2020 leaves only 2 significant Pearson tests and no significant
 Spearman tests; the maximum absolute Pearson correlation falls from 0.930 to
-0.446. The baseline must consequently remain described as a
+0.446. The frozen upstream Gaussian replay must consequently remain described as a
 conditionally-independent Gaussian approximation, not a calibrated joint
 release model.
 
@@ -1541,13 +1581,14 @@ residual, evaluation, and dependence audits are stored under
 - `emission_summary.csv` reports the fitted block models; and
 - `dependence_summary.json` summarizes cross-model and serial diagnostics.
 
-As of 20 July 2026, the July evidence-filter quadrant probabilities are 0.340
+As of 20 July 2026, the frozen upstream Gaussian replay's July
+evidence-filter quadrant probabilities are 0.340
 for growth down/inflation up, 0.251 for growth up/inflation up, 0.236 for growth
 up/inflation down, and 0.172 for growth down/inflation down. Their entropy is
 1.358, close to the four-quadrant maximum $\log 4\approx1.386$; the published
 state is deliberately diffuse rather than a hard regime call.
 
-Important limitations of the baseline are:
+Important limitations of the frozen upstream Gaussian replay are:
 
 - the VAR and observation equations are linear Gaussian and use plug-in
   parameters rather than integrating coefficient or covariance uncertainty;
@@ -1562,7 +1603,8 @@ Important limitations of the baseline are:
 - multiple weekly claims observations in a catch-up release are separate
   likelihood factors, so residual serial dependence can make the posterior too
   concentrated;
-- the baseline marginalizes a partial multivariate response with the matching
+- the upstream Gaussian replay marginalizes a partial multivariate response
+  with the matching
   covariance submatrix; it does not yet condition a later coordinate on an
   earlier asynchronous coordinate from the same correlated release model;
 - inflation expectations and input-cost series have short real-time histories,
@@ -1575,17 +1617,21 @@ Important limitations of the baseline are:
   covariance vintages; and
 - Model 02 allocation and backtesting have not yet been implemented.
 
-The crisis observation is not removed silently. The next section reports
-named Student-$t$-emission and robust-VAR sensitivities against this frozen
-Gaussian baseline. Robust score standardization, winsorized defining scores,
+The crisis observation is not removed silently. The next section reports the
+baseline-selection comparison, including Student-$t$ emissions and robust-VAR
+sensitivities, against this frozen upstream Gaussian replay. Robust score
+standardization, winsorized defining scores,
 observation-variance regimes, and likelihood tempering remain possible future
 sensitivities rather than undocumented changes.
 
-## 19. Partial-release and robust-inference sensitivity stage
+## 19. Partial-release baseline selection and robustness stage
 
-The next stage leaves the frozen Gaussian baseline intact and replays ten
-enabled variants. Its complete mathematical specification, information clock,
-results, and limitations are in
+This stage leaves the frozen upstream Gaussian artifacts intact and replays ten
+enabled variants. It selects `student_t_7_combined` as the current inference
+baseline, designates `transition_only` and `partial_only` with OLS VAR(1) as the
+two major benchmarks, and retains every other variant as a sensitivity. Its
+complete mathematical specification, information clock, results, and
+limitations are in
 [`inference_sensitivities.md`](inference_sensitivities.md).
 
 ### 19.1 Partial defining information
@@ -1654,7 +1700,8 @@ $$
 $$
 
 All same-day weights are frozen from a common pre-release-day state. The
-initial sensitivity fixes $\nu_b=7$; a second sensitivity selects from
+selected inference baseline fixes $\nu_b=7$; the selected-tail sensitivity
+chooses from
 $\{4,5,7,10,\infty\}$ using annual causal rolling-origin predictive log
 likelihood. A live year can use only completed validation years strictly before
 it.
@@ -1692,17 +1739,18 @@ The primary checkpoint is the start of the final score's publication day.
 After a four-month burn-in, it contains 183 completed-score months from January
 2011 through May 2026.
 
-| Variant | Mean score NLPD | Growth RMSE | Inflation RMSE | Hard accuracy | Soft cross-entropy |
-|---|---:|---:|---:|---:|---:|
-| Selected-tail combined | **5.720** | 1.423 | 0.495 | 73.2% | 1.303 |
-| Fixed-$\nu=7$ combined | 5.721 | 1.411 | 0.495 | 76.0% | 1.302 |
-| Partial only | 5.836 | 1.447 | 0.487 | **82.5%** | 1.300 |
-| Gaussian combined | 6.270 | **1.076** | 0.557 | 78.7% | 1.301 |
-| Real-retail combined | 10.387 | 1.959 | **0.448** | 72.7% | **1.297** |
-| Huber-VAR combined | 10.450 | 1.959 | 0.479 | 73.8% | 1.301 |
-| Student-$t$-VAR combined | 11.285 | 2.014 | 0.467 | 74.3% | 1.301 |
-| Transition only | 26.919 | 4.295 | 0.738 | 35.0% | 1.537 |
-| Gaussian non-defining evidence only | 28.065 | 3.496 | 0.880 | 33.9% | 1.571 |
+| Role | Variant | Mean score NLPD | Growth RMSE | Inflation RMSE | Hard accuracy | Soft cross-entropy |
+|---|---|---:|---:|---:|---:|---:|
+| Baseline | Fixed-$\nu=7$ combined | 5.721 | 1.411 | 0.495 | 76.0% | 1.302 |
+| Major benchmark | Partial only, OLS VAR(1) | 5.836 | 1.447 | 0.487 | **82.5%** | 1.300 |
+| Major benchmark | Transition only, OLS VAR(1) | 26.919 | 4.295 | 0.738 | 35.0% | 1.537 |
+| Sensitivity | Selected-tail combined | **5.720** | 1.423 | 0.495 | 73.2% | 1.303 |
+| Sensitivity | Gaussian combined | 6.270 | **1.076** | 0.557 | 78.7% | 1.301 |
+| Sensitivity | Real-retail combined | 10.387 | 1.959 | **0.448** | 72.7% | **1.297** |
+| Sensitivity | Stronger-retail-shrinkage combined | 10.446 | 1.959 | 0.478 | 74.3% | 1.301 |
+| Sensitivity | Huber-VAR combined | 10.450 | 1.959 | 0.479 | 73.8% | 1.301 |
+| Sensitivity | Student-$t$-VAR combined | 11.285 | 2.014 | 0.467 | 74.3% | 1.301 |
+| Sensitivity | Gaussian non-defining evidence only | 28.065 | 3.496 | 0.880 | 33.9% | 1.571 |
 
 No variant dominates all metrics. Most of the late-month gain comes from
 observing the defining components themselves. The selected-tail non-defining
@@ -1710,24 +1758,34 @@ updates lower mean NLPD by only about 0.116 relative to partial-only and worsen
 several quadrant metrics. They should not be credited with the entire gap to
 transition-only.
 
+The fixed-$\nu=7$ combined model is selected as the baseline because it retains
+the full event-driven architecture, has nearly the best full-sample mean NLPD,
+and avoids the additional annual tail-selection layer. Partial-only is the
+clean ablation for the incremental non-defining evidence, while transition-only
+is the minimum dynamics-only benchmark. This declared hierarchy does not erase
+the metric tradeoffs or imply that the baseline wins every diagnostic.
+
 The full-sample ranking is dominated by March--May 2020. Excluding only those
 three months, Student-$t$ VAR has the lowest mean NLPD at $-0.148$, followed by
 real retail at $-0.140$, Huber VAR at $-0.086$, and selected-tail/OLS VAR at
-$-0.031$. That reversal is a diagnostic, not a replacement headline result:
+$-0.031$; the selected fixed-$\nu=7$/OLS-VAR baseline is $-0.017$. That
+reversal is a diagnostic, not a replacement headline result:
 removing the observations that robust estimators discount is post hoc, while
 the full-sample mean heavily reflects one unprecedented episode. With one
 pandemic and 183 primary months, neither ordering establishes stable future
 superiority.
 
-After the six June component updates, the selected-tail/OLS-VAR July 2026
-readout as of 20 July has score means $(-0.5751,0.0908)$. Its quadrant
-probabilities are 19.54% growth-up/inflation-up, 34.15%
-growth-down/inflation-up, 24.01% growth-up/inflation-down, and 22.31%
-growth-down/inflation-down. This is one named sensitivity rather than a
-production-model selection.
+After the six June component updates, the fixed-$\nu=7$/OLS-VAR baseline's July
+2026 readout as of 20 July has score means $(-0.5097,0.0937)$. Its quadrant
+probabilities are 19.95% growth-up/inflation-up, 33.84%
+growth-down/inflation-up, 24.36% growth-up/inflation-down, and 21.84%
+growth-down/inflation-down. This is the selected Model 02 inference baseline
+readout. Benchmark and sensitivity marginals remain published rather than being
+suppressed after model selection.
 
 Configuration and public outputs:
 
 - `configs/models/m02_inference_sensitivities.yaml`;
 - `data/manifests/m02_inference_sensitivities.json`; and
-- `results/published/m02_soft_composite/inference_sensitivities/`.
+- `results/published/m02_soft_composite/inference_sensitivities/`, including
+  the machine-readable `model_registry.csv`.

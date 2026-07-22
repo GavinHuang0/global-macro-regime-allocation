@@ -48,7 +48,63 @@ def test_generated_hashes_and_required_variants() -> None:
     assert "retail_stress_interaction_combined" not in set(latest["variant_id"])
 
 
-def test_transition_only_reproduces_frozen_baseline() -> None:
+def test_published_model_roles_match_the_selected_contract() -> None:
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    method = json.loads((PUBLISHED / "method_summary.json").read_text(encoding="utf-8"))
+    registry = pd.read_csv(PUBLISHED / "model_registry.csv").set_index("variant_id")
+
+    for selection in (manifest["model_selection"], method["model_selection"]):
+        assert selection["baseline"] == "student_t_7_combined"
+        assert selection["major_benchmarks"] == ["transition_only", "partial_only"]
+        assert selection["variant_roles"]["student_t_7_combined"] == "baseline"
+        assert selection["variant_roles"]["transition_only"] == "major_benchmark"
+        assert selection["variant_roles"]["partial_only"] == "major_benchmark"
+
+    assert registry.loc["student_t_7_combined", "model_role"] == "baseline"
+    assert set(
+        registry.index[registry["model_role"].eq("major_benchmark")]
+    ) == {"transition_only", "partial_only"}
+    selected = {"student_t_7_combined", "transition_only", "partial_only"}
+    assert registry.loc[~registry.index.isin(selected), "model_role"].eq(
+        "sensitivity"
+    ).all()
+
+    for filename, identifier in (
+        ("evaluation_summary.csv", "filter_variant"),
+        ("evaluation_subperiod_summary.csv", "filter_variant"),
+        ("latest_marginals.csv", "variant_id"),
+    ):
+        frame = pd.read_csv(PUBLISHED / filename)
+        actual = frame[[identifier, "model_role"]].drop_duplicates().set_index(identifier)
+        expected = registry.loc[actual.index, ["model_role"]]
+        expected.index.name = identifier
+        pd.testing.assert_frame_equal(actual.sort_index(), expected.sort_index())
+
+    paired = pd.read_csv(PUBLISHED / "paired_comparisons.csv")
+    assert "comparison_baseline" not in paired
+    assert {
+        "comparison_reference",
+        "model_role",
+        "reference_model_role",
+    }.issubset(paired.columns)
+    baseline_pairs = paired.loc[
+        paired["comparison_scope"].eq("baseline_vs_major_benchmark")
+    ]
+    assert baseline_pairs["filter_variant"].eq("student_t_7_combined").all()
+    assert set(baseline_pairs["comparison_reference"]) == {
+        "transition_only",
+        "partial_only",
+    }
+    sensitivity_pairs = paired.loc[
+        paired["comparison_scope"].eq("sensitivity_vs_selected_baseline")
+    ]
+    assert sensitivity_pairs["model_role"].eq("sensitivity").all()
+    assert sensitivity_pairs["comparison_reference"].eq(
+        "student_t_7_combined"
+    ).all()
+
+
+def test_transition_only_reproduces_frozen_predecessor_replay() -> None:
     sensitivity = pd.read_csv(
         PROCESSED / "evaluation_rows.csv", parse_dates=["reference_month"]
     )

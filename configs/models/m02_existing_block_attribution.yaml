@@ -1,0 +1,536 @@
+schema_version: 1
+model_id: m02_soft_composite
+stage_id: existing_block_attribution
+description: >-
+  Causal attribution experiment for the seven non-defining observation models
+  already consumed by the selected student_t_7_combined baseline. Each atomic
+  block is tested in two complementary arms: added alone to partial_only and
+  removed alone from student_t_7_combined. The two inflation-pressure blocks
+  are also tested jointly as a non-primary exploratory composite. This stage
+  does not change the selected baseline or any upstream data artifact.
+
+model_selection:
+  baseline: student_t_7_combined
+  frozen_controls:
+    - transition_only
+    - partial_only
+    - student_t_7_combined
+  role_vocabulary: [baseline, major_benchmark, sensitivity]
+  selection_status: attribution_experiment_only
+  candidate_specification:
+    emission: student_t_7
+    degrees_of_freedom: 7.0
+    var: ols
+    partial_defining_releases: true
+    retail: baseline_nominal
+  rationale: >-
+    Fixing the tail treatment, transition estimator, partial defining-release
+    policy, retail specification, score construction, and mapping uncertainty
+    makes the enabled non-defining observation models the only experimental
+    difference. No variant is promoted by this configuration.
+
+sources:
+  base_filter_config: configs/models/m02_event_driven_bayesian_filter.yaml
+  frozen_sensitivity_config: configs/models/m02_inference_sensitivities.yaml
+  score_manifest: data/manifests/m02_soft_composite.json
+  score_features: data/processed/m02_soft_composite/composite_scores.csv
+  defining_components: >-
+    data/processed/m02_soft_composite/first_release_components_long.csv
+  mapping_manifest: data/manifests/m02_probability_map.json
+  mapping_history: >-
+    results/published/m02_soft_composite/probability_map/quadrant_probabilities.csv
+  evidence_manifest: data/manifests/m02_release_evidence.json
+  evidence_events: >-
+    data/processed/m02_soft_composite/release_evidence/release_events.csv
+  frozen_sensitivity_manifest: data/manifests/m02_inference_sensitivities.json
+  frozen_evaluation_rows: >-
+    data/processed/m02_soft_composite/inference_sensitivities/evaluation_rows.csv
+  frozen_event_update_audit: >-
+    data/processed/m02_soft_composite/inference_sensitivities/event_update_audit.csv.gz
+  frozen_partial_defining_audit: >-
+    data/processed/m02_soft_composite/inference_sensitivities/partial_defining_audit.csv.gz
+  frozen_exact_score_audit: >-
+    data/processed/m02_soft_composite/inference_sensitivities/exact_score_audit.csv
+  frozen_latest_marginals: >-
+    results/published/m02_soft_composite/inference_sensitivities/latest_marginals.csv
+  prior_evidence_experiment_manifest: >-
+    data/manifests/m02_evidence_block_inference.json
+  prior_evidence_experiment_evaluation_rows: >-
+    data/processed/m02_soft_composite/evidence_block_inference/evaluation_rows.csv
+
+blocks:
+  weekly_labor_stress:
+    observation_models: [weekly_labor_stress]
+    primary_atomic: true
+  monthly_labor_demand:
+    observation_models: [monthly_labor_demand]
+    primary_atomic: true
+  consumer_demand:
+    observation_models: [consumer_demand]
+    primary_atomic: true
+  housing_activity:
+    observation_models: [housing_activity]
+    primary_atomic: true
+  business_investment:
+    observation_models: [business_investment]
+    primary_atomic: true
+  inflation_expectations:
+    observation_models: [inflation_expectations]
+    primary_atomic: true
+  inflation_input_costs:
+    observation_models: [inflation_input_costs]
+    primary_atomic: true
+  inflation_pressure_pair:
+    observation_models:
+      - inflation_expectations
+      - inflation_input_costs
+    primary_atomic: false
+
+evidence_sets:
+  none:
+    observation_models: []
+  all_current:
+    observation_models:
+      - weekly_labor_stress
+      - monthly_labor_demand
+      - consumer_demand
+      - housing_activity
+      - business_investment
+      - inflation_expectations
+      - inflation_input_costs
+
+  only_weekly_labor_stress:
+    observation_models: [weekly_labor_stress]
+  only_monthly_labor_demand:
+    observation_models: [monthly_labor_demand]
+  only_consumer_demand:
+    observation_models: [consumer_demand]
+  only_housing_activity:
+    observation_models: [housing_activity]
+  only_business_investment:
+    observation_models: [business_investment]
+  only_inflation_expectations:
+    observation_models: [inflation_expectations]
+  only_inflation_input_costs:
+    observation_models: [inflation_input_costs]
+
+  without_weekly_labor_stress:
+    observation_models:
+      - monthly_labor_demand
+      - consumer_demand
+      - housing_activity
+      - business_investment
+      - inflation_expectations
+      - inflation_input_costs
+  without_monthly_labor_demand:
+    observation_models:
+      - weekly_labor_stress
+      - consumer_demand
+      - housing_activity
+      - business_investment
+      - inflation_expectations
+      - inflation_input_costs
+  without_consumer_demand:
+    observation_models:
+      - weekly_labor_stress
+      - monthly_labor_demand
+      - housing_activity
+      - business_investment
+      - inflation_expectations
+      - inflation_input_costs
+  without_housing_activity:
+    observation_models:
+      - weekly_labor_stress
+      - monthly_labor_demand
+      - consumer_demand
+      - business_investment
+      - inflation_expectations
+      - inflation_input_costs
+  without_business_investment:
+    observation_models:
+      - weekly_labor_stress
+      - monthly_labor_demand
+      - consumer_demand
+      - housing_activity
+      - inflation_expectations
+      - inflation_input_costs
+  without_inflation_expectations:
+    observation_models:
+      - weekly_labor_stress
+      - monthly_labor_demand
+      - consumer_demand
+      - housing_activity
+      - business_investment
+      - inflation_input_costs
+  without_inflation_input_costs:
+    observation_models:
+      - weekly_labor_stress
+      - monthly_labor_demand
+      - consumer_demand
+      - housing_activity
+      - business_investment
+      - inflation_expectations
+
+  only_inflation_pressure_pair:
+    observation_models:
+      - inflation_expectations
+      - inflation_input_costs
+  without_inflation_pressure_pair:
+    observation_models:
+      - weekly_labor_stress
+      - monthly_labor_demand
+      - consumer_demand
+      - housing_activity
+      - business_investment
+
+variants:
+  - id: transition_only
+    model_role: major_benchmark
+    non_defining_evidence: false
+    partial_defining_releases: false
+    emission: gaussian
+    var: ols
+    retail: baseline_nominal
+    evidence_set: none
+  - id: partial_only
+    model_role: major_benchmark
+    non_defining_evidence: false
+    partial_defining_releases: true
+    emission: gaussian
+    var: ols
+    retail: baseline_nominal
+    evidence_set: none
+  - id: student_t_7_combined
+    model_role: baseline
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: all_current
+
+  - id: add_one_weekly_labor_stress
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: only_weekly_labor_stress
+  - id: add_one_monthly_labor_demand
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: only_monthly_labor_demand
+  - id: add_one_consumer_demand
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: only_consumer_demand
+  - id: add_one_housing_activity
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: only_housing_activity
+  - id: add_one_business_investment
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: only_business_investment
+  - id: add_one_inflation_expectations
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: only_inflation_expectations
+  - id: add_one_inflation_input_costs
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: only_inflation_input_costs
+
+  - id: leave_one_out_weekly_labor_stress
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: without_weekly_labor_stress
+  - id: leave_one_out_monthly_labor_demand
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: without_monthly_labor_demand
+  - id: leave_one_out_consumer_demand
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: without_consumer_demand
+  - id: leave_one_out_housing_activity
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: without_housing_activity
+  - id: leave_one_out_business_investment
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: without_business_investment
+  - id: leave_one_out_inflation_expectations
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: without_inflation_expectations
+  - id: leave_one_out_inflation_input_costs
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: without_inflation_input_costs
+
+  - id: add_inflation_pressure_pair
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: only_inflation_pressure_pair
+  - id: leave_out_inflation_pressure_pair
+    model_role: sensitivity
+    non_defining_evidence: true
+    partial_defining_releases: true
+    emission: student_t_7
+    var: ols
+    retail: baseline_nominal
+    evidence_set: without_inflation_pressure_pair
+
+comparisons:
+  - candidate_id: add_one_weekly_labor_stress
+    reference_id: partial_only
+    block_id: weekly_labor_stress
+    experiment_arm: add_one
+    primary_atomic: true
+  - candidate_id: leave_one_out_weekly_labor_stress
+    reference_id: student_t_7_combined
+    block_id: weekly_labor_stress
+    experiment_arm: leave_one_out
+    primary_atomic: true
+  - candidate_id: add_one_monthly_labor_demand
+    reference_id: partial_only
+    block_id: monthly_labor_demand
+    experiment_arm: add_one
+    primary_atomic: true
+  - candidate_id: leave_one_out_monthly_labor_demand
+    reference_id: student_t_7_combined
+    block_id: monthly_labor_demand
+    experiment_arm: leave_one_out
+    primary_atomic: true
+  - candidate_id: add_one_consumer_demand
+    reference_id: partial_only
+    block_id: consumer_demand
+    experiment_arm: add_one
+    primary_atomic: true
+  - candidate_id: leave_one_out_consumer_demand
+    reference_id: student_t_7_combined
+    block_id: consumer_demand
+    experiment_arm: leave_one_out
+    primary_atomic: true
+  - candidate_id: add_one_housing_activity
+    reference_id: partial_only
+    block_id: housing_activity
+    experiment_arm: add_one
+    primary_atomic: true
+  - candidate_id: leave_one_out_housing_activity
+    reference_id: student_t_7_combined
+    block_id: housing_activity
+    experiment_arm: leave_one_out
+    primary_atomic: true
+  - candidate_id: add_one_business_investment
+    reference_id: partial_only
+    block_id: business_investment
+    experiment_arm: add_one
+    primary_atomic: true
+  - candidate_id: leave_one_out_business_investment
+    reference_id: student_t_7_combined
+    block_id: business_investment
+    experiment_arm: leave_one_out
+    primary_atomic: true
+  - candidate_id: add_one_inflation_expectations
+    reference_id: partial_only
+    block_id: inflation_expectations
+    experiment_arm: add_one
+    primary_atomic: true
+  - candidate_id: leave_one_out_inflation_expectations
+    reference_id: student_t_7_combined
+    block_id: inflation_expectations
+    experiment_arm: leave_one_out
+    primary_atomic: true
+  - candidate_id: add_one_inflation_input_costs
+    reference_id: partial_only
+    block_id: inflation_input_costs
+    experiment_arm: add_one
+    primary_atomic: true
+  - candidate_id: leave_one_out_inflation_input_costs
+    reference_id: student_t_7_combined
+    block_id: inflation_input_costs
+    experiment_arm: leave_one_out
+    primary_atomic: true
+  - candidate_id: add_inflation_pressure_pair
+    reference_id: partial_only
+    block_id: inflation_pressure_pair
+    experiment_arm: add_one
+    primary_atomic: false
+  - candidate_id: leave_out_inflation_pressure_pair
+    reference_id: student_t_7_combined
+    block_id: inflation_pressure_pair
+    experiment_arm: leave_one_out
+    primary_atomic: false
+
+replacement_comparisons:
+  - candidate_id: priority_03_consumer
+    reference_id: leave_one_out_consumer_demand
+    block_id: consumer_demand
+    experiment_arm: replacement_against_reduced_core
+    primary_atomic: false
+  - candidate_id: priority_04_housing
+    reference_id: leave_one_out_housing_activity
+    block_id: housing_activity
+    experiment_arm: replacement_against_reduced_core
+    primary_atomic: false
+  - candidate_id: priority_06_backlog
+    reference_id: leave_one_out_business_investment
+    block_id: business_investment
+    experiment_arm: replacement_against_reduced_core
+    primary_atomic: false
+
+evaluation:
+  primary_checkpoint: before_any_defining_release
+  initialization_burn_in_months: 4
+  information_stage_checkpoints:
+    - before_any_defining_release
+    - after_employment_situation
+    - after_midmonth_defining_releases
+    - strict_pre_final_score_day
+  metrics:
+    score_center_negative_log_predictive_density: lower
+    quadrant_cross_entropy_to_exact_score_map: lower
+    quadrant_brier_distance_to_exact_score_map: lower
+    hard_quadrant_correct: higher
+  paired_block_bootstrap:
+    random_seed: 20260722
+    replications: 5000
+    resampling: circular
+    block_length_months: 12
+    confidence_level: 0.95
+    samples:
+      - full_sample
+      - excluding_2020_03_through_2020_05
+    holm_families:
+      primary_atomic:
+        - add_one_weekly_labor_stress__vs__partial_only
+        - leave_one_out_weekly_labor_stress__vs__student_t_7_combined
+        - add_one_monthly_labor_demand__vs__partial_only
+        - leave_one_out_monthly_labor_demand__vs__student_t_7_combined
+        - add_one_consumer_demand__vs__partial_only
+        - leave_one_out_consumer_demand__vs__student_t_7_combined
+        - add_one_housing_activity__vs__partial_only
+        - leave_one_out_housing_activity__vs__student_t_7_combined
+        - add_one_business_investment__vs__partial_only
+        - leave_one_out_business_investment__vs__student_t_7_combined
+        - add_one_inflation_expectations__vs__partial_only
+        - leave_one_out_inflation_expectations__vs__student_t_7_combined
+        - add_one_inflation_input_costs__vs__partial_only
+        - leave_one_out_inflation_input_costs__vs__student_t_7_combined
+      secondary_add_one:
+        - add_one_weekly_labor_stress__vs__partial_only
+        - add_one_monthly_labor_demand__vs__partial_only
+        - add_one_consumer_demand__vs__partial_only
+        - add_one_housing_activity__vs__partial_only
+        - add_one_business_investment__vs__partial_only
+        - add_one_inflation_expectations__vs__partial_only
+        - add_one_inflation_input_costs__vs__partial_only
+      secondary_leave_one_out:
+        - leave_one_out_weekly_labor_stress__vs__student_t_7_combined
+        - leave_one_out_monthly_labor_demand__vs__student_t_7_combined
+        - leave_one_out_consumer_demand__vs__student_t_7_combined
+        - leave_one_out_housing_activity__vs__student_t_7_combined
+        - leave_one_out_business_investment__vs__student_t_7_combined
+        - leave_one_out_inflation_expectations__vs__student_t_7_combined
+        - leave_one_out_inflation_input_costs__vs__student_t_7_combined
+      exploratory_inflation_pressure_pair:
+        - add_inflation_pressure_pair__vs__partial_only
+        - leave_out_inflation_pressure_pair__vs__student_t_7_combined
+
+outputs:
+  processed_dir: data/processed/m02_soft_composite/existing_block_attribution
+  published_dir: results/published/m02_soft_composite/existing_block_attribution
+  manifest: data/manifests/m02_existing_block_attribution.json
+  evaluation_rows: evaluation_rows.csv
+  evaluation_summary: evaluation_summary.csv
+  evaluation_subperiod_summary: evaluation_subperiod_summary.csv
+  paired_comparisons: paired_comparisons.csv
+  paired_block_bootstrap: paired_block_bootstrap.csv
+  replacement_comparisons: replacement_comparisons.csv
+  replacement_block_bootstrap: replacement_block_bootstrap.csv
+  block_attribution_summary: block_attribution_summary.csv
+  block_coverage: block_coverage.csv
+  event_update_audit: event_update_audit.csv.gz
+  partial_defining_audit: partial_defining_audit.csv.gz
+  exact_score_audit: exact_score_audit.csv
+  transition_fit_audit: transition_fit_audit.csv
+  transition_weight_audit: transition_weight_audit.csv.gz
+  emission_fit_audit: emission_fit_audit.csv
+  tail_fold_scores: tail_fold_scores.csv
+  hyperparameter_schedule: hyperparameter_schedule.csv
+  latest_marginals: latest_marginals.csv
+  model_registry: model_registry.csv
+  profile_coverage: profile_coverage.csv
+  baseline_invariance: baseline_invariance.csv
+  public_evaluation_summary: evaluation_summary.csv
+  public_evaluation_subperiod_summary: evaluation_subperiod_summary.csv
+  public_paired_comparisons: paired_comparisons.csv
+  public_paired_block_bootstrap: paired_block_bootstrap.csv
+  public_replacement_comparisons: replacement_comparisons.csv
+  public_replacement_block_bootstrap: replacement_block_bootstrap.csv
+  public_block_attribution_summary: block_attribution_summary.csv
+  public_block_coverage: block_coverage.csv
+  public_profile_coverage: profile_coverage.csv
+  public_baseline_invariance: baseline_invariance.csv
+  public_model_registry: model_registry.csv
+  public_method_summary: method_summary.json

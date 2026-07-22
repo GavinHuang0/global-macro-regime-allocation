@@ -1,10 +1,13 @@
-# Model 02 partial-release and robust-inference sensitivities
+# Model 02 inference baseline selection and robustness sensitivities
 
-This document specifies the Model 02 sensitivity replay that adds partial
+This document specifies the Model 02 inference-selection replay that adds partial
 score-defining releases, robust Student-$t$ observation models, robust VAR(1)
-dynamics, and alternative retail-demand specifications. The frozen Gaussian
-baseline remains unchanged. All results in this document use the point-in-time
-replay through 20 July 2026.
+dynamics, and alternative retail-demand specifications. The earlier Gaussian
+replay remains unchanged as a frozen upstream artifact. The selected inference
+baseline is `student_t_7_combined`; `transition_only` and `partial_only`, both
+with OLS VAR(1), are the two major benchmarks. Every other enabled variant is a
+named sensitivity. All results in this document use the point-in-time replay
+through 20 July 2026.
 
 The main empirical result is deliberately narrow. Partial score-defining
 releases materially improve the late-month estimate because they reveal most
@@ -15,6 +18,15 @@ VAR dynamics improve several non-pandemic subperiod diagnostics, yet receive a
 large penalty when the unprecedented 2020 score shocks themselves are the
 forecast targets. No tested variant dominates every metric, and these results
 do not establish an economic or tradable edge.
+Selecting the fixed-$\nu=7$ combined model is therefore an explicit governance
+decision favoring a complete, comparatively simple event-driven specification
+with near-best full-sample density performance, not a claim of universal
+statistical superiority.
+
+A later evidence-set experiment leaves this selected specification frozen and
+tests six new evidence designs. None is promoted. Its definitions and results
+are recorded separately in
+[`evidence_block_experiments.md`](evidence_block_experiments.md).
 
 ## 1. Frozen upstream model and notation
 
@@ -51,7 +63,7 @@ marginal, mapping covariance is added only when converting the score
 distribution to four quadrant probabilities. It is not propagated as process
 noise and is not used as measurement error for an exact released score.
 
-The sensitivity replay does not alter the component transformations,
+The baseline-selection replay does not alter the component transformations,
 strictly lagged standardization, mapping rule, evidence-event table, or
 four-month state representation documented in the
 [Model 02 specification](README.md).
@@ -306,8 +318,8 @@ $$
 \frac{\nu_b}{\nu_b-2}\boldsymbol R_b.
 $$
 
-The initial named sensitivity fixes $\nu_b=7$. The Gaussian nested case is
-$\nu_b=\infty$.
+The selected inference baseline fixes $\nu_b=7$. The Gaussian nested case is
+$\nu_b=\infty$, and annual tail selection remains a sensitivity.
 
 ### 3.2 Iteratively reweighted ridge estimation
 
@@ -496,7 +508,7 @@ same state-update machinery.
 ### 6.1 Stronger inflation-loading shrinkage
 
 The nominal consumer block retains retail sales excluding motor vehicles and
-the same-vintage motor-vehicle component. Its baseline loading penalties are
+the same-vintage motor-vehicle component. Its nominal-retail reference loading penalties are
 $(1,1)$ for growth and inflation. The sensitivity changes each response's
 penalties to
 
@@ -553,20 +565,20 @@ The stress-interaction variant is consequently marked
 turn one crisis observation into an effectively hand-selected interaction and
 would not constitute a credible sensitivity result.
 
-## 7. Compared variants
+## 7. Baseline, benchmarks, and sensitivities
 
-| Variant | Partial defining releases | Non-defining emission | VAR | Retail block |
-|---|---|---|---|---|
-| `transition_only` | No | None | OLS | Not used |
-| `gaussian_nondefining` | No | Gaussian | OLS | Nominal baseline |
-| `partial_only` | Yes | None | OLS | Not used |
-| `gaussian_combined` | Yes | Gaussian | OLS | Nominal baseline |
-| `student_t_7_combined` | Yes | Student-$t$, $\nu=7$ | OLS | Nominal baseline |
-| `selected_tail_combined` | Yes | Annually selected $\nu$ | OLS | Nominal baseline |
-| `huber_var_combined` | Yes | Annually selected $\nu$ | Huber | Nominal baseline |
-| `student_t_var_combined` | Yes | Annually selected $\nu$ | Student-$t$, $\nu=7$ | Nominal baseline |
-| `retail_shrinkage_combined` | Yes | Annually selected $\nu$ | Huber | Strong inflation shrinkage |
-| `retail_real_decomposition_combined` | Yes | Annually selected $\nu$ | Huber | Real/implicit-price decomposition |
+| Role | Variant | Partial defining releases | Non-defining emission | VAR | Retail block |
+|---|---|---|---|---|---|
+| Baseline | `student_t_7_combined` | Yes | Student-$t$, $\nu=7$ | OLS | Nominal reference |
+| Major benchmark | `transition_only` | No | None | OLS | Not used |
+| Major benchmark | `partial_only` | Yes | None | OLS | Not used |
+| Sensitivity | `gaussian_nondefining` | No | Gaussian | OLS | Nominal reference |
+| Sensitivity | `gaussian_combined` | Yes | Gaussian | OLS | Nominal reference |
+| Sensitivity | `selected_tail_combined` | Yes | Annually selected $\nu$ | OLS | Nominal reference |
+| Sensitivity | `huber_var_combined` | Yes | Annually selected $\nu$ | Huber | Nominal reference |
+| Sensitivity | `student_t_var_combined` | Yes | Annually selected $\nu$ | Student-$t$, $\nu=7$ | Nominal reference |
+| Sensitivity | `retail_shrinkage_combined` | Yes | Annually selected $\nu$ | Huber | Strong inflation shrinkage |
+| Sensitivity | `retail_real_decomposition_combined` | Yes | Annually selected $\nu$ | Huber | Real/implicit-price decomposition |
 
 The disabled stress-interaction declaration is preserved in configuration and
 in the identification audit, but it is not included in the replayed results.
@@ -658,18 +670,18 @@ than a one-hot label.
 
 ### 10.1 Primary strict-pre-final-day comparison
 
-| Variant | Mean NLPD | Median NLPD | Growth RMSE | Inflation RMSE | Hard accuracy | Cross-entropy |
-|---|---:|---:|---:|---:|---:|---:|
-| `selected_tail_combined` | 5.720 | -0.700 | 1.423 | 0.495 | 73.2% | 1.303 |
-| `student_t_7_combined` | 5.721 | -0.669 | 1.411 | 0.495 | 76.0% | 1.302 |
-| `partial_only` | 5.836 | -0.648 | 1.447 | 0.487 | **82.5%** | 1.300 |
-| `gaussian_combined` | 6.270 | -0.697 | **1.076** | 0.557 | 78.7% | 1.301 |
-| `retail_real_decomposition_combined` | 10.387 | **-0.734** | 1.959 | **0.448** | 72.7% | **1.297** |
-| `retail_shrinkage_combined` | 10.446 | -0.679 | 1.959 | 0.478 | 74.3% | 1.301 |
-| `huber_var_combined` | 10.450 | -0.703 | 1.959 | 0.479 | 73.8% | 1.301 |
-| `student_t_var_combined` | 11.285 | -0.725 | 2.014 | 0.467 | 74.3% | 1.301 |
-| `transition_only` | 26.919 | 1.820 | 4.295 | 0.738 | 35.0% | 1.537 |
-| `gaussian_nondefining` | 28.065 | 1.734 | 3.496 | 0.880 | 33.9% | 1.571 |
+| Role | Variant | Mean NLPD | Median NLPD | Growth RMSE | Inflation RMSE | Hard accuracy | Cross-entropy |
+|---|---|---:|---:|---:|---:|---:|---:|
+| Baseline | `student_t_7_combined` | 5.721 | -0.669 | 1.411 | 0.495 | 76.0% | 1.302 |
+| Major benchmark | `partial_only` | 5.836 | -0.648 | 1.447 | 0.487 | **82.5%** | 1.300 |
+| Major benchmark | `transition_only` | 26.919 | 1.820 | 4.295 | 0.738 | 35.0% | 1.537 |
+| Sensitivity | `selected_tail_combined` | 5.720 | -0.700 | 1.423 | 0.495 | 73.2% | 1.303 |
+| Sensitivity | `gaussian_combined` | 6.270 | -0.697 | **1.076** | 0.557 | 78.7% | 1.301 |
+| Sensitivity | `retail_real_decomposition_combined` | 10.387 | **-0.734** | 1.959 | **0.448** | 72.7% | **1.297** |
+| Sensitivity | `retail_shrinkage_combined` | 10.446 | -0.679 | 1.959 | 0.478 | 74.3% | 1.301 |
+| Sensitivity | `huber_var_combined` | 10.450 | -0.703 | 1.959 | 0.479 | 73.8% | 1.301 |
+| Sensitivity | `student_t_var_combined` | 11.285 | -0.725 | 2.014 | 0.467 | 74.3% | 1.301 |
+| Sensitivity | `gaussian_nondefining` | 28.065 | 1.734 | 3.496 | 0.880 | 33.9% | 1.571 |
 
 The table has no universal winner. The selected-tail and fixed-$\nu=7$
 combined variants have the best mean score density; the Gaussian combined
@@ -677,6 +689,14 @@ variant has the lowest growth RMSE; the real-retail variant has the lowest
 inflation RMSE and soft cross-entropy; and partial-only has the highest hard
 quadrant accuracy. Differences among the soft probability scores of the
 partial-release variants are small.
+
+The fixed-$\nu=7$ combined model is the selected baseline because it includes
+both partial defining information and robust non-defining evidence, finishes
+within 0.0014 mean NLPD of the best sensitivity, and avoids an additional
+annual tail-selection mechanism. Partial-only isolates the incremental effect
+of non-defining evidence; transition-only isolates the combined contribution of
+all event updates. These benchmark roles remain important because the baseline
+does not dominate their quadrant diagnostics.
 
 The principal improvement over transition-only comes from partial target
 revelation, not from the non-defining release model. Relative to partial-only,
@@ -688,16 +708,20 @@ probability metrics.
 
 ### 10.2 Information accumulation
 
-| Checkpoint | Variant | Mean NLPD | Growth RMSE | Inflation RMSE | Hard accuracy |
-|---|---|---:|---:|---:|---:|
-| Before any defining release | Transition only | 26.922 | 4.294 | 0.739 | 36.1% |
-| Before any defining release | Partial only | 26.921 | 4.295 | 0.738 | 36.1% |
-| After employment | Partial only | 7.662 | 2.106 | 0.638 | 52.5% |
-| After employment | Selected-tail combined | 7.639 | 2.091 | 0.638 | 53.6% |
-| After midmonth releases | Partial only | 5.838 | 1.447 | 0.487 | 82.5% |
-| After midmonth releases | Selected-tail combined | 5.757 | 1.439 | 0.492 | 76.5% |
-| Strict pre-final-score day | Partial only | 5.836 | 1.447 | 0.487 | 82.5% |
-| Strict pre-final-score day | Selected-tail combined | 5.720 | 1.423 | 0.495 | 73.2% |
+| Checkpoint | Role | Variant | Mean NLPD | Growth RMSE | Inflation RMSE | Hard accuracy |
+|---|---|---|---:|---:|---:|---:|
+| Before any defining release | Baseline | Fixed-$\nu=7$ combined | 26.855 | 4.245 | 0.735 | 37.2% |
+| Before any defining release | Major benchmark | Partial only | 26.921 | 4.295 | 0.738 | 36.1% |
+| Before any defining release | Major benchmark | Transition only | 26.922 | 4.294 | 0.739 | 36.1% |
+| After employment | Baseline | Fixed-$\nu=7$ combined | 7.610 | 2.066 | 0.639 | 53.0% |
+| After employment | Major benchmark | Partial only | 7.662 | 2.106 | 0.638 | 52.5% |
+| After employment | Major benchmark | Transition only | 26.922 | 4.294 | 0.739 | 36.1% |
+| After midmonth releases | Baseline | Fixed-$\nu=7$ combined | 5.751 | 1.424 | 0.492 | 77.0% |
+| After midmonth releases | Major benchmark | Partial only | 5.838 | 1.447 | 0.487 | 82.5% |
+| After midmonth releases | Major benchmark | Transition only | 26.923 | 4.295 | 0.738 | 34.4% |
+| Strict pre-final-score day | Baseline | Fixed-$\nu=7$ combined | 5.721 | 1.411 | 0.495 | 76.0% |
+| Strict pre-final-score day | Major benchmark | Partial only | 5.836 | 1.447 | 0.487 | 82.5% |
+| Strict pre-final-score day | Major benchmark | Transition only | 26.919 | 4.295 | 0.738 | 35.0% |
 
 The sharp improvement after employment and midmonth releases is expected:
 the filter has directly observed six of the eight standardized components by
@@ -710,14 +734,15 @@ with the same accuracy.
 The three reference months March--May 2020 dominate full-sample mean density
 and RMSE. Excluding only those three months produces the following diagnostic:
 
-| Variant | Mean NLPD excluding Mar--May 2020 | Growth RMSE | Inflation RMSE | Hard accuracy |
-|---|---:|---:|---:|---:|
-| `student_t_var_combined` | **-0.148** | 0.236 | 0.414 | 74.4% |
-| `retail_real_decomposition_combined` | -0.140 | 0.192 | **0.377** | 72.8% |
-| `huber_var_combined` | -0.086 | 0.182 | 0.414 | 73.9% |
-| `selected_tail_combined` | -0.031 | 0.263 | 0.411 | 73.3% |
-| `partial_only` | 0.035 | **0.173** | 0.404 | **82.8%** |
-| `transition_only` | 2.286 | 0.886 | 0.620 | 35.6% |
+| Role | Variant | Mean NLPD excluding Mar--May 2020 | Growth RMSE | Inflation RMSE | Hard accuracy |
+|---|---|---:|---:|---:|---:|
+| Baseline | `student_t_7_combined` | -0.017 | 0.260 | 0.411 | 76.1% |
+| Major benchmark | `partial_only` | 0.035 | **0.173** | 0.404 | **82.8%** |
+| Major benchmark | `transition_only` | 2.286 | 0.886 | 0.620 | 35.6% |
+| Sensitivity | `student_t_var_combined` | **-0.148** | 0.236 | 0.414 | 74.4% |
+| Sensitivity | `retail_real_decomposition_combined` | -0.140 | 0.192 | **0.377** | 72.8% |
+| Sensitivity | `huber_var_combined` | -0.086 | 0.182 | 0.414 | 73.9% |
+| Sensitivity | `selected_tail_combined` | -0.031 | 0.263 | 0.411 | 73.3% |
 
 This ranking reversal is informative but not a replacement headline result.
 Deleting the exact observations that robust methods are designed to discount
@@ -737,26 +762,26 @@ a sensitivity and retains the complete sample as the primary comparison.
 ### 10.4 Latest current-month readout
 
 As of 20 July 2026, after processing the six available June defining
-components, the selected-tail/OLS-VAR combined variant has July score means
-$(-0.5751,0.0908)$ for growth and inflation. Its quadrant probabilities
+components, the fixed-$\nu=7$/OLS-VAR baseline has July score means
+$(-0.5097,0.0937)$ for growth and inflation. Its quadrant probabilities
 are:
 
 | Quadrant | Probability |
 |---|---:|
-| Growth up / inflation up | 19.54% |
-| Growth down / inflation up | 34.15% |
-| Growth up / inflation down | 24.01% |
-| Growth down / inflation down | 22.31% |
+| Growth up / inflation up | 19.95% |
+| Growth down / inflation up | 33.84% |
+| Growth up / inflation down | 24.36% |
+| Growth down / inflation down | 21.84% |
 
-The corresponding selected-tail June marginal is still non-exact. Its score
-means are $(-0.1957,-0.0081)$ and its four quadrant probabilities, in the same
-table order, are 21.74%, 27.87%, 22.97%, and 27.42%. These are posterior
+The corresponding baseline June marginal is still non-exact. Its score means
+are $(-0.1769,0.0031)$ and its four quadrant probabilities, in the same table
+order, are 22.23%, 27.92%, 23.03%, and 26.82%. These are posterior
 estimates after six components, not a published June composite.
 
-This is one named sensitivity's current readout, not a selected production
-forecast. Robust-VAR and retail variants produce materially different score
-means and uncertainty, so publishing only the most favorable historical
-variant would overstate model certainty.
+This is the selected Model 02 inference baseline readout. The two benchmark
+marginals and every sensitivity remain published. Robust-VAR and retail
+variants produce materially different score means and uncertainty, so the
+baseline selection does not eliminate visible model uncertainty.
 
 ## 11. Limitations and interpretation
 
@@ -798,7 +823,7 @@ variant would overstate model certainty.
 
 ## 12. Reproduction and artifacts
 
-The frozen sensitivity specification is
+The frozen inference baseline-and-sensitivity specification is
 [`configs/models/m02_inference_sensitivities.yaml`](../../../configs/models/m02_inference_sensitivities.yaml).
 The main implementation is in:
 
@@ -810,7 +835,13 @@ The main implementation is in:
 Public results are under
 [`results/published/m02_soft_composite/inference_sensitivities/`](../../../results/published/m02_soft_composite/inference_sensitivities/).
 They include the primary metric table, paired comparisons, tail-sensitivity
-summary, published subperiod diagnostics, latest marginals, and method summary.
+summary, published subperiod diagnostics, latest marginals, the
+machine-readable `model_registry.csv`, and method summary.
+In `paired_comparisons.csv`, `comparison_reference` identifies the comparator
+and every reported delta is the candidate variant's metric minus that
+reference's metric. The selected baseline is paired with each major benchmark;
+sensitivities are paired with the selected baseline, with additional direct
+retail-versus-Huber diagnostics retained under their explicit scopes.
 Detailed event weights,
 partial-component conditioning records, annual schedules, robust transition
 weights, and evaluation rows are retained under

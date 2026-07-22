@@ -1,9 +1,10 @@
-"""Build Model 02 partial-release and robust-inference sensitivities.
+"""Build the selected Model 02 inference baseline and its comparisons.
 
-The command verifies every frozen upstream artifact, prepares the baseline and
-real-retail observation blocks, runs the multi-variant causal replay, and
-publishes compact comparisons plus detailed event, fit, weight, and lineage
-audits.  It performs no network access and never reads an API credential.
+The command verifies every frozen upstream artifact, prepares the nominal and
+real-retail observation blocks, runs the baseline, two major benchmarks, and
+all enabled sensitivities, then publishes compact comparisons plus detailed
+event, fit, weight, and lineage audits. It performs no network access and never
+reads an API credential.
 """
 
 from __future__ import annotations
@@ -25,6 +26,7 @@ from regime_allocation.data.dataset_acquisition import sha256
 from regime_allocation.models.m02_soft_composite.inference_sensitivities import (
     real_retail_spec,
     run_inference_sensitivities,
+    variant_registry_from_config,
 )
 from regime_allocation.models.m02_soft_composite.partial_defining import (
     prepare_partial_defining_data,
@@ -94,6 +96,7 @@ def _load_sensitivity_config(path: Path) -> tuple[dict[str, Any], bytes]:
     ):
         raise ValueError("unexpected Model 02 sensitivity configuration identity")
     for section in (
+        "model_selection",
         "sources",
         "partial_defining_releases",
         "student_t_emissions",
@@ -106,6 +109,23 @@ def _load_sensitivity_config(path: Path) -> tuple[dict[str, Any], bytes]:
             raise ValueError(f"sensitivity config omits mapping section {section}")
     if not isinstance(config.get("variants"), list) or not config["variants"]:
         raise ValueError("sensitivity config requires variants")
+    registry = variant_registry_from_config(config)
+    selection = config["model_selection"]
+    if selection["baseline"] != "student_t_7_combined":
+        raise ValueError("Model 02 baseline must be student_t_7_combined")
+    if list(selection["major_benchmarks"]) != ["transition_only", "partial_only"]:
+        raise ValueError(
+            "Model 02 major benchmarks must be transition_only and partial_only"
+        )
+    baseline = registry.loc[registry["model_role"].eq("baseline")].iloc[0]
+    if not (
+        baseline["emission_family"] == "student_t_7"
+        and baseline["var_method"] == "ols"
+        and baseline["retail_method"] == "baseline_nominal"
+        and bool(baseline["non_defining_evidence"])
+        and bool(baseline["partial_defining_releases"])
+    ):
+        raise ValueError("selected Model 02 baseline specification has changed")
     candidates = [float(value) for value in config["student_t_emissions"]
                   ["degrees_of_freedom_sensitivity"]["candidates"]]
     if candidates != [4.0, 5.0, 7.0, 10.0, math.inf]:
@@ -138,11 +158,13 @@ def _load_sensitivity_config(path: Path) -> tuple[dict[str, Any], bytes]:
         "retail_stress_identification_audit",
         "hyperparameter_schedule",
         "latest_marginals",
+        "model_registry",
         "public_evaluation_summary",
         "public_evaluation_subperiod_summary",
         "public_paired_comparisons",
         "public_tail_summary",
         "public_latest_marginals",
+        "public_model_registry",
         "public_method_summary",
     }
     missing = required_outputs.difference(config["outputs"])
@@ -216,8 +238,11 @@ def _evaluation_summary(
         "hard_quadrant_correct": "mean",
     }
     available = {name: aggregation for name, aggregation in metrics.items() if name in frame}
+    group_keys = ["filter_variant", "evaluation_checkpoint"]
+    if "model_role" in frame:
+        group_keys.insert(1, "model_role")
     summary = (
-        frame.groupby(["filter_variant", "evaluation_checkpoint"], as_index=False)
+        frame.groupby(group_keys, as_index=False)
         .agg(available)
         .rename(
             columns={
@@ -233,7 +258,7 @@ def _evaluation_summary(
     summary["growth_rmse"] = np.sqrt(summary.pop("growth_squared_error"))
     summary["inflation_rmse"] = np.sqrt(summary.pop("inflation_squared_error"))
     medians = (
-        frame.groupby(["filter_variant", "evaluation_checkpoint"], as_index=False)[
+        frame.groupby(group_keys, as_index=False)[
             "score_center_negative_log_predictive_density"
         ]
         .median()
@@ -245,7 +270,7 @@ def _evaluation_summary(
     )
     summary = summary.merge(
         medians,
-        on=["filter_variant", "evaluation_checkpoint"],
+        on=group_keys,
         how="left",
         validate="one_to_one",
     )
@@ -308,6 +333,30 @@ def _paired_comparisons(
     ]
     metrics = [name for name in metrics if name in frame]
     rows: list[dict[str, object]] = []
+    if "model_role" not in frame:
+        raise ValueError("evaluation rows omit model_role")
+    role_counts = frame.groupby("filter_variant")["model_role"].nunique()
+    if role_counts.ne(1).any():
+        raise ValueError("a filter variant has more than one model role")
+    role_by_variant = (
+        frame[["filter_variant", "model_role"]]
+        .drop_duplicates()
+        .set_index("filter_variant")["model_role"]
+        .to_dict()
+    )
+    baseline_ids = sorted(
+        variant_id
+        for variant_id, role in role_by_variant.items()
+        if role == "baseline"
+    )
+    benchmark_ids = sorted(
+        variant_id
+        for variant_id, role in role_by_variant.items()
+        if role == "major_benchmark"
+    )
+    if len(baseline_ids) != 1 or len(benchmark_ids) != 2:
+        raise ValueError("paired comparisons require one baseline and two benchmarks")
+    baseline_id = baseline_ids[0]
 
     def add_comparison(
         variant_id: str,
@@ -331,7 +380,9 @@ def _paired_comparisons(
         for checkpoint, group in paired.groupby("evaluation_checkpoint", sort=True):
             record: dict[str, object] = {
                 "filter_variant": variant_id,
-                "comparison_baseline": comparator_id,
+                "model_role": role_by_variant[variant_id],
+                "comparison_reference": comparator_id,
+                "reference_model_role": role_by_variant[comparator_id],
                 "comparison_scope": comparison_scope,
                 "evaluation_checkpoint": checkpoint,
                 "paired_months": int(len(group)),
@@ -342,19 +393,25 @@ def _paired_comparisons(
                 variant_values = pd.to_numeric(
                     group[f"{metric}_variant"], errors="coerce"
                 ).astype(float)
-                transition_values = pd.to_numeric(
+                reference_values = pd.to_numeric(
                     group[f"{metric}_comparator"], errors="coerce"
                 ).astype(float)
-                delta = variant_values - transition_values
+                delta = variant_values - reference_values
                 record[f"mean_delta_{metric}"] = float(delta.mean())
             rows.append(record)
 
-    for variant_id in sorted(frame["filter_variant"].unique()):
-        if variant_id != "transition_only":
+    for benchmark_id in benchmark_ids:
+        add_comparison(
+            baseline_id,
+            benchmark_id,
+            comparison_scope="baseline_vs_major_benchmark",
+        )
+    for variant_id, role in sorted(role_by_variant.items()):
+        if role == "sensitivity":
             add_comparison(
                 str(variant_id),
-                "transition_only",
-                comparison_scope="all_common_evaluation_months",
+                baseline_id,
+                comparison_scope="sensitivity_vs_selected_baseline",
             )
     if {
         "retail_shrinkage_combined",
@@ -527,6 +584,8 @@ def build_inference_sensitivities(
     root = project_root.resolve()
     config_path = _project_path(root, config_path)
     sensitivity, sensitivity_bytes = _load_sensitivity_config(config_path)
+    model_registry = variant_registry_from_config(sensitivity)
+    role_by_variant = model_registry.set_index("variant_id")["model_role"].to_dict()
     base_path = _project_path(root, sensitivity["sources"]["base_filter_config"])
     base, base_bytes = _load_yaml(base_path)
     if base.get("model_id") != MODEL_ID:
@@ -651,6 +710,7 @@ def build_inference_sensitivities(
         "retail_stress_identification_audit",
         "hyperparameter_schedule",
         "latest_marginals",
+        "model_registry",
     )
     processed_paths = {
         key: _namespace_path(processed_dir, outputs[key]) for key in processed_keys
@@ -661,6 +721,7 @@ def build_inference_sensitivities(
         "public_paired_comparisons",
         "public_tail_summary",
         "public_latest_marginals",
+        "public_model_registry",
         "public_method_summary",
     )
     public_paths = {
@@ -683,6 +744,7 @@ def build_inference_sensitivities(
         "retail_stress_identification_audit": stress_audit,
         "hyperparameter_schedule": result.hyperparameter_schedule,
         "latest_marginals": result.latest_marginals,
+        "model_registry": model_registry,
     }
     for key, frame in tables.items():
         _write_csv(frame, processed_paths[key])
@@ -694,8 +756,18 @@ def build_inference_sensitivities(
     _write_csv(paired, public_paths["public_paired_comparisons"])
     _write_csv(tail_summary, public_paths["public_tail_summary"])
     _write_csv(result.latest_marginals, public_paths["public_latest_marginals"])
+    _write_csv(model_registry, public_paths["public_model_registry"])
 
     stress = sensitivity["retail_sensitivities"]["stress_interaction"]
+    selection = sensitivity["model_selection"]
+    sensitivity_ids = model_registry.loc[
+        model_registry["model_role"].eq("sensitivity"), "variant_id"
+    ].tolist()
+    disabled_sensitivity_ids = model_registry.loc[
+        model_registry["model_role"].eq("sensitivity")
+        & ~model_registry["enabled"],
+        "variant_id",
+    ].tolist()
     method_summary = {
         "schema_version": 1,
         "model_id": MODEL_ID,
@@ -703,6 +775,18 @@ def build_inference_sensitivities(
         "replay_start": result.initial_date.date().isoformat(),
         "replay_end": result.replay_end.date().isoformat(),
         "variants": sorted(result.latest_states),
+        "model_selection": {
+            "baseline": str(selection["baseline"]),
+            "major_benchmarks": list(selection["major_benchmarks"]),
+            "sensitivities": sensitivity_ids,
+            "disabled_sensitivities": disabled_sensitivity_ids,
+            "selection_status": str(selection["selection_status"]),
+            "rationale": str(selection["rationale"]),
+            "variant_roles": {
+                str(variant_id): str(role)
+                for variant_id, role in sorted(role_by_variant.items())
+            },
+        },
         "partial_defining_updates_applied": int(
             result.partial_defining_audit.get("status", pd.Series(dtype=str))
             .eq("applied")
@@ -790,6 +874,17 @@ def build_inference_sensitivities(
             for name in sorted(manifest_paths)
         ],
         "implementation_file_hashes": implementation_hashes,
+        "model_selection": {
+            "baseline": str(selection["baseline"]),
+            "major_benchmarks": list(selection["major_benchmarks"]),
+            "sensitivities": sensitivity_ids,
+            "disabled_sensitivities": disabled_sensitivity_ids,
+            "selection_status": str(selection["selection_status"]),
+            "variant_roles": {
+                str(variant_id): str(role)
+                for variant_id, role in sorted(role_by_variant.items())
+            },
+        },
         "information_contract": {
             "transition_cutoff": "pair_available_at_strictly_before_month_roll",
             "component_fit_cutoff": "complete_score_available_strictly_before_release",
@@ -817,6 +912,7 @@ def build_inference_sensitivities(
         "paired": public_paths["public_paired_comparisons"],
         "tails": public_paths["public_tail_summary"],
         "latest": public_paths["public_latest_marginals"],
+        "registry": public_paths["public_model_registry"],
         "summary": public_paths["public_method_summary"],
     }
 
