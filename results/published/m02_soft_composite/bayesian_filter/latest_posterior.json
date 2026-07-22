@@ -1,0 +1,809 @@
+{
+  "as_of_date": "2026-07-20",
+  "checkpoint_id": "m02:003573",
+  "checkpoint_type": "latest",
+  "current_month_event_status_counts": {
+    "applied": 6
+  },
+  "dependence_summary": {
+    "bh_q_below_0_05": 64,
+    "cross_model_test_rows": 414,
+    "interpretation_caveat": "Failure to reject a dependence test does not establish conditional independence; inspect effect sizes, sample coverage, serial dependence, and statistical power.",
+    "p_value_caveat": "Correlation p-values are exploratory when residual serial dependence is present; effect sizes and coverage remain primary.",
+    "serial_adjusted_q_below_0_05": 28,
+    "serial_test_rows": 39,
+    "strongest_absolute_correlations": [
+      {
+        "correlation": -0.929649435125495,
+        "lag_months": -1,
+        "left_block_id": "consumer_demand",
+        "left_model_id": "consumer_demand",
+        "left_response_id": "retail_sales_ex_motor_vehicles_log_change",
+        "p_value": 1.528468145107081e-42,
+        "q_value": 5.227361056266218e-40,
+        "right_block_id": "monthly_labor_demand",
+        "right_model_id": "monthly_labor_demand",
+        "right_response_id": "layoffs_discharges_rate_change",
+        "sample_count": 96,
+        "statistic": "pearson"
+      },
+      {
+        "correlation": 0.8425081842054323,
+        "lag_months": -1,
+        "left_block_id": "consumer_demand",
+        "left_model_id": "consumer_demand",
+        "left_response_id": "retail_sales_ex_motor_vehicles_log_change",
+        "p_value": 5.397404404166254e-27,
+        "q_value": 6.15304102074953e-25,
+        "right_block_id": "monthly_labor_demand",
+        "right_model_id": "monthly_labor_demand",
+        "right_response_id": "quits_rate_change",
+        "sample_count": 96,
+        "statistic": "pearson"
+      },
+      {
+        "correlation": -0.8248542597207663,
+        "lag_months": -1,
+        "left_block_id": "consumer_demand",
+        "left_model_id": "consumer_demand",
+        "left_response_id": "retail_sales_ex_motor_vehicles_log_change",
+        "p_value": 5.207189022141969e-29,
+        "q_value": 8.904293227862766e-27,
+        "right_block_id": "weekly_labor_stress",
+        "right_model_id": "weekly_labor_stress",
+        "right_response_id": "initial_claims_innovation",
+        "sample_count": 112,
+        "statistic": "pearson"
+      },
+      {
+        "correlation": 0.806323975431214,
+        "lag_months": 0,
+        "left_block_id": "monthly_labor_demand",
+        "left_model_id": "monthly_labor_demand",
+        "left_response_id": "layoffs_discharges_rate_change",
+        "p_value": 3.6920758897813015e-23,
+        "q_value": 2.52537990861041e-21,
+        "right_block_id": "weekly_labor_stress",
+        "right_model_id": "weekly_labor_stress",
+        "right_response_id": "initial_claims_innovation",
+        "sample_count": 96,
+        "statistic": "pearson"
+      },
+      {
+        "correlation": -0.8051125998513152,
+        "lag_months": 0,
+        "left_block_id": "monthly_labor_demand",
+        "left_model_id": "monthly_labor_demand",
+        "left_response_id": "quits_rate_change",
+        "p_value": 4.8026515070513507e-23,
+        "q_value": 2.73751135901927e-21,
+        "right_block_id": "weekly_labor_stress",
+        "right_model_id": "weekly_labor_stress",
+        "right_response_id": "initial_claims_innovation",
+        "sample_count": 96,
+        "statistic": "pearson"
+      },
+      {
+        "correlation": -0.7825916289585796,
+        "lag_months": 0,
+        "left_block_id": "consumer_demand",
+        "left_model_id": "consumer_demand",
+        "left_response_id": "motor_vehicle_sales_log_change",
+        "p_value": 1.3632536054778947e-24,
+        "q_value": 1.1655818326836e-22,
+        "right_block_id": "weekly_labor_stress",
+        "right_model_id": "weekly_labor_stress",
+        "right_response_id": "initial_claims_innovation",
+        "sample_count": 113,
+        "statistic": "pearson"
+      },
+      {
+        "correlation": -0.7794820712536407,
+        "lag_months": 0,
+        "left_block_id": "consumer_demand",
+        "left_model_id": "consumer_demand",
+        "left_response_id": "motor_vehicle_sales_log_change",
+        "p_value": 8.417890149050564e-21,
+        "q_value": 4.11274061567899e-19,
+        "right_block_id": "monthly_labor_demand",
+        "right_model_id": "monthly_labor_demand",
+        "right_response_id": "layoffs_discharges_rate_change",
+        "sample_count": 96,
+        "statistic": "pearson"
+      },
+      {
+        "correlation": 0.7373035154410359,
+        "lag_months": 0,
+        "left_block_id": "consumer_demand",
+        "left_model_id": "consumer_demand",
+        "left_response_id": "motor_vehicle_sales_log_change",
+        "p_value": 1.0748869535309297e-17,
+        "q_value": 4.595141726344725e-16,
+        "right_block_id": "monthly_labor_demand",
+        "right_model_id": "monthly_labor_demand",
+        "right_response_id": "quits_rate_change",
+        "sample_count": 96,
+        "statistic": "pearson"
+      },
+      {
+        "correlation": 0.7111675840061832,
+        "lag_months": -1,
+        "left_block_id": "business_investment",
+        "left_model_id": "business_investment",
+        "left_response_id": "core_capital_goods_shipments_log_change",
+        "p_value": 2.4138337963897148e-14,
+        "q_value": 9.172568426280915e-13,
+        "right_block_id": "monthly_labor_demand",
+        "right_model_id": "monthly_labor_demand",
+        "right_response_id": "quits_rate_change",
+        "sample_count": 85,
+        "statistic": "pearson"
+      },
+      {
+        "correlation": -0.6882713177941076,
+        "lag_months": -1,
+        "left_block_id": "business_investment",
+        "left_model_id": "business_investment",
+        "left_response_id": "core_capital_goods_shipments_log_change",
+        "p_value": 3.376104500344683e-13,
+        "q_value": 1.049661581016256e-11,
+        "right_block_id": "weekly_labor_stress",
+        "right_model_id": "weekly_labor_stress",
+        "right_response_id": "initial_claims_innovation",
+        "sample_count": 85,
+        "statistic": "pearson"
+      }
+    ],
+    "valid_cross_model_tests": 342,
+    "valid_serial_tests": 36
+  },
+  "joint_path_assumption": "Baseline Sobol path readout treats monthly mapping perturbations as independent; Gaussian score-center dynamics retain cross-month dependence.",
+  "latest_joint_path_maximum_marginal_error": 0.001393725632879178,
+  "latest_joint_path_sobol_samples": 16384,
+  "mapping": {
+    "available_at": "2026-06-25",
+    "interpretation": "Mapping covariance is reporting uncertainty for U=Z+epsilon_map; it is not propagated as uncertainty in an exact released score center.",
+    "proxy_reference_month": "2026-05-01",
+    "status": "available"
+  },
+  "model_id": "m02_soft_composite",
+  "stage_id": "event_driven_linear_gaussian_filter",
+  "top_joint_quadrant_paths": [
+    {
+      "probability": 0.025146484375,
+      "regimes": [
+        "growth_up_inflation_up",
+        "growth_up_inflation_up",
+        "growth_down_inflation_up",
+        "growth_down_inflation_up"
+      ]
+    },
+    {
+      "probability": 0.024169921875,
+      "regimes": [
+        "growth_up_inflation_up",
+        "growth_down_inflation_up",
+        "growth_down_inflation_up",
+        "growth_down_inflation_up"
+      ]
+    },
+    {
+      "probability": 0.02032470703125,
+      "regimes": [
+        "growth_down_inflation_up",
+        "growth_down_inflation_up",
+        "growth_down_inflation_up",
+        "growth_down_inflation_up"
+      ]
+    },
+    {
+      "probability": 0.020263671875,
+      "regimes": [
+        "growth_down_inflation_up",
+        "growth_up_inflation_up",
+        "growth_down_inflation_up",
+        "growth_down_inflation_up"
+      ]
+    },
+    {
+      "probability": 0.0186767578125,
+      "regimes": [
+        "growth_up_inflation_up",
+        "growth_up_inflation_up",
+        "growth_down_inflation_up",
+        "growth_up_inflation_up"
+      ]
+    },
+    {
+      "probability": 0.01727294921875,
+      "regimes": [
+        "growth_up_inflation_up",
+        "growth_down_inflation_up",
+        "growth_down_inflation_up",
+        "growth_up_inflation_up"
+      ]
+    },
+    {
+      "probability": 0.015869140625,
+      "regimes": [
+        "growth_down_inflation_up",
+        "growth_up_inflation_up",
+        "growth_down_inflation_up",
+        "growth_up_inflation_up"
+      ]
+    },
+    {
+      "probability": 0.015625,
+      "regimes": [
+        "growth_down_inflation_up",
+        "growth_down_inflation_up",
+        "growth_down_inflation_up",
+        "growth_up_inflation_up"
+      ]
+    },
+    {
+      "probability": 0.01470947265625,
+      "regimes": [
+        "growth_up_inflation_up",
+        "growth_up_inflation_up",
+        "growth_up_inflation_up",
+        "growth_down_inflation_up"
+      ]
+    },
+    {
+      "probability": 0.01458740234375,
+      "regimes": [
+        "growth_up_inflation_up",
+        "growth_up_inflation_up",
+        "growth_down_inflation_up",
+        "growth_up_inflation_down"
+      ]
+    }
+  ],
+  "variants": {
+    "evidence_filter": {
+      "exact_mask": [
+        true,
+        true,
+        false,
+        false
+      ],
+      "joint_score_center_covariance": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          2.5135576989749064,
+          -0.2298279399026458,
+          0.31084998476144743,
+          0.0058612611979518255
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.2298279399026458,
+          0.3481648199642607,
+          0.16649917911093254,
+          0.1891421067348573
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.31084998476144743,
+          0.16649917911093254,
+          11.631981555040186,
+          -0.8690561335650002
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0058612611979518255,
+          0.1891421067348573,
+          -0.8690561335650002,
+          0.5208922789288682
+        ]
+      ],
+      "joint_score_center_mean": [
+        0.1247488547515804,
+        0.7735514248814588,
+        0.0273944260020107,
+        0.4104760171455257,
+        -0.49196220165508464,
+        0.31955604053994996,
+        -0.11249311059784912,
+        0.23232965142204656
+      ],
+      "monthly_marginals": [
+        {
+          "latent_covariance": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "quadrants": [
+            {
+              "probability": 0.4660393163342353,
+              "regime_id": "growth_up_inflation_up",
+              "regime_label": "Growth composite up / inflation composite up"
+            },
+            {
+              "probability": 0.4010957422368248,
+              "regime_id": "growth_down_inflation_up",
+              "regime_label": "Growth composite down / inflation composite up"
+            },
+            {
+              "probability": 0.07160639116635031,
+              "regime_id": "growth_up_inflation_down",
+              "regime_label": "Growth composite up / inflation composite down"
+            },
+            {
+              "probability": 0.06125855026258964,
+              "regime_id": "growth_down_inflation_down",
+              "regime_label": "Growth composite down / inflation composite down"
+            }
+          ],
+          "reference_month": "2026-04-01",
+          "relative_month": -3,
+          "score_center_is_exact": true,
+          "score_center_mean": [
+            0.1247488547515804,
+            0.7735514248814588
+          ]
+        },
+        {
+          "latent_covariance": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "quadrants": [
+            {
+              "probability": 0.36701084096501885,
+              "regime_id": "growth_up_inflation_up",
+              "regime_label": "Growth composite up / inflation composite up"
+            },
+            {
+              "probability": 0.35558619001000596,
+              "regime_id": "growth_down_inflation_up",
+              "regime_label": "Growth composite down / inflation composite up"
+            },
+            {
+              "probability": 0.14126774180639784,
+              "regime_id": "growth_up_inflation_down",
+              "regime_label": "Growth composite up / inflation composite down"
+            },
+            {
+              "probability": 0.13613522721857735,
+              "regime_id": "growth_down_inflation_down",
+              "regime_label": "Growth composite down / inflation composite down"
+            }
+          ],
+          "reference_month": "2026-05-01",
+          "relative_month": -2,
+          "score_center_is_exact": true,
+          "score_center_mean": [
+            0.0273944260020107,
+            0.4104760171455257
+          ]
+        },
+        {
+          "latent_covariance": [
+            [
+              2.5135576989749064,
+              -0.2298279399026458
+            ],
+            [
+              -0.2298279399026458,
+              0.3481648199642607
+            ]
+          ],
+          "quadrants": [
+            {
+              "probability": 0.24042525083723335,
+              "regime_id": "growth_up_inflation_up",
+              "regime_label": "Growth composite up / inflation composite up"
+            },
+            {
+              "probability": 0.39659064697650015,
+              "regime_id": "growth_down_inflation_up",
+              "regime_label": "Growth composite down / inflation composite up"
+            },
+            {
+              "probability": 0.16533415532037918,
+              "regime_id": "growth_up_inflation_down",
+              "regime_label": "Growth composite up / inflation composite down"
+            },
+            {
+              "probability": 0.19764994686588735,
+              "regime_id": "growth_down_inflation_down",
+              "regime_label": "Growth composite down / inflation composite down"
+            }
+          ],
+          "reference_month": "2026-06-01",
+          "relative_month": -1,
+          "score_center_is_exact": false,
+          "score_center_mean": [
+            -0.49196220165508464,
+            0.31955604053994996
+          ]
+        },
+        {
+          "latent_covariance": [
+            [
+              11.631981555040186,
+              -0.8690561335650002
+            ],
+            [
+              -0.8690561335650002,
+              0.5208922789288682
+            ]
+          ],
+          "quadrants": [
+            {
+              "probability": 0.251406709859387,
+              "regime_id": "growth_up_inflation_up",
+              "regime_label": "Growth composite up / inflation composite up"
+            },
+            {
+              "probability": 0.3402732370391967,
+              "regime_id": "growth_down_inflation_up",
+              "regime_label": "Growth composite down / inflation composite up"
+            },
+            {
+              "probability": 0.23632372419983244,
+              "regime_id": "growth_up_inflation_down",
+              "regime_label": "Growth composite up / inflation composite down"
+            },
+            {
+              "probability": 0.17199632890158384,
+              "regime_id": "growth_down_inflation_down",
+              "regime_label": "Growth composite down / inflation composite down"
+            }
+          ],
+          "reference_month": "2026-07-01",
+          "relative_month": 0,
+          "score_center_is_exact": false,
+          "score_center_mean": [
+            -0.11249311059784912,
+            0.23232965142204656
+          ]
+        }
+      ],
+      "reference_months": [
+        "2026-04-01",
+        "2026-05-01",
+        "2026-06-01",
+        "2026-07-01"
+      ]
+    },
+    "transition_only": {
+      "exact_mask": [
+        true,
+        true,
+        false,
+        false
+      ],
+      "joint_score_center_covariance": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          11.548092104318515,
+          -0.9890536346888701,
+          1.4709268014457826,
+          0.06543975263479844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.9890536346888701,
+          0.412739248582239,
+          0.06980824130072806,
+          0.18457102479003484
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.4709268014457826,
+          0.06980824130072806,
+          11.805116908784678,
+          -0.863055222579518
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.06543975263479844,
+          0.18457102479003484,
+          -0.863055222579518,
+          0.521747896190112
+        ]
+      ],
+      "joint_score_center_mean": [
+        0.1247488547515804,
+        0.7735514248814588,
+        0.0273944260020107,
+        0.4104760171455257,
+        -0.023333046885164438,
+        0.3300302365229643,
+        -0.08134310248431281,
+        0.2798906311821805
+      ],
+      "monthly_marginals": [
+        {
+          "latent_covariance": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "quadrants": [
+            {
+              "probability": 0.4660393163342353,
+              "regime_id": "growth_up_inflation_up",
+              "regime_label": "Growth composite up / inflation composite up"
+            },
+            {
+              "probability": 0.4010957422368248,
+              "regime_id": "growth_down_inflation_up",
+              "regime_label": "Growth composite down / inflation composite up"
+            },
+            {
+              "probability": 0.07160639116635031,
+              "regime_id": "growth_up_inflation_down",
+              "regime_label": "Growth composite up / inflation composite down"
+            },
+            {
+              "probability": 0.06125855026258964,
+              "regime_id": "growth_down_inflation_down",
+              "regime_label": "Growth composite down / inflation composite down"
+            }
+          ],
+          "reference_month": "2026-04-01",
+          "relative_month": -3,
+          "score_center_is_exact": true,
+          "score_center_mean": [
+            0.1247488547515804,
+            0.7735514248814588
+          ]
+        },
+        {
+          "latent_covariance": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "quadrants": [
+            {
+              "probability": 0.36701084096501885,
+              "regime_id": "growth_up_inflation_up",
+              "regime_label": "Growth composite up / inflation composite up"
+            },
+            {
+              "probability": 0.35558619001000596,
+              "regime_id": "growth_down_inflation_up",
+              "regime_label": "Growth composite down / inflation composite up"
+            },
+            {
+              "probability": 0.14126774180639784,
+              "regime_id": "growth_up_inflation_down",
+              "regime_label": "Growth composite up / inflation composite down"
+            },
+            {
+              "probability": 0.13613522721857735,
+              "regime_id": "growth_down_inflation_down",
+              "regime_label": "Growth composite down / inflation composite down"
+            }
+          ],
+          "reference_month": "2026-05-01",
+          "relative_month": -2,
+          "score_center_is_exact": true,
+          "score_center_mean": [
+            0.0273944260020107,
+            0.4104760171455257
+          ]
+        },
+        {
+          "latent_covariance": [
+            [
+              11.548092104318515,
+              -0.9890536346888701
+            ],
+            [
+              -0.9890536346888701,
+              0.412739248582239
+            ]
+          ],
+          "quadrants": [
+            {
+              "probability": 0.27298485381285553,
+              "regime_id": "growth_up_inflation_up",
+              "regime_label": "Growth composite up / inflation composite up"
+            },
+            {
+              "probability": 0.3633546903168853,
+              "regime_id": "growth_down_inflation_up",
+              "regime_label": "Growth composite down / inflation composite up"
+            },
+            {
+              "probability": 0.2244618184741134,
+              "regime_id": "growth_up_inflation_down",
+              "regime_label": "Growth composite up / inflation composite down"
+            },
+            {
+              "probability": 0.1391986373961458,
+              "regime_id": "growth_down_inflation_down",
+              "regime_label": "Growth composite down / inflation composite down"
+            }
+          ],
+          "reference_month": "2026-06-01",
+          "relative_month": -1,
+          "score_center_is_exact": false,
+          "score_center_mean": [
+            -0.023333046885164438,
+            0.3300302365229643
+          ]
+        },
+        {
+          "latent_covariance": [
+            [
+              11.805116908784678,
+              -0.863055222579518
+            ],
+            [
+              -0.863055222579518,
+              0.521747896190112
+            ]
+          ],
+          "quadrants": [
+            {
+              "probability": 0.2633924204869367,
+              "regime_id": "growth_up_inflation_up",
+              "regime_label": "Growth composite up / inflation composite up"
+            },
+            {
+              "probability": 0.34656812102858203,
+              "regime_id": "growth_down_inflation_up",
+              "regime_label": "Growth composite down / inflation composite up"
+            },
+            {
+              "probability": 0.2277917301632636,
+              "regime_id": "growth_up_inflation_down",
+              "regime_label": "Growth composite up / inflation composite down"
+            },
+            {
+              "probability": 0.1622477283212177,
+              "regime_id": "growth_down_inflation_down",
+              "regime_label": "Growth composite down / inflation composite down"
+            }
+          ],
+          "reference_month": "2026-07-01",
+          "relative_month": 0,
+          "score_center_is_exact": false,
+          "score_center_mean": [
+            -0.08134310248431281,
+            0.2798906311821805
+          ]
+        }
+      ],
+      "reference_months": [
+        "2026-04-01",
+        "2026-05-01",
+        "2026-06-01",
+        "2026-07-01"
+      ]
+    }
+  }
+}

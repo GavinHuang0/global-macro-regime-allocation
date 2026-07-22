@@ -1,0 +1,138 @@
+{
+  "fit": {
+    "design_condition_number": 4.827102807771081,
+    "innovation_covariance": [
+      [
+        11.500901162182291,
+        -0.9848987178133481
+      ],
+      [
+        -0.9848987178133481,
+        0.4111226059542533
+      ]
+    ],
+    "intercept": [
+      -0.27415998680797404,
+      0.08984623045131596
+    ],
+    "is_stable": true,
+    "latest_response_month": "2026-05-01",
+    "r_squared": {
+      "growth": 0.03617121499198961,
+      "inflation": 0.3154709237607033
+    },
+    "residual_degrees_of_freedom": 244,
+    "spectral_radius": 0.6498066958936841,
+    "training_pairs": 247,
+    "transition_matrix": [
+      [
+        0.17849293196625093,
+        0.5968594585429562
+      ],
+      [
+        0.055320314286087746,
+        0.5797504926627846
+      ]
+    ]
+  },
+  "interpretation": "One-step marginal quadrant prior from the reporting distribution around the latent score VAR forecast; this is not a daily posterior or a four-month joint path.",
+  "model_id": "m02_soft_composite",
+  "next_month_latent_prior": {
+    "covariance": [
+      [
+        11.500901162182291,
+        -0.9848987178133481
+      ],
+      [
+        -0.9848987178133481,
+        0.4111226059542533
+      ]
+    ],
+    "mean": [
+      -0.02427378205299499,
+      0.32933537187381023
+    ]
+  },
+  "next_month_prior": {
+    "correlation": -0.2867395639528769,
+    "covariance": [
+      [
+        13.24339080602505,
+        -0.9867504617555483
+      ],
+      [
+        -0.9867504617555483,
+        0.894211478975417
+      ]
+    ],
+    "entropy": 1.3322515421518433,
+    "mean": [
+      -0.02427378205299499,
+      0.32933537187381023
+    ],
+    "probability_sum": 1.0,
+    "quadrant_weight_sum": 1.0,
+    "quadrants": [
+      {
+        "probability": 0.2728987708384051,
+        "regime_id": "growth_up_inflation_up",
+        "regime_label": "Growth composite up / inflation composite up",
+        "weight": 0.2728987708384051
+      },
+      {
+        "probability": 0.36328317825364026,
+        "regime_id": "growth_down_inflation_up",
+        "regime_label": "Growth composite down / inflation composite up",
+        "weight": 0.36328317825364026
+      },
+      {
+        "probability": 0.2244402302548073,
+        "regime_id": "growth_up_inflation_down",
+        "regime_label": "Growth composite up / inflation composite down",
+        "weight": 0.2244402302548073
+      },
+      {
+        "probability": 0.13937782065314736,
+        "regime_id": "growth_down_inflation_down",
+        "regime_label": "Growth composite down / inflation composite down",
+        "weight": 0.13937782065314736
+      }
+    ],
+    "state": "reporting_score_for_quadrant_integration"
+  },
+  "operational_timing": {
+    "available_by_target_end": true,
+    "available_by_target_start": false,
+    "delay_from_target_start_days": 24,
+    "target_month_end": "2026-06-30"
+  },
+  "prior_available_at": "2026-06-25",
+  "prior_kind": "as_of_exact_source_score_release",
+  "prior_status": "available",
+  "source_reference_month": "2026-05-01",
+  "source_state": {
+    "score": [
+      0.0273944260020107,
+      0.4104760171455257
+    ],
+    "score_is_exact": true
+  },
+  "stage_id": "m02_var1_transition",
+  "target_mapping_covariance_proxy": {
+    "covariance": [
+      [
+        1.7424896438427584,
+        -0.0018517439422001
+      ],
+      [
+        -0.0018517439422001,
+        0.4830888730211636
+      ]
+    ],
+    "interpretation": "Reporting-only approximation for the unavailable target-month mapping noise; it is not uncertainty in the exact source state.",
+    "method": "latest_causally_available_baseline_map_at_source_cutoff",
+    "proxy_available_at": "2026-06-25",
+    "proxy_reference_month": "2026-05-01"
+  },
+  "target_reference_month": "2026-06-01"
+}

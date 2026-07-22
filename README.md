@@ -1,11 +1,14 @@
 # Global Macro Regime Detection and Allocation
 
-## Model 02: soft composite model in development
+## Model 02: soft composite, event-driven Gaussian model
 
-Model 02 is now implemented through its Gaussian quadrant-mapping stage.
-It is a deliberately modest revision of Model 01, kept in the separate
+Model 02 is a deliberately modest revision of Model 01, kept in the separate
 `m02_soft_composite` configuration, package, data, manifest, documentation, and
-result namespaces. Model 01 remains frozen below.
+result namespaces. Its score, Gaussian quadrant map, and standalone VAR(1)
+transition artifacts are published. The release-evidence data and rolling
+Bayesian-filter implementation are complete, and the causal replay is published
+through 20 July 2026. Model 02 allocation and backtesting have not yet been
+implemented. Model 01 remains frozen below.
 
 The defining component set is unchanged: four first-release growth indicators
 and four first-release inflation indicators. Model 02 makes two score changes:
@@ -61,13 +64,14 @@ growth score of $-51.8317$. The score is correct under the unbounded classical
 standardization specified here. The implemented baseline preserves this rule,
 while a later sensitivity should address crisis-outlier robustness.
 
-The observed score $\boldsymbol s_m=(G_m,I_m)^\top$ is perturbed by
+The observed score $\boldsymbol s_m=(G_m,I_m)^\top$ is mapped through the
+reporting variable
 
 $$
-\widetilde{\boldsymbol s}_m
-=\boldsymbol s_m+\boldsymbol\varepsilon_m,
+\boldsymbol U_m
+=\boldsymbol s_m+\boldsymbol\epsilon_m^{\mathrm{map}},
 \qquad
-\boldsymbol\varepsilon_m\sim
+\boldsymbol\epsilon_m^{\mathrm{map}}\sim
 \mathcal N(\boldsymbol 0,\boldsymbol\Omega_{\mathrm{map},m}),
 $$
 
@@ -99,6 +103,236 @@ These are score-definition weights, not transition forecasts or
 release-updated posteriors. The 12-month map has 214 causal monthly probability
 vectors from June 2008 through May 2026.
 
+The transition and filtering state is the released composite-score center
+
+$$
+\boldsymbol Z_m=\boldsymbol s_m=(G_m,I_m)^\top.
+$$
+
+Once its complete score is released on date $T_m$, $\boldsymbol Z_m$ is known
+exactly. The perturbed reporting variable
+
+$$
+\boldsymbol U_m=\boldsymbol Z_m+\boldsymbol\epsilon_m^{\mathrm{map}},
+\qquad
+\boldsymbol\epsilon_m^{\mathrm{map}}
+\sim\mathcal N(\boldsymbol 0,\boldsymbol\Omega_{\mathrm{map},m}),
+$$
+
+exists only to translate a score distribution into soft quadrant membership.
+Mapping covariance is not propagated as uncertainty in the exact VAR state.
+
+The expanding VAR(1) is fitted to deterministic score centers:
+
+$$
+\boldsymbol Z_{m+1}
+=\widehat{\boldsymbol c}_m
++\widehat{\boldsymbol A}_m\boldsymbol Z_m
++\boldsymbol\eta_{m+1},
+\qquad
+\boldsymbol\eta_{m+1}\sim
+\mathcal N(\boldsymbol 0,\widehat{\boldsymbol Q}_m).
+$$
+
+The next innovation is assumed conditionally independent of the current state.
+Given an exact source score, the latent next-month prior is
+
+$$
+\boldsymbol Z_{m+1}\mid\mathcal D_{T_m}
+\sim\mathcal N\!\left(
+\widehat{\boldsymbol c}_m
++\widehat{\boldsymbol A}_m\boldsymbol s_m,
+\widehat{\boldsymbol Q}_m
+\right).
+$$
+
+The standalone transition report adds the latest causally available mapping
+covariance only to its quadrant readout:
+
+$$
+\operatorname{Var}(\boldsymbol U_{m+1}\mid\mathcal D_{T_m})
+=\widehat{\boldsymbol Q}_m
++\boldsymbol\Omega_{m+1}^{\mathrm{proxy}}.
+$$
+
+It never uses
+$\widehat{\boldsymbol A}_m\boldsymbol\Omega_{\mathrm{map},m}
+\widehat{\boldsymbol A}_m^\top$.
+
+The VAR is refitted at every eligible source cutoff after a 60-pair warm-up,
+using only exact consecutive monthly pairs then available. Coefficients may use
+earlier deterministic-score pairs even when those months predate the Gaussian
+map; a prior is published only when the source month has that map. For the June
+2026 target, the corrected quadrant prior is 27.29%
+growth-up/inflation-up, 36.33% growth-down/inflation-up, 22.44%
+growth-up/inflation-down, and 13.94% growth-down/inflation-down. This prior
+became available on 25 June 2026, so its
+late-within-month timing must be retained when later evidence updates are
+evaluated. None of the historical one-step priors was available at the start of
+its target month; a beginning-of-month prior will require a separately specified
+multi-step propagation from the latest state then observable.
+
+The plain OLS baseline deliberately does not clip the April 2020 score or force
+VAR stability. That cutoff produces the only unstable historical fit, and the
+shock leaves the latest growth innovation variance unusually large. A robust
+VAR should therefore be a separately named sensitivity, not an undocumented
+change to this baseline.
+
+### Model 02 release evidence
+
+Non-defining evidence is organized into observation models rather than treated
+as one conditionally independent scalar stream:
+
+| Economic block | Observed responses | State-loading policy |
+|---|---|---|
+| Weekly labor stress | Causal log-AR(1) innovation in initial claims (`ICSA`) | Growth estimated; inflation fixed to zero |
+| Monthly labor demand | Changes in JOLTS openings, hires, quits, and layoffs/discharges rates | Both estimated; stronger inflation shrinkage except for quits |
+| Consumer demand | Log changes in retail sales excluding motor vehicles and a same-vintage motor-vehicle component | Both estimated |
+| Housing activity | Log changes in starts and permits | Both estimated; mortgage-rate change and methodology-break controls |
+| Business investment | Log changes in core capital-goods orders and shipments | Both estimated; stronger inflation shrinkage |
+| Inflation pressure | Change in one-year inflation expectations; log change in intermediate-materials prices | Primarily inflation; the two asynchronous releases have separate models |
+
+Existing point-in-time Model 01 evidence is hash-verified and reused. Only
+`MORTGAGE30US`, `ANXAVS`, `EXPINF1YR`, and `WPSID61` are newly retrieved, using
+the authenticated FRED API and never serializing `FRED_API_KEY`. Monthly
+features use same-vintage changes and causal expanding standardization.
+`EXPINF1YR` is eligible only when first published within its own reference
+month; its month-end-relative release lag can therefore be negative without
+being look-ahead leakage.
+
+For observation model $b$ and an event referring to month $q(e)$,
+
+$$
+\boldsymbol y_e
+=\boldsymbol a_b
++\boldsymbol H_b\boldsymbol Z_{q(e)}
++\boldsymbol C_b\boldsymbol v_e
++\boldsymbol\epsilon_e,
+\qquad
+\boldsymbol\epsilon_e\sim
+\mathcal N(\boldsymbol 0,\boldsymbol R_b).
+$$
+
+The state loadings in $\boldsymbol H_b$ use response-by-axis ridge penalties;
+the intercept and observed controls are unpenalized, and the claims inflation
+loading is exactly zero. A positive base penalty is chosen from a frozen grid
+by rolling-origin predictive Gaussian negative log likelihood, holding all rows
+with the same availability timestamp out together. The final residual
+covariance $\boldsymbol R_b$ is a single Ledoit–Wolf estimate for that
+observation model, followed by a small eigenvalue floor. Training availability
+is the latest of the release, target-score, and control availability dates, and
+must be strictly earlier than the event being scored.
+
+### Rolling four-month Bayesian filter
+
+The filter retains an eight-dimensional joint Gaussian for four consecutive
+score centers:
+
+$$
+\boldsymbol Z_{m-3:m}
+=\left(
+\boldsymbol Z_{m-3}^\top,
+\boldsymbol Z_{m-2}^\top,
+\boldsymbol Z_{m-1}^\top,
+\boldsymbol Z_m^\top
+\right)^\top.
+$$
+
+At each month roll it drops the oldest two coordinates, copies the six
+overlapping coordinates and their cross-covariances, and appends a VAR forecast;
+$\boldsymbol Q$ is added only to the new month's $2\times2$ covariance block.
+An event conditions the coordinates for its actual reference month and can
+update other months through cross-time covariance. Events are never silently
+retargeted to the current month.
+
+On a date with several releases, all emission fits use the common pre-release
+information set, then the configured Gaussian factors are applied in stable
+model order. Complete composite scores are processed after release evidence at
+the end of their availability day as exact, zero-noise observations of
+$\boldsymbol Z_m$. Evidence arriving after its target score is exact remains a
+predictive-residual diagnostic but cannot alter that target. This timing is
+especially important for JOLTS, whose reference-month score is often already
+exact by the time the JOLTS release arrives; the event audit, rather than a
+retargeting rule, will quantify those no-op updates.
+
+Monthly quadrant probabilities add the latest causally eligible
+$\boldsymbol\Omega_{\mathrm{map}}$ only at readout. Four-month path
+probabilities are approximated reproducibly with a scrambled Sobol sequence.
+The baseline adds the four mapping covariances block-diagonally, which assumes
+mapping perturbations are independent across months; that is an explicit
+reporting approximation, not a property established by the data.
+
+The causal replay compares the evidence filter with an otherwise identical
+transition-only filter at two explicitly separated information cutoffs. The
+primary forecast is frozen at the start of the completed score's availability
+day, after any deterministic calendar roll but before every release sharing
+that date. A post-release/pre-exact forecast is retained only as a sensitivity,
+because the source artifacts do not provide dependable intraday ordering.
+Published metrics are score-center Gaussian negative log predictive density,
+growth and inflation RMSE, and cross-entropy, Brier distance, and
+Kullback–Leibler divergence relative to the exact score's soft quadrant map.
+
+Across 188 strict-pre-day score completions, the evidence filter did not
+uniformly improve on the transition-only baseline:
+
+| Lower-is-better metric | Evidence filter | Transition only | Difference |
+|---|---:|---:|---:|
+| Growth-score RMSE | 3.441 | 4.238 | -0.797 |
+| Inflation-score RMSE | 0.852 | 0.733 | +0.119 |
+| Mean Gaussian NLPD | 28.031 | 26.247 | +1.785 |
+| Median Gaussian NLPD | 1.770 | 1.817 | -0.047 |
+| Mean quadrant cross-entropy | 1.573 | 1.527 | +0.045 |
+| Mean quadrant Brier distance | 0.160 | 0.151 | +0.008 |
+| Mean quadrant KL divergence | 0.515 | 0.470 | +0.045 |
+
+The apparently better full-sample growth RMSE is dominated by the 2020 shock.
+Excluding March--June 2020, growth RMSE is 0.893 for the evidence filter versus
+0.745 for transition only. Conversely, the evidence filter has lower NLPD in
+134 months, higher NLPD in 45, and ties in 9, but its April 2020 NLPD penalty is
+about 783 points larger. The median and mean therefore tell materially
+different stories. The post-release/pre-exact sensitivity is very close to the
+strict-pre-day result and does not change this conclusion.
+
+Dependence diagnostics use causal whitened predictive innovations measured from
+the common pre-release state for every observation sharing a publication date,
+so their values do not depend on the stable likelihood-application order.
+They report Pearson and Spearman cross-model correlations at monthly lags
+$-1$, $0$, and $+1$ with Benjamini–Hochberg adjustment, plus Ljung–Box serial
+tests. Weekly claims innovations are averaged within reference month only for
+cross-block comparisons; their serial tests retain every observation and use
+the original weekly reference date, including same-publication catch-up
+batches. Responses fitted
+jointly are not redundantly cross-tested, while the two separately fitted
+inflation-pressure models remain eligible for comparison. Failure to reject a
+test does not establish conditional independence, particularly for short
+histories.
+
+The dependence diagnostics reject the baseline's simple factorization often:
+64 of 342 valid cross-model tests have Benjamini--Hochberg $q<0.05$ (59
+Pearson and 5 Spearman), and 28 of 36 valid serial tests do as well. These
+statistics are exploratory because serial dependence is widespread, but they
+are strong evidence against treating the blocks as cleanly independent. A
+later sensitivity should use joint disturbances, block tempering, or a robust
+heavy-tailed observation model.
+
+The cross-model result is also crisis-sensitive. Excluding 2020 leaves only 2
+significant Pearson tests and no significant Spearman tests after adjustment,
+and the maximum absolute Pearson correlation falls from 0.930 to 0.446. Thus
+the full-sample rejection should not be read as stable linear dependence in
+ordinary periods; it shows that the Gaussian factorization is particularly
+fragile around extreme observations.
+
+As of 20 July 2026, the current-month evidence-filter probabilities are 34.0%
+growth-down/inflation-up, 25.1% growth-up/inflation-up, 23.6%
+growth-up/inflation-down, and 17.2% growth-down/inflation-down. The distribution
+is intentionally diffuse; its entropy is 1.358 versus the four-state maximum
+of $\log 4\approx1.386$.
+
+The baseline remains intentionally Gaussian and non-robust. The April 2020
+score outlier inflates VAR process variance and can affect Gaussian emission
+fits; robust scaling, robust VAR dynamics, and heavy-tailed observation errors
+belong in named sensitivities rather than being introduced silently.
+
 The complete mathematical definition, coverage limitations, and artifact
 contract are in
 [`docs/models/m02_soft_composite/README.md`](docs/models/m02_soft_composite/README.md).
@@ -110,6 +344,20 @@ The probability-map snapshot is under
 [`results/published/m02_soft_composite/probability_map/`](results/published/m02_soft_composite/probability_map/)
 with provenance in
 [`data/manifests/m02_probability_map.json`](data/manifests/m02_probability_map.json).
+The VAR priors are under
+[`results/published/m02_soft_composite/transition/`](results/published/m02_soft_composite/transition/)
+with provenance in
+[`data/manifests/m02_var1_transition.json`](data/manifests/m02_var1_transition.json).
+The release-evidence contract is in
+[`configs/models/m02_release_evidence.yaml`](configs/models/m02_release_evidence.yaml)
+with provenance in
+[`data/manifests/m02_release_evidence.json`](data/manifests/m02_release_evidence.json).
+The filter specification is frozen in
+[`configs/models/m02_event_driven_bayesian_filter.yaml`](configs/models/m02_event_driven_bayesian_filter.yaml);
+its public results are under
+[`results/published/m02_soft_composite/bayesian_filter/`](results/published/m02_soft_composite/bayesian_filter/),
+with provenance in
+[`data/manifests/m02_event_driven_bayesian_filter.json`](data/manifests/m02_event_driven_bayesian_filter.json).
 
 ---
 
@@ -139,7 +387,7 @@ small and statistically inconclusive.
 | ID | Architecture | Status |
 |---|---|---|
 | `m01_deterministic_composite` | Deterministic monthly target, event-driven Bayesian filter, posterior allocation | **Frozen** |
-| `m02_soft_composite` | Unsmoothed deterministic scores, Gaussian quadrant mapping, score dynamics | **Quadrant mapping complete; dynamics pending** |
+| `m02_soft_composite` | Unsmoothed scores, Gaussian quadrant mapping, expanding VAR(1), linear-Gaussian event filter | **Inference published; allocation pending** |
 | `m03_switching_state_space` | Regime-switching continuous state-space model | Planned |
 
 ## End-to-end architecture

@@ -1,0 +1,169 @@
+{
+  "archive_start_policy": "latest_reference_period_only",
+  "available_feature_rows": 3001,
+  "configuration": "configs/models/m02_release_evidence.yaml",
+  "configuration_sha256": "e9f8cb6c8ca28925d0c057fdaed95cdf08b2ce3a976380b7bf671730dceda512",
+  "credential_policy": "FRED_API_KEY is read from the runtime environment only and is never serialized into artifacts, cache identities, or logs",
+  "eligible_new_first_release_observation_rows": 1209,
+  "event_block_counts": {
+    "business_investment": 493,
+    "consumer_demand": 604,
+    "housing_activity": 1002,
+    "inflation_pressure": 189,
+    "monthly_labor_demand": 768,
+    "weekly_labor_stress": 675
+  },
+  "event_rows": 3731,
+  "event_status_counts": {
+    "ar_warmup": 52,
+    "available": 3001,
+    "standardization_warmup": 678
+  },
+  "evidence_set_id": "m02_release_evidence_v1",
+  "feature_start": "2000-06-01",
+  "first_event_release_date": "2000-07-20",
+  "generated_at_utc": "2026-07-21T17:19:56.860808+00:00",
+  "generated_files": [
+    {
+      "bytes": 290117,
+      "path": "data/processed/m02_soft_composite/release_evidence/new_first_release_observations.csv",
+      "sha256": "0bb3f22a765a71fdbd29d5b7ff3e7df10cb2977906e4a710504ef59e3c4cfb67"
+    },
+    {
+      "bytes": 1414680,
+      "path": "data/processed/m02_soft_composite/release_evidence/release_events.csv",
+      "sha256": "c3d5b32e437ac51edb4bc6ac673714723c8267b4ff3b4f1c262f2ab2931b2470"
+    },
+    {
+      "bytes": 1154909,
+      "path": "data/processed/m02_soft_composite/release_evidence/available_release_features.csv",
+      "sha256": "e186420da2b72015c4c6703a9b3fad1e32350d062baec902de8a9bb0bfbf83c0"
+    }
+  ],
+  "housing_rate_control_policy": "first-release weekly values averaged by reference month, differenced, causally standardized, and aligned to the latest component release for each housing reference month",
+  "inflation_block_event_policy": "asynchronous_feature_events",
+  "input_lineage": {
+    "m01_evidence": {
+      "event_path": "data/processed/m01_non_defining_release_evidence/non_defining_release_events.csv",
+      "event_rows": 3968,
+      "event_sha256": "b9d1cd8d395a60d965a6851791c41368acc9c153c6dd23d1054d3cbb7c29ff05",
+      "manifest_path": "data/manifests/m01_non_defining_release_evidence.json",
+      "manifest_sha256": "dac7f457e52d2f12042f8380031690b24898ab4dae4a65df058e2434ac0acae2",
+      "provider_selected": "alfred_web"
+    }
+  },
+  "last_event_release_date": "2026-07-16",
+  "m01_provider_selected": "alfred_web",
+  "mixed_provenance": true,
+  "model_id": "m02_soft_composite",
+  "monthly_release_timing_policy": {
+    "ANXAVS": "retrospective_after_reference_month_end",
+    "EXPINF1YR": "contemporaneous_within_reference_month",
+    "WPSID61": "retrospective_after_reference_month_end"
+  },
+  "new_first_release_observation_rows": 2009,
+  "new_observation_status_counts": {
+    "archive_bootstrap_history": 337,
+    "eligible": 1209,
+    "outside_contemporaneous_reference_month": 4,
+    "release_lag_exceeds_max": 459
+  },
+  "new_series_failure_policy": "stop_without_fallback",
+  "new_series_provider_requested": "fred",
+  "new_series_provider_selected": "fred_api",
+  "observation_end": "2026-07-20",
+  "provenance_note": "Reused rows retain the provider recorded by Model 01; only MORTGAGE30US, ANXAVS, EXPINF1YR, and WPSID61 were acquired for this stage through fred_api.",
+  "providers_used_in_events": [
+    "alfred_web",
+    "fred_api"
+  ],
+  "raw_acquisitions_new_series_only": [
+    {
+      "bytes": 15935,
+      "cache_origin": "existing_normalized_cache",
+      "extraction_diagnostics": {
+        "matrix_rows": 389,
+        "rows_excluded_archive_bootstrap": 208,
+        "rows_excluded_backfill_lag": 0,
+        "rows_excluded_missing_prior": 0,
+        "rows_excluded_negative_lag": 0,
+        "rows_retained": 181,
+        "rows_without_any_vintage": 0
+      },
+      "first_release_observations": 389,
+      "minimum_standardization_history": 60,
+      "path": "data/raw/fred_api/m02_release_evidence/ANXAVS_3b807a1ce3a7_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 95,
+      "release_timing": "retrospective_after_reference_month_end",
+      "series_id": "ANXAVS",
+      "sha256": "0b5340a50367bd4c6f9d8046f744b0267b4738cc0544ae4abd154d75d45e42c6",
+      "source_url": "https://fred.stlouisfed.org/series/ANXAVS",
+      "vintage_start": "2011-05-01"
+    },
+    {
+      "bytes": 5174,
+      "cache_origin": "existing_normalized_cache",
+      "extraction_diagnostics": {
+        "matrix_rows": 391,
+        "rows_excluded_archive_bootstrap": 334,
+        "rows_excluded_missing_prior": 0,
+        "rows_excluded_outside_reference_month": 4,
+        "rows_retained": 53,
+        "rows_without_any_vintage": 0
+      },
+      "first_release_observations": 391,
+      "minimum_standardization_history": 24,
+      "path": "data/raw/fred_api/m02_release_evidence/EXPINF1YR_321fbf6bdf06_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 500,
+      "release_timing": "contemporaneous_within_reference_month",
+      "series_id": "EXPINF1YR",
+      "sha256": "331ee163c38b853dc5ecc6037e9a424c75bf13616a60995bc6758e47f185af72",
+      "source_url": "https://fred.stlouisfed.org/series/EXPINF1YR",
+      "vintage_start": "2021-11-01"
+    },
+    {
+      "cache_directory": "data/raw/fred_api/m02_release_evidence/provider_chunks/MORTGAGE30US",
+      "cache_origin": "provider_managed_chunk_cache",
+      "first_release_observations": 839,
+      "minimum_standardization_history": 24,
+      "normalized_observations_sha256": "aac64576b96d8bfcf08347d0084498409af2059a4ea4d5cc182dbcf785d7f4ed",
+      "provider": "fred_api",
+      "release_id": 190,
+      "series_id": "MORTGAGE30US",
+      "source_url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
+      "vintage_start": "2010-06-01"
+    },
+    {
+      "bytes": 7321,
+      "cache_origin": "existing_normalized_cache",
+      "extraction_diagnostics": {
+        "matrix_rows": 390,
+        "rows_excluded_archive_bootstrap": 254,
+        "rows_excluded_backfill_lag": 0,
+        "rows_excluded_missing_prior": 0,
+        "rows_excluded_negative_lag": 0,
+        "rows_retained": 136,
+        "rows_without_any_vintage": 0
+      },
+      "first_release_observations": 390,
+      "minimum_standardization_history": 60,
+      "path": "data/raw/fred_api/m02_release_evidence/WPSID61_920e79eca0e1_levels_by_vintage.zip",
+      "provider": "fred_api",
+      "release_id": 46,
+      "release_timing": "retrospective_after_reference_month_end",
+      "series_id": "WPSID61",
+      "sha256": "137d61a68c4353bce96fd050b1043f97e9de9151ee2f63b5027ac3a6943a21e7",
+      "source_url": "https://fred.stlouisfed.org/series/WPSID61",
+      "vintage_start": "2015-03-01"
+    }
+  ],
+  "release_lag_days_note": "Monthly release_lag_days remains measured from reference-month end. Eligible EXPINF1YR rows are contemporaneous and therefore normally have negative values; all other monthly series retain the retrospective non-negative-lag rule.",
+  "retail_coordinate_policy": "RSFSXMV plus same-vintage RSAFS-minus-RSFSXMV motor component",
+  "reused_event_rows_before_derived_features": 2679,
+  "schema_version": 1,
+  "scope": "causal evidence acquisition and feature construction only",
+  "stage_id": "m02_release_evidence",
+  "vintage_end": "2026-07-20"
+}

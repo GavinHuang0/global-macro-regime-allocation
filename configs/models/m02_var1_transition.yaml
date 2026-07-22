@@ -1,0 +1,71 @@
+schema_version: 1
+model_id: m02_soft_composite
+stage_id: m02_var1_transition
+description: >-
+  Causal expanding VAR(1) transition for the exact Model 02 score center,
+  followed by reporting-only mapping uncertainty and Gaussian next-month
+  quadrant integration.
+
+inputs:
+  score_manifest: data/manifests/m02_soft_composite.json
+  score_features: data/processed/m02_soft_composite/composite_scores.csv
+  probability_map_manifest: data/manifests/m02_probability_map.json
+  baseline_mapping: >-
+    results/published/m02_soft_composite/probability_map/quadrant_probabilities.csv
+
+transition:
+  state_order: [growth_score, inflation_score]
+  lag_order: 1
+  estimator: expanding_multivariate_ols
+  include_intercept: true
+  include_time_trend: false
+  regularization: none
+  minimum_training_pairs: 60
+  require_consecutive_reference_months: true
+  include_pair_ending_at_source_month: true
+  forecast_issue_policy: source_score_availability_date
+  operational_start_of_month_prior: false
+  availability_cutoff: pair_available_at_on_or_before_prior_available_at
+  reference_cutoff: response_month_on_or_before_source_month
+  innovation_covariance: residual_cross_product_over_n_minus_3
+  parameter_uncertainty: excluded_from_baseline
+  # Z_m is observed exactly once its composite score is released. The VAR
+  # evolves Z, not the reporting perturbation used to form quadrant weights.
+  source_state: exact_released_composite_score_center
+  forecast_mean: intercept_plus_A_times_exact_source_score
+  latent_forecast_covariance: Q
+  # Omega_map for m+1 is unavailable at the source cutoff. The standalone
+  # prior therefore uses the latest causal baseline map as an explicit proxy
+  # for target reporting noise. This proxy is added at readout, never pushed
+  # through A.
+  target_mapping_covariance_proxy: >-
+    latest_causally_available_baseline_map_at_source_cutoff
+  reporting_forecast_covariance: Q_plus_Omega_map_proxy
+  mapping_noise_independent_of_var_innovation: true
+  force_stationarity: false
+
+  expected_coverage:
+    score_history_rows: 317
+    candidate_adjacent_pairs: 316
+    eligible_consecutive_pairs_at_latest_cutoff: 247
+    baseline_mapping_months: 214
+    available_prior_months: 189
+    first_source_month: 2010-07-01
+    first_target_month: 2010-08-01
+    latest_source_month: 2026-05-01
+    latest_target_month: 2026-06-01
+    latest_training_pairs: 247
+    unstable_prior_fits: 1
+    priors_available_by_target_start: 0
+    priors_available_by_target_end: 157
+    priors_available_after_target_end: 32
+
+outputs:
+  pair_audit: data/processed/m02_soft_composite/var1_transition/pair_audit.csv
+  published_history: >-
+    results/published/m02_soft_composite/transition/next_month_priors.csv
+  published_latest: >-
+    results/published/m02_soft_composite/transition/latest_next_month_prior.json
+  published_summary: >-
+    results/published/m02_soft_composite/transition/transition_summary.json
+  manifest: data/manifests/m02_var1_transition.json

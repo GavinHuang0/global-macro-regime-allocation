@@ -1,0 +1,111 @@
+{
+  "configuration": "configs/models/m02_var1_transition.yaml",
+  "configuration_sha256": "53a66fcb64537e6242e18b89e34298867e539d5c4d3e75e16e9212808b81fe83",
+  "coverage": {
+    "available_prior_months": 189,
+    "baseline_mapping_months": 214,
+    "candidate_adjacent_pairs": 316,
+    "eligible_consecutive_pairs_at_latest_cutoff": 247,
+    "first_source_month": "2010-07-01",
+    "first_target_month": "2010-08-01",
+    "latest_source_month": "2026-05-01",
+    "latest_target_month": "2026-06-01",
+    "latest_training_pairs": 247,
+    "priors_available_after_target_end": 32,
+    "priors_available_by_target_end": 157,
+    "priors_available_by_target_start": 0,
+    "score_history_rows": 317,
+    "unstable_prior_fits": 1
+  },
+  "data_snapshot_sha256": "eb4b1ad0b7a71e427d4dc44c4ac677c6210c52d651a0e9f407223e2935ab9f7d",
+  "generated_at_utc": "2026-07-21T18:44:46.614666+00:00",
+  "generated_file_hashes": [
+    {
+      "bytes": 42564,
+      "path": "data/processed/m02_soft_composite/var1_transition/pair_audit.csv",
+      "sha256": "335ba057c79640ded19bed10a522276caae34952cbb27b9498787792fb3e909a"
+    },
+    {
+      "bytes": 203397,
+      "path": "results/published/m02_soft_composite/transition/next_month_priors.csv",
+      "sha256": "ba7518b076d40564f5a70ffb03360a396743238c8545e2a2ba8da7721ed80aaa"
+    },
+    {
+      "bytes": 3876,
+      "path": "results/published/m02_soft_composite/transition/latest_next_month_prior.json",
+      "sha256": "d33940fca82a1ed958df78f17b5777dfd8c715f7ea6cf22eb3d7d436f1293453"
+    },
+    {
+      "bytes": 2593,
+      "path": "results/published/m02_soft_composite/transition/transition_summary.json",
+      "sha256": "1cdddd85a0e23fd44d80a21bebe6ffd2dd062ab7edf291ce03c35920676487f1"
+    }
+  ],
+  "input_files": [
+    {
+      "path": "data/processed/m02_soft_composite/composite_scores.csv",
+      "sha256": "1af087293505536c3e65be9c17d003b250f2e883c693e2fca581303566a5a6bd"
+    },
+    {
+      "path": "results/published/m02_soft_composite/probability_map/quadrant_probabilities.csv",
+      "sha256": "bd234853b48a3fc4f67c267a6470d33dbb469c03c0e10e15c6dbdba420d3a67d"
+    }
+  ],
+  "model_id": "m02_soft_composite",
+  "processed_files": [
+    "data/processed/m02_soft_composite/var1_transition/pair_audit.csv"
+  ],
+  "published_files": [
+    "results/published/m02_soft_composite/transition/next_month_priors.csv",
+    "results/published/m02_soft_composite/transition/latest_next_month_prior.json",
+    "results/published/m02_soft_composite/transition/transition_summary.json"
+  ],
+  "runtime": {
+    "packages": {
+      "PyYAML": "6.0.3",
+      "numpy": "2.3.5",
+      "pandas": "3.0.1",
+      "scipy": "1.18.0"
+    },
+    "python": "3.12.13"
+  },
+  "schema_version": 1,
+  "stage_id": "m02_var1_transition",
+  "transition_definition": {
+    "availability_cutoff": "pair_available_at_on_or_before_prior_available_at",
+    "estimator": "expanding_multivariate_ols",
+    "force_stationarity": false,
+    "forecast_issue_policy": "source_score_availability_date",
+    "forecast_mean": "intercept_plus_A_times_exact_source_score",
+    "include_intercept": true,
+    "include_pair_ending_at_source_month": true,
+    "include_time_trend": false,
+    "innovation_covariance": "residual_cross_product_over_n_minus_3",
+    "lag_order": 1,
+    "latent_forecast_covariance": "Q",
+    "mapping_noise_independent_of_var_innovation": true,
+    "minimum_training_pairs": 60,
+    "operational_start_of_month_prior": false,
+    "parameter_uncertainty": "excluded_from_baseline",
+    "reference_cutoff": "response_month_on_or_before_source_month",
+    "regularization": "none",
+    "reporting_forecast_covariance": "Q_plus_Omega_map_proxy",
+    "require_consecutive_reference_months": true,
+    "source_state": "exact_released_composite_score_center",
+    "state_order": [
+      "growth_score",
+      "inflation_score"
+    ],
+    "target_mapping_covariance_proxy": "latest_causally_available_baseline_map_at_source_cutoff"
+  },
+  "upstream_manifests": [
+    {
+      "path": "data/manifests/m02_soft_composite.json",
+      "sha256": "c4781cb3230393241063b61c456b3a8f0bfd5b0fc0f731b3c3a9b7704d66ed14"
+    },
+    {
+      "path": "data/manifests/m02_probability_map.json",
+      "sha256": "19cf4e4c68140dda9b5fde4ddabe1afd5986a8058612f6f2b9b04c6a87dff1cf"
+    }
+  ]
+}

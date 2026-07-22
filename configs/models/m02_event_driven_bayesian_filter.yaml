@@ -1,0 +1,260 @@
+schema_version: 1
+model_id: m02_soft_composite
+stage_id: event_driven_linear_gaussian_filter
+description: >-
+  Causal event-driven Bayesian filter for four consecutive monthly Model 02
+  growth/inflation score pairs. A VAR(1) evolves the released score centers,
+  non-defining releases enter through structured linear-Gaussian observation
+  models, and a completed composite score is conditioned on exactly at the
+  end of its availability date. Gaussian mapping uncertainty is added only
+  when score distributions are translated into quadrant probabilities.
+
+sources:
+  score_manifest: data/manifests/m02_soft_composite.json
+  score_features: data/processed/m02_soft_composite/composite_scores.csv
+  probability_map_manifest: data/manifests/m02_probability_map.json
+  probability_map: >-
+    results/published/m02_soft_composite/probability_map/quadrant_probabilities.csv
+  evidence_manifest: data/manifests/m02_release_evidence.json
+  evidence_events: >-
+    data/processed/m02_soft_composite/release_evidence/release_events.csv
+
+state:
+  axes: [growth_score, inflation_score]
+  monthly_state_symbol: Z
+  path_months: 4
+  dimension: 8
+  initialization: earliest_feasible_month_start
+  exact_score_policy: zero_noise_end_of_day_conditioning
+  repeated_exact_score_policy: identical_no_op_conflicting_error
+  evidence_for_exact_month_policy: predictive_diagnostic_only
+  out_of_path_event_policy: record_and_skip
+
+transition:
+  model: expanding_var1_ols
+  intercept: true
+  minimum_training_pairs: 60
+  fit_cutoff: pair_available_strictly_before_month_roll
+  pair_rule: exact_consecutive_complete_score_months
+  process_covariance: residual_cross_product_divided_by_n_minus_3
+  stationarity_projection: false
+  parameter_uncertainty: plug_in
+
+mapping:
+  baseline_revision_horizon_months: 12
+  covariance_as_of_rule: latest_available_mapping_strictly_before_checkpoint
+  after_exact_score_rule: newly_available_same_day_mapping_may_enter_readout
+  equation: U_m = Z_m + epsilon_map_m
+  cross_month_mapping_errors: independent_baseline
+  joint_path_method: scrambled_sobol
+  joint_path_samples: 16384
+
+emissions:
+  family: multivariate_gaussian
+  state_reference_policy: event_reference_month_without_silent_retargeting
+  training_window: expanding
+  training_availability: >-
+    max(release_available_at, target_score_available_at,
+    control_available_at) strictly before scored release
+  tuning_metric: rolling_origin_predictive_gaussian_nll
+  same_timestamp_validation: atomic_holdout
+  lambda_grid: [0.001, 0.01, 0.1, 1.0, 10.0, 100.0]
+  lambda_tie_rule: select_larger_lambda
+  covariance:
+    estimator: ledoit_wolf
+    pooling: one_residual_covariance_per_observation_model
+    eigenvalue_floor: 1.0e-8
+  unpenalized_terms: [intercept, observed_controls]
+
+observation_models:
+  weekly_labor_stress:
+    economic_block: weekly_labor_stress
+    event_block: weekly_labor_stress
+    responses: [initial_claims_innovation]
+    controls: []
+    loading_penalties:
+      - [1.0, 0.0]
+    exact_zero_mask:
+      - [false, true]
+    minimum_training_samples: 104
+    minimum_distinct_target_months: 24
+    validation_minimum_training_samples: 52
+    minimum_validation_observations: 52
+
+  monthly_labor_demand:
+    economic_block: monthly_labor_demand
+    event_block: monthly_labor_demand
+    responses:
+      - job_openings_rate_change
+      - hires_rate_change
+      - quits_rate_change
+      - layoffs_discharges_rate_change
+    controls: []
+    loading_penalties:
+      - [1.0, 10.0]
+      - [1.0, 10.0]
+      - [1.0, 1.0]
+      - [1.0, 10.0]
+    exact_zero_mask:
+      - [false, false]
+      - [false, false]
+      - [false, false]
+      - [false, false]
+    minimum_training_samples: 36
+    validation_minimum_training_samples: 24
+    minimum_validation_observations: 12
+
+  consumer_demand:
+    economic_block: consumer_demand
+    event_block: consumer_demand
+    responses:
+      - retail_sales_ex_motor_vehicles_log_change
+      - motor_vehicle_sales_log_change
+    controls: []
+    loading_penalties:
+      - [1.0, 1.0]
+      - [1.0, 1.0]
+    exact_zero_mask:
+      - [false, false]
+      - [false, false]
+    minimum_training_samples: 60
+    validation_minimum_training_samples: 36
+    minimum_validation_observations: 24
+
+  housing_activity:
+    economic_block: housing_activity
+    event_block: housing_activity
+    responses:
+      - housing_starts_log_change
+      - building_permits_log_change
+    controls:
+      - mortgage_rate_monthly_average_change_control
+      - mortgage_rate_post_2022_11_17_methodology
+    loading_penalties:
+      - [1.0, 1.0]
+      - [1.0, 1.0]
+    exact_zero_mask:
+      - [false, false]
+      - [false, false]
+    minimum_training_samples: 36
+    validation_minimum_training_samples: 24
+    minimum_validation_observations: 12
+
+  business_investment:
+    economic_block: business_investment
+    event_block: business_investment
+    responses:
+      - core_capital_goods_orders_log_change
+      - core_capital_goods_shipments_log_change
+    controls: []
+    loading_penalties:
+      - [1.0, 10.0]
+      - [1.0, 10.0]
+    exact_zero_mask:
+      - [false, false]
+      - [false, false]
+    minimum_training_samples: 36
+    validation_minimum_training_samples: 24
+    minimum_validation_observations: 12
+
+  inflation_expectations:
+    economic_block: inflation_pressure
+    event_block: inflation_pressure
+    responses: [one_year_inflation_expectations_change]
+    controls: []
+    loading_penalties:
+      - [10.0, 1.0]
+    exact_zero_mask:
+      - [false, false]
+    minimum_training_samples: 24
+    validation_minimum_training_samples: 12
+    minimum_validation_observations: 8
+
+  inflation_input_costs:
+    economic_block: inflation_pressure
+    event_block: inflation_pressure
+    responses: [intermediate_materials_prices_log_change]
+    controls: []
+    loading_penalties:
+      - [10.0, 1.0]
+    exact_zero_mask:
+      - [false, false]
+    minimum_training_samples: 36
+    validation_minimum_training_samples: 24
+    minimum_validation_observations: 12
+
+calendar:
+  replay_end: 2026-07-20
+  day_order:
+    - pre_month_roll_checkpoint
+    - month_roll
+    - post_month_roll_checkpoint
+    - pre_exact_score_day_checkpoint
+    - pre_release_group_checkpoint
+    - atomic_release_group
+    - post_release_group_checkpoint
+    - pre_exact_score_checkpoint
+    - exact_score_conditioning
+    - post_exact_score_checkpoint
+    - month_end_checkpoint
+  same_day_release_policy: >-
+    fit every model at the shared pre-release cutoff, then apply the conditionally
+    independent Gaussian factors in stable model-id order
+
+evaluation:
+  comparison: evidence_filter_vs_transition_only
+  primary_score_at: >-
+    start_of_availability_day_after_calendar_roll_but_before_any_same_day_release
+  sensitivity_score_at: after_same_day_release_blocks_before_exact_score
+  timestamp_caveat: >-
+    upstream availability is day-level, so primary forecast metrics exclude all
+    releases sharing the completed score's availability date
+  metrics:
+    - score_center_negative_log_predictive_density
+    - growth_score_rmse
+    - inflation_score_rmse
+    - quadrant_cross_entropy_to_exact_score_map
+    - quadrant_brier_distance_to_exact_score_map
+    - quadrant_kl_divergence_to_exact_score_map
+
+dependence:
+  residual_source: causal_shared_pre_release_whitened_predictive_innovations
+  weekly_response_ids: [initial_claims_innovation]
+  weekly_claims_monthly_aggregation: mean
+  cross_block_lags: [-1, 0, 1]
+  cross_block_statistics: [pearson, spearman]
+  minimum_pair_observations: 12
+  multiple_testing: benjamini_hochberg
+  serial_significance_level: 0.05
+  weekly_serial_lags: [1, 4, 8]
+  monthly_serial_lags: [1, 3, 6]
+  interpretation: diagnostics_do_not_establish_independence
+
+outputs:
+  processed_dir: data/processed/m02_soft_composite/bayesian_filter
+  checkpoint_index: checkpoint_index.csv
+  joint_gaussian_checkpoints: joint_gaussian_checkpoints.csv.gz
+  marginal_checkpoints: marginal_checkpoints.csv
+  joint_path_checkpoints: joint_path_checkpoints.csv.gz
+  event_update_audit: event_update_audit.csv
+  observation_preparation_audit: observation_preparation_audit.csv
+  exact_score_audit: exact_score_audit.csv
+  transition_fit_audit: transition_fit_audit.csv
+  emission_fit_audit: emission_fit_audit.jsonl
+  evaluation_rows: evaluation_rows.csv
+  evaluation_summary: evaluation_summary.csv
+  predictive_residuals: predictive_residuals.csv
+  dependence_monthly_residuals: dependence_monthly_residuals.csv
+  dependence_pairwise: dependence_pairwise.csv
+  dependence_serial: dependence_serial.csv
+  manifest: data/manifests/m02_event_driven_bayesian_filter.json
+  published_dir: results/published/m02_soft_composite/bayesian_filter
+  latest_posterior: latest_posterior.json
+  latest_joint_path_probabilities: latest_joint_path_probabilities.csv
+  monthly_current_posteriors: monthly_current_posteriors.csv
+  published_emission_summary: emission_summary.csv
+  published_evaluation_summary: evaluation_summary.csv
+  published_dependence_pairwise: dependence_pairwise.csv
+  published_dependence_serial: dependence_serial.csv
+  published_dependence_summary: dependence_summary.json
+  published_filter_summary: filter_summary.json

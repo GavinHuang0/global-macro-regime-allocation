@@ -1,0 +1,175 @@
+schema_version: 1
+model_id: m02_soft_composite
+stage_id: m02_release_evidence
+evidence_set_id: m02_release_evidence_v1
+description: >-
+  Point-in-time, non-defining evidence for Model 02. Existing first-release
+  features are reused from the frozen Model 01 event artifact after hash and
+  schema verification. Only MORTGAGE30US, ANXAVS, EXPINF1YR, and WPSID61 are
+  newly acquired. This stage constructs causal features and events only; it
+  does not fit observation equations or perform Bayesian filtering.
+
+inputs:
+  m01_evidence_manifest: data/manifests/m01_non_defining_release_evidence.json
+  m01_events: >-
+    data/processed/m01_non_defining_release_evidence/non_defining_release_events.csv
+
+provider_policy:
+  new_series_provider: fred_api
+  on_selected_provider_failure: stop_without_fallback
+  credentials: runtime_environment_only
+
+data:
+  feature_start: 2000-06-01
+  observation_start: 1994-01-01
+  observation_end: 2026-07-20
+  vintage_start: 1994-01-01
+  vintage_end: 2026-07-20
+  monthly_max_release_lag_days: 92
+  weekly_max_release_lag_days: 92
+  archive_start_latest_only: true
+
+features:
+  standard_deviation_ddof: 1
+  default_monthly_min_standardization_history: 60
+  short_history_min_standardization_history: 24
+  mortgage_control_min_standardization_history: 24
+  mortgage_methodology_change_date: 2022-11-17
+
+blocks:
+  weekly_labor_stress:
+    loading_policy:
+      growth: estimated
+      inflation: fixed_zero
+    reused_sources:
+      - series_id: ICSA
+        m01_release_block: weekly_claims
+        feature_name: initial_claims_innovation
+        transform: expanding_log_ar1_innovation
+
+  monthly_labor_demand:
+    loading_policy:
+      growth: estimated
+      inflation: stronger_shrinkage_except_quits
+    reused_sources:
+      - series_id: JTSJOR
+        m01_release_block: jolts
+        feature_name: job_openings_rate_change
+        transform: difference
+      - series_id: JTSHIR
+        m01_release_block: jolts
+        feature_name: hires_rate_change
+        transform: difference
+      - series_id: JTSQUR
+        m01_release_block: jolts
+        feature_name: quits_rate_change
+        transform: difference
+      - series_id: JTSLDR
+        m01_release_block: jolts
+        feature_name: layoffs_discharges_rate_change
+        transform: difference
+
+  consumer_demand:
+    loading_policy:
+      growth: estimated
+      inflation: estimated
+    reused_sources:
+      - series_id: RSFSXMV
+        m01_release_block: retail_sales
+        feature_name: retail_sales_ex_motor_vehicles_log_change
+        transform: log_difference
+    derived_sources:
+      - series_id: RSAFS_MINUS_RSFSXMV
+        source_series_ids: [RSAFS, RSFSXMV]
+        m01_release_block: retail_sales
+        feature_name: motor_vehicle_sales_log_change
+        transform: same_vintage_level_difference_then_log_difference
+        min_standardization_history: 60
+
+  housing_activity:
+    loading_policy:
+      growth: estimated
+      inflation: estimated
+    reused_sources:
+      - series_id: HOUST
+        m01_release_block: housing
+        feature_name: housing_starts_log_change
+        transform: log_difference
+      - series_id: PERMIT
+        m01_release_block: housing
+        feature_name: building_permits_log_change
+        transform: log_difference
+    controls:
+      - series_id: MORTGAGE30US
+        release_id: 190
+        frequency: weekly
+        feature_name: mortgage_rate_monthly_average_change_control
+        transform: reference_month_average_difference
+        housing_event_alignment: latest_component_release_for_reference_month
+        vintage_start: 2010-06-01
+        min_standardization_history: 24
+      - series_id: MORTGAGE30US_METHOD_20221117
+        source_series_ids: [MORTGAGE30US]
+        feature_name: mortgage_rate_post_2022_11_17_methodology
+        transform: post_methodology_indicator
+
+  business_investment:
+    loading_policy:
+      growth: estimated
+      inflation: stronger_shrinkage
+    reused_sources:
+      - series_id: NEWORDER
+        m01_release_block: durable_goods
+        feature_name: core_capital_goods_orders_log_change
+        transform: log_difference
+    new_sources:
+      - series_id: ANXAVS
+        release_id: 95
+        frequency: monthly
+        feature_name: core_capital_goods_shipments_log_change
+        transform: log_difference
+        release_timing: retrospective_after_reference_month_end
+        vintage_start: 2011-05-01
+        min_standardization_history: 60
+
+  inflation_pressure:
+    loading_policy:
+      growth: stronger_shrinkage
+      inflation: estimated
+    event_policy: asynchronous_feature_events_within_block
+    new_sources:
+      - series_id: EXPINF1YR
+        release_id: 500
+        release_name: Inflation Expectations
+        frequency: monthly
+        feature_name: one_year_inflation_expectations_change
+        transform: difference
+        # Cleveland Fed estimates are contemporaneous: an observation labelled
+        # month m is first published during month m, not after m ends.
+        release_timing: contemporaneous_within_reference_month
+        vintage_start: 2021-11-01
+        min_standardization_history: 24
+        coverage_expectation_at_2026_07_20:
+          initial_release_rows_including_archive: 391
+          contemporaneous_rows_after_archive_policy: 53
+          available_rows_after_warmup: 29
+          note: >-
+            Four otherwise current-era observations are excluded because they
+            first appeared outside their own reference month. Counts are audit
+            expectations rather than imputation or acceptance overrides.
+      - series_id: WPSID61
+        release_id: 46
+        frequency: monthly
+        feature_name: intermediate_materials_prices_log_change
+        transform: log_difference
+        release_timing: retrospective_after_reference_month_end
+        vintage_start: 2015-03-01
+        min_standardization_history: 60
+
+outputs:
+  raw_dir: data/raw/m02_release_evidence
+  processed_dir: data/processed/m02_soft_composite/release_evidence
+  events_file: release_events.csv
+  features_file: available_release_features.csv
+  new_first_release_observations_file: new_first_release_observations.csv
+  manifest: data/manifests/m02_release_evidence.json

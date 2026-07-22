@@ -1,0 +1,241 @@
+{
+  "configuration": "configs/models/m02_event_driven_bayesian_filter.yaml",
+  "configuration_sha256": "4357da3e904491b06bdf687ae9abdff797695d81e91d0beb4aff278ba201686d",
+  "coverage": {
+    "checkpoints": 3573,
+    "emission_fits": 633,
+    "evaluation_rows": 752,
+    "events": 1406,
+    "exact_scores": 378,
+    "replay_end": "2026-07-20",
+    "replay_start": "2010-09-01"
+  },
+  "credential_policy": "no network access and no credential read in inference stage",
+  "data_snapshot_sha256": "b8c5922bc88964069466d38b07187a6987c727e321cf8ed6322f639270c5195a",
+  "dependence_diagnostics": {
+    "correlation_p_q_values": "exploratory",
+    "cross_block_lags": [
+      -1,
+      0,
+      1
+    ],
+    "cross_block_statistics": [
+      "pearson",
+      "spearman"
+    ],
+    "cross_block_test_rows": 414,
+    "interpretation_caveat": "Failure to reject a dependence test does not establish conditional independence; inspect effect sizes, sample coverage, serial dependence, and statistical power.",
+    "method": "causal_oos_release_block_residual_dependence_diagnostics",
+    "monthly_residual_rows": 1335,
+    "multiple_testing": "Benjamini-Hochberg across all valid cross-model pairs, statistics, and lags",
+    "same_publication_batch_policy": "retain every row; order weekly serial residuals by configured observation_date, otherwise by publication time, reference month, and stable source order with an explicit caveat",
+    "serial_diagnostic": "Ljung-Box with df equal to reported lag",
+    "serial_multiple_testing": "Benjamini-Hochberg across all valid residual-series/lag tests",
+    "serial_significance_level_for_correlation_label": 0.05,
+    "serial_test_rows": 39,
+    "weekly_aggregation": "ICSA residual mean by reference month for cross-block correlations only; serial tests retain every weekly residual",
+    "weekly_serial_lag_caveat": "calendar-week semantics require an observation_date column and contiguous seven-day observation spacing"
+  },
+  "generated_at_utc": "2026-07-21T18:38:52.328378+00:00",
+  "generated_file_hashes": [
+    {
+      "bytes": 389593,
+      "path": "data/processed/m02_soft_composite/bayesian_filter/checkpoint_index.csv",
+      "sha256": "ad2cd82915096975e76e36f6b61f637bab6e93f92e00652c8ff09690231b0b0f"
+    },
+    {
+      "bytes": 268327,
+      "path": "data/processed/m02_soft_composite/bayesian_filter/joint_gaussian_checkpoints.csv.gz",
+      "sha256": "b5646fd927890d0f17f9646bdb03ee62bc7d8e503864fcd3115da5142ec86eaf"
+    },
+    {
+      "bytes": 7348588,
+      "path": "data/processed/m02_soft_composite/bayesian_filter/marginal_checkpoints.csv",
+      "sha256": "bf443ea83e75f50da11bbf5c17fe8ad47768830a6724c32976dd24d30f88412d"
+    },
+    {
+      "bytes": 1987489,
+      "path": "data/processed/m02_soft_composite/bayesian_filter/joint_path_checkpoints.csv.gz",
+      "sha256": "ea8ba1065184cb6625c7b9667e5196ea62c798ec7462819daa7de966c96e8b01"
+    },
+    {
+      "bytes": 667733,
+      "path": "data/processed/m02_soft_composite/bayesian_filter/event_update_audit.csv",
+      "sha256": "f371d17be0582e92dc2edd26f8351f6977931e9a946c200f46a6214c2b539fac"
+    },
+    {
+      "bytes": 746,
+      "path": "data/processed/m02_soft_composite/bayesian_filter/observation_preparation_audit.csv",
+      "sha256": "448116cd276e61092dd9780ab020d761a33813413210e1e9b2d0ef0e9dfe7b04"
+    },
+    {
+      "bytes": 22367,
+      "path": "data/processed/m02_soft_composite/bayesian_filter/exact_score_audit.csv",
+      "sha256": "eb2ba3f4b3165b3d02bb1d29c1a46e16616878575be1ef16437e421694805b2c"
+    },
+    {
+      "bytes": 60551,
+      "path": "data/processed/m02_soft_composite/bayesian_filter/transition_fit_audit.csv",
+      "sha256": "eee3dae65abf92a6972a046a79e7e9164714076ed4cdca4d3e5488b42d4c6abb"
+    },
+    {
+      "bytes": 2726018,
+      "path": "data/processed/m02_soft_composite/bayesian_filter/emission_fit_audit.jsonl",
+      "sha256": "52811fbe74512739a1d3d66bfc0d1ee689287cc573d0e0920c931ab6d13bb18c"
+    },
+    {
+      "bytes": 305482,
+      "path": "data/processed/m02_soft_composite/bayesian_filter/evaluation_rows.csv",
+      "sha256": "c9d16d2e6bce735681591cbb1bafd86f6a73b78df7b67494bca7ee8f7353e243"
+    },
+    {
+      "bytes": 2342,
+      "path": "data/processed/m02_soft_composite/bayesian_filter/evaluation_summary.csv",
+      "sha256": "38fe16b99e87e41425685524b4b83423ee24d3729028db14391f6ba3dbf14c59"
+    },
+    {
+      "bytes": 492827,
+      "path": "data/processed/m02_soft_composite/bayesian_filter/predictive_residuals.csv",
+      "sha256": "66ff16d99ae1228b25a40ed336be8e910190946c89c7ef1329a6b5459629a418"
+    },
+    {
+      "bytes": 162170,
+      "path": "data/processed/m02_soft_composite/bayesian_filter/dependence_monthly_residuals.csv",
+      "sha256": "ca23234fa980f3a14710c39d691c8d25370cef4c2856441d256e25e21a5ec437"
+    },
+    {
+      "bytes": 154349,
+      "path": "data/processed/m02_soft_composite/bayesian_filter/dependence_pairwise.csv",
+      "sha256": "eff04e5eea53704261175055aadc117596b943c94efb6a25d5a340a1e4a88540"
+    },
+    {
+      "bytes": 12526,
+      "path": "data/processed/m02_soft_composite/bayesian_filter/dependence_serial.csv",
+      "sha256": "06cb5845de956b1e4cee7b054ae489edb8cfba0cdaae86e6f39d4afd9543dffe"
+    },
+    {
+      "bytes": 24561,
+      "path": "results/published/m02_soft_composite/bayesian_filter/latest_posterior.json",
+      "sha256": "39b2b4ee79fe80deefb01f017d4ab26de645f6721d043786501dee23876becca"
+    },
+    {
+      "bytes": 48510,
+      "path": "results/published/m02_soft_composite/bayesian_filter/latest_joint_path_probabilities.csv",
+      "sha256": "b41c5ea48a8ee211c58ef56064a0fb37bceb81640725c9d2e6dd10538b874155"
+    },
+    {
+      "bytes": 52723,
+      "path": "results/published/m02_soft_composite/bayesian_filter/monthly_current_posteriors.csv",
+      "sha256": "3491587afc5d7da9a25666418075d04b361955ebbb9916056ad44996bdf67152"
+    },
+    {
+      "bytes": 2864,
+      "path": "results/published/m02_soft_composite/bayesian_filter/emission_summary.csv",
+      "sha256": "0a75aab9535ea9b1773fef068dd142bdbd8674e9025db91bcba772b2d2bba9d6"
+    },
+    {
+      "bytes": 2342,
+      "path": "results/published/m02_soft_composite/bayesian_filter/evaluation_summary.csv",
+      "sha256": "38fe16b99e87e41425685524b4b83423ee24d3729028db14391f6ba3dbf14c59"
+    },
+    {
+      "bytes": 154349,
+      "path": "results/published/m02_soft_composite/bayesian_filter/dependence_pairwise.csv",
+      "sha256": "eff04e5eea53704261175055aadc117596b943c94efb6a25d5a340a1e4a88540"
+    },
+    {
+      "bytes": 12526,
+      "path": "results/published/m02_soft_composite/bayesian_filter/dependence_serial.csv",
+      "sha256": "06cb5845de956b1e4cee7b054ae489edb8cfba0cdaae86e6f39d4afd9543dffe"
+    },
+    {
+      "bytes": 5859,
+      "path": "results/published/m02_soft_composite/bayesian_filter/dependence_summary.json",
+      "sha256": "7902e62a44460becb74213f4bcc2a39d749b888833a81309f830b605f21289a9"
+    },
+    {
+      "bytes": 17220,
+      "path": "results/published/m02_soft_composite/bayesian_filter/filter_summary.json",
+      "sha256": "98a80f150be3bbc06b195f6f018acaa5b63fcf13bb77f7814d783d62c260496a"
+    }
+  ],
+  "information_contract": {
+    "emission_cutoff": "training_available_at_strictly_before_release",
+    "event_reference_policy": "actual_event_reference_month",
+    "exact_score_timing": "end_of_availability_day",
+    "mapping_role": "reporting_readout_only",
+    "post_release_evaluation_role": "labeled_sensitivity_only",
+    "primary_evaluation_cutoff": "before_all_releases_on_exact_score_availability_date",
+    "same_day_order": "release_factors_then_exact_score",
+    "transition_cutoff": "pair_available_at_strictly_before_month_roll"
+  },
+  "input_files": [
+    {
+      "path": "data/processed/m02_soft_composite/composite_scores.csv",
+      "sha256": "1af087293505536c3e65be9c17d003b250f2e883c693e2fca581303566a5a6bd"
+    },
+    {
+      "path": "results/published/m02_soft_composite/probability_map/quadrant_probabilities.csv",
+      "sha256": "bd234853b48a3fc4f67c267a6470d33dbb469c03c0e10e15c6dbdba420d3a67d"
+    },
+    {
+      "path": "data/processed/m02_soft_composite/release_evidence/release_events.csv",
+      "sha256": "c3d5b32e437ac51edb4bc6ac673714723c8267b4ff3b4f1c262f2ab2931b2470"
+    }
+  ],
+  "model_id": "m02_soft_composite",
+  "processed_files": [
+    "data/processed/m02_soft_composite/bayesian_filter/checkpoint_index.csv",
+    "data/processed/m02_soft_composite/bayesian_filter/joint_gaussian_checkpoints.csv.gz",
+    "data/processed/m02_soft_composite/bayesian_filter/marginal_checkpoints.csv",
+    "data/processed/m02_soft_composite/bayesian_filter/joint_path_checkpoints.csv.gz",
+    "data/processed/m02_soft_composite/bayesian_filter/event_update_audit.csv",
+    "data/processed/m02_soft_composite/bayesian_filter/observation_preparation_audit.csv",
+    "data/processed/m02_soft_composite/bayesian_filter/exact_score_audit.csv",
+    "data/processed/m02_soft_composite/bayesian_filter/transition_fit_audit.csv",
+    "data/processed/m02_soft_composite/bayesian_filter/emission_fit_audit.jsonl",
+    "data/processed/m02_soft_composite/bayesian_filter/evaluation_rows.csv",
+    "data/processed/m02_soft_composite/bayesian_filter/evaluation_summary.csv",
+    "data/processed/m02_soft_composite/bayesian_filter/predictive_residuals.csv",
+    "data/processed/m02_soft_composite/bayesian_filter/dependence_monthly_residuals.csv",
+    "data/processed/m02_soft_composite/bayesian_filter/dependence_pairwise.csv",
+    "data/processed/m02_soft_composite/bayesian_filter/dependence_serial.csv"
+  ],
+  "published_files": [
+    "results/published/m02_soft_composite/bayesian_filter/latest_posterior.json",
+    "results/published/m02_soft_composite/bayesian_filter/latest_joint_path_probabilities.csv",
+    "results/published/m02_soft_composite/bayesian_filter/monthly_current_posteriors.csv",
+    "results/published/m02_soft_composite/bayesian_filter/emission_summary.csv",
+    "results/published/m02_soft_composite/bayesian_filter/evaluation_summary.csv",
+    "results/published/m02_soft_composite/bayesian_filter/dependence_pairwise.csv",
+    "results/published/m02_soft_composite/bayesian_filter/dependence_serial.csv",
+    "results/published/m02_soft_composite/bayesian_filter/dependence_summary.json",
+    "results/published/m02_soft_composite/bayesian_filter/filter_summary.json"
+  ],
+  "runtime": {
+    "packages": {
+      "PyYAML": "6.0.3",
+      "numpy": "2.3.5",
+      "pandas": "3.0.1",
+      "scikit-learn": "1.9.0",
+      "scipy": "1.18.0"
+    },
+    "python": "3.12.13"
+  },
+  "schema_version": 1,
+  "stage_id": "event_driven_linear_gaussian_filter",
+  "upstream_manifests": [
+    {
+      "path": "data/manifests/m02_soft_composite.json",
+      "sha256": "c4781cb3230393241063b61c456b3a8f0bfd5b0fc0f731b3c3a9b7704d66ed14"
+    },
+    {
+      "path": "data/manifests/m02_probability_map.json",
+      "sha256": "19cf4e4c68140dda9b5fde4ddabe1afd5986a8058612f6f2b9b04c6a87dff1cf"
+    },
+    {
+      "path": "data/manifests/m02_release_evidence.json",
+      "sha256": "2c5f427243f5552f9e05e5a06754da88eb2a9c1611f611a85afb23ecf6f42a8f"
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "coverage": {
+    "available_prior_months": 189,
+    "baseline_mapping_months": 214,
+    "candidate_adjacent_pairs": 316,
+    "eligible_consecutive_pairs_at_latest_cutoff": 247,
+    "first_source_month": "2010-07-01",
+    "first_target_month": "2010-08-01",
+    "latest_source_month": "2026-05-01",
+    "latest_target_month": "2026-06-01",
+    "latest_training_pairs": 247,
+    "priors_available_after_target_end": 32,
+    "priors_available_by_target_end": 157,
+    "priors_available_by_target_start": 0,
+    "score_history_rows": 317,
+    "unstable_prior_fits": 1
+  },
+  "covid_outlier_diagnostic": {
+    "interpretation": "The literal unbounded-score OLS baseline is retained; no winsorization or stationarity projection is applied.",
+    "pre_shock_growth_innovation_variance": 0.9299469586767777,
+    "pre_shock_source_month": "2020-03-01",
+    "shock_growth_prior_mean": -160.7728006842321,
+    "shock_source_month": "2020-04-01",
+    "shock_spectral_radius": 3.0988030211401476
+  },
+  "latest": {
+    "growth_innovation_variance": 11.500901162182291,
+    "inflation_innovation_variance": 0.4111226059542533,
+    "mapping_proxy_reference_month": "2026-05-01",
+    "reporting_covariance_convention": "Q_plus_Omega_map_proxy",
+    "source_reference_month": "2026-05-01",
+    "spectral_radius": 0.6498066958936841,
+    "target_reference_month": "2026-06-01",
+    "training_pairs": 247
+  },
+  "model_id": "m02_soft_composite",
+  "operational_timing": {
+    "available_after_target_end_source_months": [
+      "2010-08-01",
+      "2010-09-01",
+      "2011-06-01",
+      "2012-01-01",
+      "2012-04-01",
+      "2013-01-01",
+      "2013-06-01",
+      "2013-09-01",
+      "2013-10-01",
+      "2014-01-01",
+      "2014-03-01",
+      "2014-06-01",
+      "2014-12-01",
+      "2015-01-01",
+      "2015-04-01",
+      "2015-06-01",
+      "2015-12-01",
+      "2016-06-01",
+      "2017-01-01",
+      "2017-03-01",
+      "2017-06-01",
+      "2018-01-01",
+      "2018-12-01",
+      "2019-01-01",
+      "2019-02-01",
+      "2020-08-01",
+      "2021-08-01",
+      "2022-10-01",
+      "2025-09-01",
+      "2025-12-01",
+      "2026-01-01",
+      "2026-02-01"
+    ],
+    "available_by_target_end": 157,
+    "available_by_target_start": 0,
+    "forecast_issue_policy": "source_score_availability_date"
+  },
+  "stage_id": "m02_var1_transition",
+  "status_counts": {
+    "available": 189,
+    "insufficient_transition_history": 25,
+    "source_map_unavailable": 103
+  },
+  "unstable_source_months": [
+    "2020-04-01"
+  ]
+}
