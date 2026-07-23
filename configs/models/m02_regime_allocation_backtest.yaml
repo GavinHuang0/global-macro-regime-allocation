@@ -3,8 +3,8 @@ model_id: m02_soft_composite
 stage_id: weekly_posterior_regime_allocation_backtest
 description: >-
   Causal weekly portfolio allocation using the promoted
-  student_t_7_reduced_core Model 02 posterior, the frozen Model 01 portfolio
-  construction policy, first-common-session weekly execution, and explicit
+  student_t_7_reduced_core Model 02 posterior, frequency-equivalent weekly
+  return estimation, first-common-session weekly execution, and explicit
   trading costs.
 
 sources:
@@ -55,15 +55,19 @@ timing:
   incomplete_latest_week_policy: publish_target_but_exclude_from_performance
 
 estimation:
-  return_frequency: monthly_open_to_open
-  minimum_labeled_months: 60
+  return_frequency: weekly_open_to_open
+  leading_partial_week_policy: exclude_monday_anchor_before_common_price_history
+  minimum_labeled_weeks: 260
+  model01_history_equivalent_months: 60
   regime_labels:
     source: model02_completed_composite_scores
     rule: sign_of_exact_growth_and_inflation_scores
     availability: score_available_at
+    weekly_association: calendar_month_containing_reference_week_monday
   regime_means:
-    estimator: pooled_mean_pseudo_month_shrinkage
-    pseudo_months: 24.0
+    estimator: pooled_mean_pseudo_week_shrinkage
+    pseudo_weeks: 104.0
+    model01_equivalent_pseudo_months: 24.0
     formula: (n_r * regime_mean + kappa * pooled_mean) / (n_r + kappa)
     empty_regime_policy: pooled_mean
   covariance:
@@ -76,11 +80,11 @@ estimation:
     covariance: shared_within_regime_plus_between_regime_mean_covariance
 
 optimization:
-  objective: maximize_one_month_expected_return_net_of_estimated_trading_cost
+  objective: maximize_one_week_expected_return_net_of_estimated_trading_cost
   long_only: true
   fully_invested: true
   annualized_volatility_cap: 0.10
-  covariance_annualization_factor: 12.0
+  covariance_annualization_factor: 52.0
   per_asset_transaction_cost:
     SPY: 0.0005
     IEF: 0.0005
@@ -147,12 +151,25 @@ benchmarks:
     rebalance: weekly_first_common_session_open
   apply_same_realized_transaction_costs: true
 
+additional_strategies:
+  pooled_anchor_posterior_active_sleeve:
+    method_id: pooled_anchor_posterior_25pct
+    role: exploratory_not_promoted
+    replaces_promoted_baseline: false
+    construction: convex_combination_of_weekly_targets
+    pooled_core_method: pooled_mean_optimizer
+    pooled_core_fraction: 0.75
+    posterior_sleeve_method: posterior_optimized
+    posterior_sleeve_fraction: 0.25
+    realized_transaction_costs: consolidated_blended_target_at_same_five_basis_points
+    paired_comparators: [pooled_mean_optimizer, posterior_optimized]
+
 sensitivity:
   design: one_parameter_at_a_time
   same_backtest_dates: true
   select_baseline_after_results: false
   parameters:
-    regime_mean_pseudo_months: [0.0, 12.0, 24.0, 48.0, 96.0]
+    regime_mean_pseudo_weeks: [0.0, 52.0, 104.0, 208.0, 416.0]
     annualized_volatility_cap: [0.08, 0.10, 0.12]
     per_asset_transaction_cost: [0.0, 0.0005, 0.0010]
     concentration_cap_multiplier: [0.8, 1.0, 1.2]

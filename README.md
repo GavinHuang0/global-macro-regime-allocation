@@ -57,14 +57,42 @@ The promoted baseline now has a weekly allocation and backtest in
 [`portfolio_allocation.md`](docs/models/m02_soft_composite/portfolio_allocation.md)
 and
 [`portfolio_backtest_results.md`](docs/models/m02_soft_composite/portfolio_backtest_results.md).
+Its forecast and holding horizons are aligned: estimates use Monday-anchored
+open-to-next-week-open returns, a 260-week minimum, 104-pseudo-week regime-mean
+shrinkage, and 52x covariance annualization. Each holding is associated with
+the hard label for its Monday's calendar month, and both its ending open and
+label must be available by the Sunday fit cutoff. The optimizer maximizes
+expected one-week return net of one estimated rebalance cost.
 The formal sample contains 445 complete weeks from January 2018 through the
-week of 6 July 2026. The posterior optimizer returned 108.79% in total, or
-8.98% annualized, versus 122.26% and 9.78% for the otherwise identical
-pooled-mean ablation. Their posterior-minus-pooled annualized mean difference
-is -0.761%, with a 95% 26-week block-bootstrap interval of
-[-2.321%, 0.144%]. The interval includes zero; the weekly result does not
-establish a reliable incremental posterior edge. Model 01 remains frozen
-below.
+week of 6 July 2026. The corrected posterior optimizer returned 123.6021% in
+total, with 9.8595% CAGR, 10.4170% annualized volatility, 0.95565 zero-rate
+Sharpe, 0.71690 BIL-excess Sharpe, and -21.7545% maximum drawdown. The
+otherwise identical pooled-mean ablation returned 123.0780%, or 9.8294% CAGR.
+Their posterior-minus-pooled annualized mean difference is +0.0187066%, with a
+95% 26-week block-bootstrap interval of [-0.0876424%, +0.1297494%] and 0.6281
+bootstrap fraction above zero. The interval includes zero, so the weekly result
+does not establish a reliable incremental posterior edge. The old 108.79%
+total-return and 8.98% CAGR figures are superseded by this horizon-mismatch
+correction; the change aligns units and is not a Model 02 signal-quality
+improvement.
+
+An exploratory post-result strategy,
+`pooled_anchor_posterior_25pct`, blends each weekly target as 75% pooled mean
+plus 25% posterior. Simulated on its own drift and trades with the same
+five-basis-point one-way cost, it returned 123.2173866%, with 9.8373991% CAGR,
+10.4809091% volatility, 0.9485128 zero-rate Sharpe, 0.7112097 BIL-excess
+Sharpe, -21.9286402% maximum drawdown, 27.1480535% annualized one-way turnover,
+and 2.982445 basis points of annualized cost drag. Posterior minus anchor has
+annualized mean +0.01371398% with 95% interval
+[-0.0660674%, +0.0969896%] and 0.6249 bootstrap fraction above zero; anchor
+minus pooled mean is +0.00499261% with interval
+[-0.0214632%, +0.0327264%] and fraction 0.6376. Both intervals include zero.
+The source strategies are unchanged, and their latest targets coincide, so the
+latest anchor target is unchanged as well. The convex blend inherits their
+linear caps but has no separately audited 10% constraint under one common
+covariance estimate. The 25% sleeve is exploratory, non-promoted, and not an
+independently validated improvement. The benchmark paths and Model 01 remain
+frozen below.
 
 ### Historical Model 02 reduced-core feature revision
 

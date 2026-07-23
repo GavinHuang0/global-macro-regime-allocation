@@ -1,12 +1,32 @@
 {
   "allocation_specification_count": 11,
+  "alternative_strategy_count": 1,
+  "anchored_active_sleeve": {
+    "construction": "convex_combination_of_weekly_targets",
+    "method": "pooled_anchor_posterior_25pct",
+    "pooled_core_fraction": 0.75,
+    "pooled_core_method": "pooled_mean_optimizer",
+    "posterior_sleeve_fraction": 0.25,
+    "posterior_sleeve_method": "posterior_optimized",
+    "replaces_promoted_baseline": false,
+    "role": "exploratory_not_promoted",
+    "transaction_cost_policy": "simulate_consolidated_target_path"
+  },
   "benchmark_count": 4,
   "configuration": "configs/models/m02_regime_allocation_backtest.yaml",
-  "configuration_sha256": "cd8ab00fd82c7b271986638c28d10661970c90140a3c5b857e804a7b460bdf96",
+  "configuration_sha256": "bcb50017fef35f17a29706e85f03541e6fa96b9b819003c993088d1ce55b34c5",
   "credential_policy": "This stage consumes credential-free processed files and never reads environment credentials or downloads data.",
   "formal_backtest_end": "2026-07-06T00:00:00",
   "formal_backtest_start": "2018-01-01T00:00:00",
-  "generated_at_utc": "2026-07-22T15:39:51.326369+00:00",
+  "generated_at_utc": "2026-07-22T18:01:10.476444+00:00",
+  "horizon_alignment": {
+    "aligned": true,
+    "covariance_annualization_factor": 52.0,
+    "estimation_return_frequency": "weekly_open_to_open",
+    "holding_return_frequency": "weekly_open_to_open",
+    "minimum_labeled_weeks": 260,
+    "regime_mean_pseudo_weeks": 104.0
+  },
   "implementation_files": [
     {
       "bytes": 40890,
@@ -64,14 +84,19 @@
       "sha256": "33035a986315b7bb47d543a2b984791b02e870be944af5aa68e22e628c891d3d"
     },
     {
-      "bytes": 49677,
+      "bytes": 72284,
       "path": "src/regime_allocation/portfolio/m02_pipeline.py",
-      "sha256": "cc86457ffe6d28120c7267df3449758a6dea7a594a18ad8749835acf0623a14c"
+      "sha256": "49990e08dbf9cfc443f5bc38199f7a38ff34b0b2b29e27fa01fc77a9c557d07c"
     },
     {
-      "bytes": 15290,
+      "bytes": 9149,
+      "path": "src/regime_allocation/portfolio/m02_estimation.py",
+      "sha256": "7a1036cfad44cc4216057b2c105ff44b59f7bada363c34bd13b94374ca64484c"
+    },
+    {
+      "bytes": 15801,
       "path": "src/regime_allocation/portfolio/m02_weekly.py",
-      "sha256": "d86e23fe51bedb282d8ef7591539ad246f48bed4c436594a3a2cb044e5fa00c1"
+      "sha256": "7bf542138fa2d809ac42255594dbce3f46406bc0f32180611b19ec75ab616f56"
     },
     {
       "bytes": 50396,
@@ -207,44 +232,44 @@
       "sha256": "1f1130ce0fb2adede855ffb085ef3a900722325e7a81333eb501ae42ceaa7f01"
     },
     {
-      "bytes": 34503310,
+      "bytes": 35106047,
       "path": "data/processed/m02_regime_allocation_backtest/regime_estimate_audit.csv",
-      "sha256": "21758c51a7e78ada4b53e812ce6ce8aa0eabb57090e4d463dfbde0feb3b233f7"
+      "sha256": "24977cb5f22926c850e35b8cb9fc1ab2d6ed78870e6cc383c9e12dea72fec07f"
     },
     {
-      "bytes": 3077897,
+      "bytes": 3003106,
       "path": "data/processed/m02_regime_allocation_backtest/optimizer_audit.csv",
-      "sha256": "2a7eae11ec44ef6add47e561618ad6c9afe26c801e817f4d33d636fcfc5abb1b"
+      "sha256": "a411c976ac740735c59ffc463922b482818e0261d28dfe50f021a8e98d04b303"
     },
     {
-      "bytes": 7201491,
+      "bytes": 8496629,
       "path": "data/processed/m02_regime_allocation_backtest/weekly_weights.csv",
-      "sha256": "e30db049cf8fcec83a6127bf55e07fb1eea3d86f0727ea945fb53edc9ba631fd"
+      "sha256": "3a8682d0f9927204b086fc53d42a09ccb922ff8f6422b6d1fa775cdf28b0fc36"
     },
     {
-      "bytes": 1354110,
+      "bytes": 1449469,
       "path": "data/processed/m02_regime_allocation_backtest/weekly_strategy_returns.csv",
-      "sha256": "ad4d489f740d5906b2c105cf014e7620993f56dcd113c46ee0a4545847c106d0"
+      "sha256": "0f1061899f174aefabb36f994c43fa1249b6f60e0782ea12f8f2b73914e44851"
     },
     {
-      "bytes": 620360,
+      "bytes": 662455,
       "path": "data/processed/m02_regime_allocation_backtest/daily_nav.csv.gz",
-      "sha256": "148da1c5b62d473c785a3da1fb45b91e647bd5eeab0a8bbda5b4976e94e28899"
+      "sha256": "d50a610bb32e5dc306ccaa3e531598b16055d61047ed2961ed4e42080acd5676"
     },
     {
-      "bytes": 6005,
+      "bytes": 6329,
       "path": "data/processed/m02_regime_allocation_backtest/performance_metrics.csv",
-      "sha256": "6f426e13d898472a772076de859485196ab2a3505f29a1b4bcd44da2e85a472f"
+      "sha256": "acd745cc437a7d3c2027613746c4c7da2694be21db1a607f0e521eba13b91943"
     },
     {
-      "bytes": 1378,
+      "bytes": 1922,
       "path": "data/processed/m02_regime_allocation_backtest/comparison_uncertainty.csv",
-      "sha256": "51c58d4d6300a3fadc7b686339c32259eae76dd69d459f888e92c9fddd58c46f"
+      "sha256": "acc309482f30205d2da790c73a653d512d9d10b52a1a598bbc6f58468538ec25"
     },
     {
-      "bytes": 4884,
+      "bytes": 5045,
       "path": "data/processed/m02_regime_allocation_backtest/sensitivity_metrics.csv",
-      "sha256": "587600e09e437c57b1ab627fd15dd629383721290785bb724d3697c4e0eb9370"
+      "sha256": "a5a57d2e108197a34c1a1a96b7be4414a22a4ba08097d7971765c11660413214"
     },
     {
       "bytes": 375550,
@@ -252,39 +277,39 @@
       "sha256": "2af837b324f01f61ed71342833001a64fef80c384d0a170e03dcd21f990b9bb5"
     },
     {
-      "bytes": 2063,
+      "bytes": 2737,
       "path": "results/published/m02_regime_allocation_backtest/latest_allocation.json",
-      "sha256": "b5e9453adc09880f848042717e2fd0e5cc9a80fe8aef37de0407223e5da92c22"
+      "sha256": "5e0373a3f9fa776ef89e487efe71c50b48c983bc08dd1d33b2131ceaac1d35e3"
     },
     {
-      "bytes": 9542,
+      "bytes": 13337,
       "path": "results/published/m02_regime_allocation_backtest/backtest_summary.json",
-      "sha256": "9c831e9617e4012f395ed3697d1961f6f5448caf786f17694e8769f2bb78d9a8"
+      "sha256": "94d8295c2d98f9d69a4eb90a303d115562d883f2b9076045fafb922ad010b699"
     },
     {
-      "bytes": 2221,
+      "bytes": 2573,
       "path": "results/published/m02_regime_allocation_backtest/performance_summary.csv",
-      "sha256": "673d57dccde3fb0325e3bc9fdef51798e50324a75c0c046446d7cc303ebc4a35"
+      "sha256": "6a9fb26519733d233c20637340fe04f05aa0b962e1fa0f6895e8bfed88f58255"
     },
     {
-      "bytes": 1378,
+      "bytes": 1922,
       "path": "results/published/m02_regime_allocation_backtest/comparison_uncertainty.csv",
-      "sha256": "51c58d4d6300a3fadc7b686339c32259eae76dd69d459f888e92c9fddd58c46f"
+      "sha256": "acc309482f30205d2da790c73a653d512d9d10b52a1a598bbc6f58468538ec25"
     },
     {
-      "bytes": 440426,
+      "bytes": 533780,
       "path": "results/published/m02_regime_allocation_backtest/weekly_returns.csv",
-      "sha256": "d74c1ea4c21a943fe8c22529d1eb449acb6a619fab673db9f77cb27e041e3796"
+      "sha256": "ddadb9b8da42b9bb14ffe7bd42e13922db47cfad917a7a201767553e35b00973"
     },
     {
-      "bytes": 2204441,
+      "bytes": 3222719,
       "path": "results/published/m02_regime_allocation_backtest/weekly_weights.csv",
-      "sha256": "789c30664d5c4f7fb90439029bd4f3fa5d95a7bc795535ac656a6a7999010022"
+      "sha256": "b437afc3ec76e41eba1b93aecfa5244c68c0ed3e04b8f6da405be632d863f2a9"
     },
     {
-      "bytes": 4884,
+      "bytes": 5045,
       "path": "results/published/m02_regime_allocation_backtest/sensitivity_metrics.csv",
-      "sha256": "587600e09e437c57b1ab627fd15dd629383721290785bb724d3697c4e0eb9370"
+      "sha256": "a5a57d2e108197a34c1a1a96b7be4414a22a4ba08097d7971765c11660413214"
     }
   ],
   "periods_per_year": 52,

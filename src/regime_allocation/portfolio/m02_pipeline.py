@@ -1,10 +1,9 @@
 """Build the promoted Model 02 weekly allocation and causal backtest.
 
-The portfolio policy intentionally mirrors Model 01.  Regime-conditioned ETF
-moments remain monthly and retain the same shrinkage, risk, constraint, cost,
-benchmark, and sensitivity settings.  Model 02 changes the executable signal
-source and the rebalance/accounting cadence: its promoted reduced-core filter
-is sampled at each calendar-week Monday before same-day releases, and targets
+The portfolio uses one-week open-to-open returns, frequency-equivalent weekly
+history and shrinkage settings, a 52x covariance annualization factor, and a
+one-week expected-return objective.  The promoted reduced-core filter is
+sampled at each calendar-week Monday before same-day releases, and targets
 trade at the first common adjusted open in that week.
 """
 
@@ -59,9 +58,10 @@ from regime_allocation.portfolio.estimation import (
     PROBABILITY_COLUMNS,
     PosteriorMixtureMoments,
     RegimeReturnEstimate,
-    build_adjusted_open_holding_returns,
-    fit_causal_regime_return_model,
     posterior_mixture_moments,
+)
+from regime_allocation.portfolio.m02_estimation import (
+    fit_causal_weekly_regime_return_model,
 )
 from regime_allocation.portfolio.m02_weekly import (
     build_weekly_execution_schedule,
@@ -78,7 +78,6 @@ from regime_allocation.portfolio.pipeline import (
     BASELINE_METHOD,
     BENCHMARK_METHODS,
     POOLED_METHOD,
-    _allocation_specifications,
     _daily_total_returns,
     _group_caps,
     _known_pretrade_weights,
@@ -92,6 +91,19 @@ from regime_allocation.portfolio.pipeline import (
 
 STAGE_ID = "weekly_posterior_regime_allocation_backtest"
 PERIODS_PER_YEAR = 52
+MODEL01_PERIODS_PER_YEAR = 12
+MINIMUM_LABELED_WEEKS = 260
+BASELINE_PSEUDO_WEEKS = 104.0
+ANCHORED_METHOD = "pooled_anchor_posterior_25pct"
+ANCHORED_CORE_FRACTION = 0.75
+POSTERIOR_SLEEVE_FRACTION = 0.25
+M02_PUBLIC_METHODS = (BASELINE_METHOD, ANCHORED_METHOD, *BENCHMARK_METHODS)
+POSTERIOR_COMPARATOR_METHODS = (*BENCHMARK_METHODS, ANCHORED_METHOD)
+WEEKLY_ASSOCIATION = "calendar_month_containing_reference_week_monday"
+WEEKLY_OBJECTIVE = "maximize_one_week_expected_return_net_of_estimated_trading_cost"
+LEADING_PARTIAL_WEEK_POLICY = (
+    "exclude_monday_anchor_before_common_price_history"
+)
 
 
 def _sha256(payload: bytes) -> str:
@@ -113,6 +125,28 @@ def _json_safe(value: object) -> object:
     if isinstance(value, np.bool_):
         return bool(value)
     return value
+
+
+def _validate_active_sleeve_policy(config: Mapping[str, Any]) -> None:
+    sleeve = config.get("additional_strategies", {}).get(
+        "pooled_anchor_posterior_active_sleeve", {}
+    )
+    expected = {
+        "method_id": ANCHORED_METHOD,
+        "role": "exploratory_not_promoted",
+        "replaces_promoted_baseline": False,
+        "construction": "convex_combination_of_weekly_targets",
+        "pooled_core_method": POOLED_METHOD,
+        "pooled_core_fraction": ANCHORED_CORE_FRACTION,
+        "posterior_sleeve_method": BASELINE_METHOD,
+        "posterior_sleeve_fraction": POSTERIOR_SLEEVE_FRACTION,
+        "realized_transaction_costs": (
+            "consolidated_blended_target_at_same_five_basis_points"
+        ),
+        "paired_comparators": [POOLED_METHOD, BASELINE_METHOD],
+    }
+    if sleeve != expected:
+        raise ValueError("Model 02 anchored active-sleeve strategy differs")
 
 
 def _load_config(path: Path) -> tuple[dict[str, Any], bytes]:
@@ -137,8 +171,31 @@ def _load_config(path: Path) -> tuple[dict[str, Any], bytes]:
         raise ValueError("Model 02 allocation must use calendar-week Monday anchors")
     if int(config.get("evaluation", {}).get("periods_per_year", 0)) != PERIODS_PER_YEAR:
         raise ValueError("weekly evaluation must use 52 periods per year")
-    if float(config["optimization"].get("covariance_annualization_factor", -1)) != 12.0:
-        raise ValueError("monthly return covariance must retain 12x annualization")
+    estimation = config.get("estimation", {})
+    if estimation.get("return_frequency") != "weekly_open_to_open":
+        raise ValueError("Model 02 return estimation must be weekly open-to-open")
+    if estimation.get("leading_partial_week_policy") != LEADING_PARTIAL_WEEK_POLICY:
+        raise ValueError("weekly estimation must exclude a truncated leading week")
+    if int(estimation.get("minimum_labeled_weeks", 0)) != MINIMUM_LABELED_WEEKS:
+        raise ValueError("weekly estimation must require 260 labeled weeks")
+    if (
+        float(estimation.get("regime_means", {}).get("pseudo_weeks", -1))
+        != BASELINE_PSEUDO_WEEKS
+    ):
+        raise ValueError("weekly regime-mean shrinkage must use 104 pseudo-weeks")
+    if (
+        estimation.get("regime_labels", {}).get("weekly_association")
+        != WEEKLY_ASSOCIATION
+    ):
+        raise ValueError("weekly returns must use their Monday-month regime label")
+    if config.get("optimization", {}).get("objective") != WEEKLY_OBJECTIVE:
+        raise ValueError("Model 02 optimization objective must use weekly returns")
+    if (
+        float(config["optimization"].get("covariance_annualization_factor", -1))
+        != PERIODS_PER_YEAR
+    ):
+        raise ValueError("weekly return covariance must use 52x annualization")
+    _validate_active_sleeve_policy(config)
     return config, raw
 
 
@@ -152,20 +209,75 @@ def _without(mapping: Mapping[str, Any], *keys: str) -> dict[str, Any]:
 def _validate_model01_policy_parity(
     config: Mapping[str, Any], template: Mapping[str, Any]
 ) -> None:
-    """Prove that cadence is the only portfolio-policy change."""
+    """Prove that changes from Model 01 are frequency-equivalent translations."""
 
     if config["universe"] != template["universe"]:
         raise ValueError("Model 02 universe differs from the Model 01 template")
-    for key in (
-        "return_frequency",
-        "minimum_labeled_months",
-        "regime_means",
-        "covariance",
-        "posterior_mixture",
+    _validate_active_sleeve_policy(config)
+    estimation = config["estimation"]
+    template_estimation = template["estimation"]
+    if estimation["return_frequency"] != "weekly_open_to_open":
+        raise ValueError("Model 02 return frequency is not weekly")
+    if estimation["leading_partial_week_policy"] != LEADING_PARTIAL_WEEK_POLICY:
+        raise ValueError("Model 02 leading partial-week policy differs")
+    expected_weeks = int(
+        template_estimation["minimum_labeled_months"]
+        * PERIODS_PER_YEAR
+        / MODEL01_PERIODS_PER_YEAR
+    )
+    if int(estimation["minimum_labeled_weeks"]) != expected_weeks:
+        raise ValueError("Model 02 minimum history is not frequency-equivalent")
+    if (
+        float(estimation["model01_history_equivalent_months"])
+        != float(template_estimation["minimum_labeled_months"])
     ):
+        raise ValueError("Model 02 minimum-history lineage differs from Model 01")
+    template_kappa = float(template_estimation["regime_means"]["pseudo_months"])
+    expected_kappa = template_kappa * PERIODS_PER_YEAR / MODEL01_PERIODS_PER_YEAR
+    if float(estimation["regime_means"]["pseudo_weeks"]) != expected_kappa:
+        raise ValueError("Model 02 mean shrinkage is not frequency-equivalent")
+    if (
+        float(estimation["regime_means"]["model01_equivalent_pseudo_months"])
+        != template_kappa
+    ):
+        raise ValueError("Model 02 mean-shrinkage lineage differs from Model 01")
+    expected_regime_means = {
+        "estimator": str(template_estimation["regime_means"]["estimator"]).replace(
+            "pseudo_month", "pseudo_week"
+        ),
+        "pseudo_weeks": expected_kappa,
+        "model01_equivalent_pseudo_months": template_kappa,
+        "formula": template_estimation["regime_means"]["formula"],
+        "empty_regime_policy": template_estimation["regime_means"][
+            "empty_regime_policy"
+        ],
+    }
+    if estimation["regime_means"] != expected_regime_means:
+        raise ValueError("Model 02 regime-mean estimator is not the weekly analogue")
+    for key in ("covariance", "posterior_mixture"):
         if config["estimation"][key] != template["estimation"][key]:
             raise ValueError(f"Model 02 estimation policy differs at {key}")
-    if config["optimization"] != template["optimization"]:
+    expected_regime_labels = {
+        "source": "model02_completed_composite_scores",
+        "rule": "sign_of_exact_growth_and_inflation_scores",
+        "availability": "score_available_at",
+        "weekly_association": WEEKLY_ASSOCIATION,
+    }
+    if estimation["regime_labels"] != expected_regime_labels:
+        raise ValueError("Model 02 weekly regime-label association differs")
+    optimization = config["optimization"]
+    template_optimization = template["optimization"]
+    if optimization["objective"] != str(template_optimization["objective"]).replace(
+        "one_month", "one_week"
+    ):
+        raise ValueError("Model 02 optimizer objective is not the weekly analogue")
+    if float(optimization["covariance_annualization_factor"]) != PERIODS_PER_YEAR:
+        raise ValueError("Model 02 covariance annualization is not weekly")
+    if _without(
+        optimization, "objective", "covariance_annualization_factor"
+    ) != _without(
+        template_optimization, "objective", "covariance_annualization_factor"
+    ):
         raise ValueError("Model 02 optimization policy differs from Model 01")
     for benchmark in (
         "pooled_mean_optimizer",
@@ -183,8 +295,27 @@ def _validate_model01_policy_parity(
         != template["benchmarks"]["apply_same_realized_transaction_costs"]
     ):
         raise ValueError("benchmark transaction-cost policy differs from Model 01")
-    if config["sensitivity"] != template["sensitivity"]:
-        raise ValueError("Model 02 allocation sensitivities differ from Model 01")
+    sensitivity = config["sensitivity"]
+    template_sensitivity = template["sensitivity"]
+    if _without(sensitivity, "parameters") != _without(
+        template_sensitivity, "parameters"
+    ):
+        raise ValueError("Model 02 allocation sensitivity design differs")
+    weekly_parameters = sensitivity["parameters"]
+    monthly_parameters = template_sensitivity["parameters"]
+    expected_kappas = [
+        float(value) * PERIODS_PER_YEAR / MODEL01_PERIODS_PER_YEAR
+        for value in monthly_parameters["regime_mean_pseudo_months"]
+    ]
+    if list(map(float, weekly_parameters["regime_mean_pseudo_weeks"])) != expected_kappas:
+        raise ValueError("Model 02 kappa sensitivities are not frequency-equivalent")
+    for key in (
+        "annualized_volatility_cap",
+        "per_asset_transaction_cost",
+        "concentration_cap_multiplier",
+    ):
+        if weekly_parameters[key] != monthly_parameters[key]:
+            raise ValueError(f"Model 02 sensitivity differs at {key}")
 
     evaluation = config["evaluation"]
     template_evaluation = template["evaluation"]
@@ -210,6 +341,100 @@ def _validate_model01_policy_parity(
         raise ValueError("Model 02 uncertainty method is not the weekly analogue")
     if int(uncertainty["block_length_weeks"]) != 26:
         raise ValueError("Model 02 uncertainty block must be 26 weeks")
+
+
+def _allocation_specifications(
+    config: Mapping[str, Any],
+) -> tuple[AllocationSpecification, ...]:
+    """Return the weekly baseline and one-at-a-time policy sensitivities."""
+
+    baseline_kappa = float(config["estimation"]["regime_means"]["pseudo_weeks"])
+    baseline_volatility = float(config["optimization"]["annualized_volatility_cap"])
+    first_asset = config["universe"]["strategy_assets"][0]
+    baseline_cost = float(
+        config["optimization"]["per_asset_transaction_cost"][first_asset]
+    )
+    specifications = [
+        AllocationSpecification(
+            method=BASELINE_METHOD,
+            specification_type="baseline",
+            parameter="baseline",
+            parameter_value=1.0,
+            kappa=baseline_kappa,
+            volatility_cap=baseline_volatility,
+            transaction_cost=baseline_cost,
+            cap_multiplier=1.0,
+        )
+    ]
+    parameters = config["sensitivity"]["parameters"]
+    for raw in parameters["regime_mean_pseudo_weeks"]:
+        value = float(raw)
+        if value == baseline_kappa:
+            continue
+        specifications.append(
+            AllocationSpecification(
+                method=f"sensitivity_kappa_{value:g}",
+                specification_type="sensitivity",
+                parameter="regime_mean_pseudo_weeks",
+                parameter_value=value,
+                kappa=value,
+                volatility_cap=baseline_volatility,
+                transaction_cost=baseline_cost,
+                cap_multiplier=1.0,
+            )
+        )
+    for raw in parameters["annualized_volatility_cap"]:
+        value = float(raw)
+        if value == baseline_volatility:
+            continue
+        specifications.append(
+            AllocationSpecification(
+                method=f"sensitivity_volatility_cap_{value:g}",
+                specification_type="sensitivity",
+                parameter="annualized_volatility_cap",
+                parameter_value=value,
+                kappa=baseline_kappa,
+                volatility_cap=value,
+                transaction_cost=baseline_cost,
+                cap_multiplier=1.0,
+            )
+        )
+    for raw in parameters["per_asset_transaction_cost"]:
+        value = float(raw)
+        if value == baseline_cost:
+            continue
+        specifications.append(
+            AllocationSpecification(
+                method=f"sensitivity_transaction_cost_{value:g}",
+                specification_type="sensitivity",
+                parameter="per_asset_transaction_cost",
+                parameter_value=value,
+                kappa=baseline_kappa,
+                volatility_cap=baseline_volatility,
+                transaction_cost=value,
+                cap_multiplier=1.0,
+            )
+        )
+    for raw in parameters["concentration_cap_multiplier"]:
+        value = float(raw)
+        if value == 1.0:
+            continue
+        specifications.append(
+            AllocationSpecification(
+                method=f"sensitivity_concentration_caps_{value:g}",
+                specification_type="sensitivity",
+                parameter="concentration_cap_multiplier",
+                parameter_value=value,
+                kappa=baseline_kappa,
+                volatility_cap=baseline_volatility,
+                transaction_cost=baseline_cost,
+                cap_multiplier=value,
+            )
+        )
+    identifiers = [item.method for item in specifications]
+    if len(identifiers) != len(set(identifiers)):
+        raise RuntimeError("allocation specification identifiers are not unique")
+    return tuple(specifications)
 
 
 def _manifest_hash(manifest: Mapping[str, Any], relative_path: str) -> str:
@@ -414,10 +639,10 @@ def _record_estimate(
                     "reference_week": signal["reference_week"],
                     "signal_date": signal["signal_date"],
                     "knowledge_cutoff": estimate.knowledge_cutoff,
-                    "kappa": estimate.kappa,
+                    "pseudo_weeks": estimate.kappa,
                     "training_count": estimate.training_count,
-                    "first_training_holding_month": estimate.first_holding_month,
-                    "last_training_holding_month": estimate.last_holding_month,
+                    "first_training_reference_week": estimate.first_holding_month,
+                    "last_training_reference_week": estimate.last_holding_month,
                     "regime_id": regime_id,
                     "regime_count": int(estimate.regime_counts.loc[regime_id]),
                     "ticker": asset,
@@ -455,7 +680,7 @@ def _record_optimizer(
         "signal_date": signal["signal_date"],
         "regime_reference_month": signal["regime_reference_month"],
         "estimated_pretrade_as_of": estimated_pretrade_as_of,
-        "kappa": specification.kappa,
+        "pseudo_weeks": specification.kappa,
         "volatility_cap": specification.volatility_cap,
         "transaction_cost": specification.transaction_cost,
         "concentration_cap_multiplier": specification.cap_multiplier,
@@ -463,9 +688,9 @@ def _record_optimizer(
         "posterior_entropy": float(
             -(posterior * np.log(posterior.clip(lower=1e-300))).sum()
         ),
-        "expected_portfolio_monthly_return": result.expected_monthly_return,
+        "expected_portfolio_weekly_return": result.expected_monthly_return,
         "estimated_transaction_cost": result.estimated_transaction_cost,
-        "net_expected_monthly_return": result.net_expected_monthly_return,
+        "net_expected_weekly_return": result.net_expected_monthly_return,
         "estimated_annualized_volatility": result.annualized_volatility,
         "estimated_traded_notional": result.traded_notional,
         "estimated_half_l1_turnover": result.half_l1_turnover,
@@ -482,7 +707,7 @@ def _record_optimizer(
     }
     record.update(
         {
-            f"expected_return_{asset}": float(expected_returns.loc[asset])
+            f"expected_weekly_return_{asset}": float(expected_returns.loc[asset])
             for asset in result.assets
         }
     )
@@ -527,6 +752,7 @@ def _dynamic_targets(
     strategy_assets: Sequence[str],
     simulation_assets: Sequence[str],
     minimum_observations: int,
+    covariance_annualization_factor: float,
     asset_caps: Mapping[str, float],
     group_caps: Sequence[GroupCap],
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -545,7 +771,7 @@ def _dynamic_targets(
             estimate_key = (cutoff, specification.kappa)
             estimate = estimate_cache.get(estimate_key)
             if estimate is None:
-                estimate = fit_causal_regime_return_model(
+                estimate = fit_causal_weekly_regime_return_model(
                     estimator_returns,
                     regime_history,
                     knowledge_cutoff=cutoff,
@@ -604,9 +830,12 @@ def _dynamic_targets(
             )
             result = optimize_long_only(
                 assets=strategy_assets,
+                # The frozen optimizer API is period-generic despite its legacy
+                # monthly argument name.  Model 02 supplies weekly moments here.
                 expected_monthly_returns=moments.expected_mean.to_numpy(dtype=float),
                 annualized_covariance=(
-                    moments.covariance.to_numpy(dtype=float) * 12.0
+                    moments.covariance.to_numpy(dtype=float)
+                    * covariance_annualization_factor
                 ),
                 pretrade_weights=pretrade,
                 asset_caps=scaled_asset_caps,
@@ -652,6 +881,129 @@ def _dynamic_targets(
         pd.DataFrame.from_records(weight_records),
         pd.DataFrame.from_records(estimate_records),
         pd.DataFrame.from_records(optimizer_records),
+    )
+
+
+def _anchored_active_sleeve_targets(
+    dynamic_weights: pd.DataFrame,
+    *,
+    output_method: str = ANCHORED_METHOD,
+    core_method: str = POOLED_METHOD,
+    active_method: str = BASELINE_METHOD,
+    active_fraction: float = POSTERIOR_SLEEVE_FRACTION,
+) -> pd.DataFrame:
+    """Blend a pooled core with a limited posterior active sleeve.
+
+    The two source methods remain independently formed virtual sleeves.  Their
+    weekly targets are combined before consolidated portfolio accounting, so
+    realized trades can net across the pooled core and posterior sleeve.
+    """
+
+    if not isinstance(output_method, str) or not output_method:
+        raise ValueError("output_method must be a non-empty string")
+    if core_method == active_method or output_method in {core_method, active_method}:
+        raise ValueError("active-sleeve method identifiers must be distinct")
+    if not np.isfinite(active_fraction) or not 0.0 < active_fraction < 1.0:
+        raise ValueError("active_fraction must lie strictly between zero and one")
+    core_fraction = 1.0 - float(active_fraction)
+    required = {
+        "method",
+        "reference_week",
+        "signal_date",
+        "execution_date",
+        "regime_reference_month",
+        "ticker",
+        "target_weight",
+        "is_live_only",
+        "posterior_map_regime",
+    }
+    missing = required.difference(dynamic_weights.columns)
+    if missing:
+        raise ValueError(
+            "dynamic weights are missing active-sleeve columns: "
+            + ", ".join(sorted(missing))
+        )
+    if output_method in set(dynamic_weights["method"].astype(str)):
+        raise ValueError("output active-sleeve method already exists")
+    legs = dynamic_weights.loc[
+        dynamic_weights["method"].astype(str).isin((core_method, active_method))
+    ].copy()
+    if set(legs["method"].astype(str)) != {core_method, active_method}:
+        raise ValueError("active-sleeve source method is missing")
+    keys = ["reference_week", "ticker"]
+    if legs.duplicated(["method", *keys]).any():
+        raise ValueError("active-sleeve source weights contain duplicate keys")
+    metadata = [
+        "signal_date",
+        "execution_date",
+        "regime_reference_month",
+        "is_live_only",
+    ]
+    core = legs.loc[legs["method"].eq(core_method), [*keys, *metadata, "target_weight"]]
+    core = core.rename(columns={"target_weight": "pooled_core_target_weight"})
+    active = legs.loc[
+        legs["method"].eq(active_method),
+        [*keys, *metadata, "target_weight", "posterior_map_regime"],
+    ].rename(
+        columns={
+            **{column: f"active_{column}" for column in metadata},
+            "target_weight": "posterior_sleeve_target_weight",
+        }
+    )
+    merged = core.merge(active, on=keys, how="outer", validate="one_to_one", indicator=True)
+    if not merged["_merge"].eq("both").all():
+        raise ValueError("active-sleeve source methods have different week/ticker keys")
+    for column in metadata:
+        left = merged[column]
+        right = merged[f"active_{column}"]
+        if not (left.eq(right) | (left.isna() & right.isna())).all():
+            raise ValueError(f"active-sleeve source metadata differ at {column}")
+    for column in ("pooled_core_target_weight", "posterior_sleeve_target_weight"):
+        merged[column] = pd.to_numeric(merged[column], errors="coerce")
+        if not np.isfinite(merged[column].to_numpy(dtype=float)).all():
+            raise ValueError("active-sleeve source weights must be finite")
+        if merged[column].lt(-1.0e-12).any():
+            raise ValueError("active-sleeve source weights must be long-only")
+    for column in ("pooled_core_target_weight", "posterior_sleeve_target_weight"):
+        totals = merged.groupby("reference_week", sort=False)[column].sum()
+        if not np.allclose(totals.to_numpy(dtype=float), 1.0, atol=1.0e-10):
+            raise ValueError("each active-sleeve source target must sum to one")
+    merged["target_weight"] = (
+        core_fraction * merged["pooled_core_target_weight"]
+        + float(active_fraction) * merged["posterior_sleeve_target_weight"]
+    )
+    merged["posterior_active_deviation"] = (
+        merged["target_weight"] - merged["pooled_core_target_weight"]
+    )
+    target_totals = merged.groupby("reference_week", sort=False)["target_weight"].sum()
+    if not np.allclose(target_totals.to_numpy(dtype=float), 1.0, atol=1.0e-10):
+        raise RuntimeError("anchored active-sleeve targets do not sum to one")
+    output = pd.DataFrame(
+        {
+            "method": output_method,
+            "specification_type": "anchored_strategy",
+            "reference_week": merged["reference_week"],
+            "signal_date": merged["signal_date"],
+            "execution_date": merged["execution_date"],
+            "regime_reference_month": merged["regime_reference_month"],
+            "ticker": merged["ticker"],
+            "target_weight": merged["target_weight"],
+            "is_live_only": merged["is_live_only"],
+            "posterior_map_regime": merged["posterior_map_regime"],
+            "optimization_outcome": "convex_target_blend",
+            "anchor_core_method": core_method,
+            "posterior_sleeve_method": active_method,
+            "pooled_core_fraction": core_fraction,
+            "posterior_sleeve_fraction": float(active_fraction),
+            "pooled_core_target_weight": merged["pooled_core_target_weight"],
+            "posterior_sleeve_target_weight": merged[
+                "posterior_sleeve_target_weight"
+            ],
+            "posterior_active_deviation": merged["posterior_active_deviation"],
+        }
+    )
+    return output.sort_values(["reference_week", "ticker"], kind="stable").reset_index(
+        drop=True
     )
 
 
@@ -752,6 +1104,43 @@ def _weekly_metric_labels(frame: pd.DataFrame) -> pd.DataFrame:
     )
 
 
+def _weekly_estimator_history(
+    weekly_returns: pd.DataFrame,
+    *,
+    strategy_assets: Sequence[str],
+) -> pd.DataFrame:
+    """Return full-history weekly observations eligible for regime estimation.
+
+    The generic return builder can emit a Monday anchor before the price
+    snapshot begins when the first source row falls midweek.  Such a period is
+    truncated rather than a verifiable weekly holding return, so estimation
+    begins with the first Monday anchor on or after common price history.
+    """
+
+    assets = tuple(map(str, strategy_assets))
+    required = {"reference_week", "start_date", "end_date", *assets}
+    missing = required.difference(weekly_returns.columns)
+    if missing:
+        raise ValueError(
+            "weekly estimator source is missing columns: "
+            + ", ".join(sorted(missing))
+        )
+    history = weekly_returns.copy()
+    for column in ("reference_week", "start_date", "end_date"):
+        history[column] = pd.to_datetime(history[column], errors="raise").dt.normalize()
+    first_common_open = pd.Timestamp(history["start_date"].min())
+    first_anchor = first_common_open.to_period("W-SUN").start_time.normalize()
+    if first_anchor < first_common_open:
+        first_anchor += pd.Timedelta(weeks=1)
+    history = history.loc[history["reference_week"].ge(first_anchor)].copy()
+    if history.empty:
+        raise ValueError("weekly estimator history is empty after source-start guard")
+    history = history.rename(columns={"end_date": "return_available_at"})
+    return history.loc[
+        :, ["reference_week", "return_available_at", *assets]
+    ].reset_index(drop=True)
+
+
 def _latest_payload(
     *,
     config: Mapping[str, Any],
@@ -763,6 +1152,12 @@ def _latest_payload(
     baseline = weights.loc[weights["method"].eq(BASELINE_METHOD)]
     latest_week = pd.Timestamp(baseline["reference_week"].max())
     allocation = baseline.loc[baseline["reference_week"].eq(latest_week)]
+    anchored = weights.loc[
+        weights["method"].eq(ANCHORED_METHOD)
+        & weights["reference_week"].eq(latest_week)
+    ]
+    if anchored.empty:
+        raise ValueError("latest anchored active-sleeve target is missing")
     audit = optimizer_audit.loc[
         optimizer_audit["method"].eq(BASELINE_METHOD)
         & optimizer_audit["reference_week"].eq(latest_week)
@@ -793,8 +1188,20 @@ def _latest_payload(
             for row in allocation.itertuples(index=False)
             if float(row.target_weight) > 1e-12
         ],
-        "estimated_monthly_return": float(
-            audit["expected_portfolio_monthly_return"]
+        "exploratory_anchored_strategy": {
+            "method": ANCHORED_METHOD,
+            "role": "exploratory_not_promoted",
+            "replaces_promoted_baseline": False,
+            "pooled_core_fraction": ANCHORED_CORE_FRACTION,
+            "posterior_sleeve_fraction": POSTERIOR_SLEEVE_FRACTION,
+            "target_weights": [
+                {"ticker": row.ticker, "weight": float(row.target_weight)}
+                for row in anchored.itertuples(index=False)
+                if float(row.target_weight) > 1e-12
+            ],
+        },
+        "estimated_weekly_return": float(
+            audit["expected_portfolio_weekly_return"]
         ),
         "estimated_annualized_volatility": float(
             audit["estimated_annualized_volatility"]
@@ -803,12 +1210,13 @@ def _latest_payload(
         "optimization_outcome": audit["optimization_outcome"],
         "binding_constraints": audit["binding_constraints"],
         "baseline_parameters": {
-            "regime_mean_pseudo_months": float(audit["kappa"]),
+            "regime_mean_pseudo_weeks": float(audit["pseudo_weeks"]),
             "annualized_volatility_cap": float(audit["volatility_cap"]),
             "per_asset_transaction_cost": float(audit["transaction_cost"]),
-            "minimum_labeled_months": int(
-                config["estimation"]["minimum_labeled_months"]
+            "minimum_labeled_weeks": int(
+                config["estimation"]["minimum_labeled_weeks"]
             ),
+            "estimation_return_frequency": config["estimation"]["return_frequency"],
             "rebalance_frequency": "weekly",
         },
         "universe_note": (
@@ -928,15 +1336,16 @@ def build_m02_allocation_backtest(
         raise ValueError("promoted replay did not produce every weekly signal")
 
     history = derive_m02_regime_history(scores)
-    engine_returns = build_weekly_open_to_open_holding_returns(
+    all_weekly_returns = build_weekly_open_to_open_holding_returns(
         prices, assets=simulation_assets
     )
-    engine_returns = engine_returns.loc[
-        engine_returns["reference_week"].ge(start_week)
-    ].reset_index(drop=True)
-    estimator_returns = build_adjusted_open_holding_returns(
-        prices, asset_ids=strategy_assets
+    estimator_returns = _weekly_estimator_history(
+        all_weekly_returns,
+        strategy_assets=strategy_assets,
     )
+    engine_returns = all_weekly_returns.loc[
+        all_weekly_returns["reference_week"].ge(start_week)
+    ].reset_index(drop=True)
     complete_end_week = pd.Timestamp(engine_returns["reference_week"].max())
     if not signals["reference_week"].eq(complete_end_week).any():
         raise ValueError("complete weekly return range lacks a promoted signal")
@@ -962,12 +1371,25 @@ def build_m02_allocation_backtest(
         prices=prices,
         strategy_assets=strategy_assets,
         simulation_assets=simulation_assets,
-        minimum_observations=int(config["estimation"]["minimum_labeled_months"]),
+        minimum_observations=int(config["estimation"]["minimum_labeled_weeks"]),
+        covariance_annualization_factor=float(
+            config["optimization"]["covariance_annualization_factor"]
+        ),
         asset_caps={
             str(asset): float(value)
             for asset, value in config["optimization"]["asset_caps"].items()
         },
         group_caps=_group_caps(config),
+    )
+    sleeve_policy = config["additional_strategies"][
+        "pooled_anchor_posterior_active_sleeve"
+    ]
+    anchored_weights = _anchored_active_sleeve_targets(
+        dynamic_weights,
+        output_method=str(sleeve_policy["method_id"]),
+        core_method=str(sleeve_policy["pooled_core_method"]),
+        active_method=str(sleeve_policy["posterior_sleeve_method"]),
+        active_fraction=float(sleeve_policy["posterior_sleeve_fraction"]),
     )
     benchmark_weights, legacy_audit = _benchmark_targets(
         signals=signals,
@@ -976,12 +1398,15 @@ def build_m02_allocation_backtest(
         strategy_assets=strategy_assets,
         simulation_assets=simulation_assets,
     )
-    weights = pd.concat([dynamic_weights, benchmark_weights], ignore_index=True)
+    weights = pd.concat(
+        [dynamic_weights, anchored_weights, benchmark_weights], ignore_index=True
+    )
     baseline_cost = float(
         config["optimization"]["per_asset_transaction_cost"][strategy_assets[0]]
     )
     costs = {item.method: item.transaction_cost for item in dynamic_specifications}
     costs.update({method: baseline_cost for method in BENCHMARK_METHODS})
+    costs[ANCHORED_METHOD] = baseline_cost
     complete_weights = weights.loc[~weights["is_live_only"]].copy()
     simulations: list[pd.DataFrame] = []
     target_frames: list[pd.DataFrame] = []
@@ -1017,19 +1442,32 @@ def build_m02_allocation_backtest(
         )
     )
     uncertainty_config = config["evaluation"]["uncertainty"]
-    uncertainty = _weekly_metric_labels(
-        paired_circular_block_bootstrap(
-            metric_input,
-            baseline_method=str(uncertainty_config["baseline_method"]),
-            comparator_methods=BENCHMARK_METHODS,
-            block_length=int(uncertainty_config["block_length_weeks"]),
-            n_resamples=int(uncertainty_config["resamples"]),
-            confidence_level=float(uncertainty_config["confidence_level"]),
-            seed=int(uncertainty_config["random_seed"]),
-            periods_per_year=PERIODS_PER_YEAR,
-        )
+    posterior_uncertainty = paired_circular_block_bootstrap(
+        metric_input,
+        baseline_method=str(uncertainty_config["baseline_method"]),
+        comparator_methods=POSTERIOR_COMPARATOR_METHODS,
+        block_length=int(uncertainty_config["block_length_weeks"]),
+        n_resamples=int(uncertainty_config["resamples"]),
+        confidence_level=float(uncertainty_config["confidence_level"]),
+        seed=int(uncertainty_config["random_seed"]),
+        periods_per_year=PERIODS_PER_YEAR,
     )
-    sensitivity = _sensitivity_table(metrics, specifications)
+    anchored_uncertainty = paired_circular_block_bootstrap(
+        metric_input,
+        baseline_method=ANCHORED_METHOD,
+        comparator_methods=(POOLED_METHOD,),
+        block_length=int(uncertainty_config["block_length_weeks"]),
+        n_resamples=int(uncertainty_config["resamples"]),
+        confidence_level=float(uncertainty_config["confidence_level"]),
+        seed=int(uncertainty_config["random_seed"]),
+        periods_per_year=PERIODS_PER_YEAR,
+    )
+    uncertainty = _weekly_metric_labels(
+        pd.concat([posterior_uncertainty, anchored_uncertainty], ignore_index=True)
+    )
+    sensitivity = _sensitivity_table(metrics, specifications).rename(
+        columns={"kappa": "pseudo_weeks"}
+    )
 
     output = config["outputs"]
     processed_dir = _project_path(root, output["processed_dir"])
@@ -1072,7 +1510,7 @@ def build_m02_allocation_backtest(
     _write_csv(uncertainty, paths["uncertainty"])
     _write_csv(sensitivity, paths["sensitivity"])
     _write_csv(legacy_audit, paths["legacy_audit"])
-    public_methods = (BASELINE_METHOD, *BENCHMARK_METHODS)
+    public_methods = M02_PUBLIC_METHODS
     published_performance = metrics.loc[
         metrics["method"].isin(public_methods)
     ].copy()
@@ -1107,17 +1545,47 @@ def build_m02_allocation_backtest(
             ].nunique()
         ),
         "latest_live_target_week": latest_signal_week,
-        "monthly_estimation_retained": True,
+        "estimation_return_frequency": config["estimation"]["return_frequency"],
+        "holding_return_frequency": "weekly_open_to_open",
+        "forecast_horizon": "one_week",
+        "holding_horizon": "one_week",
+        "forecast_holding_horizons_aligned": True,
+        "minimum_labeled_weeks": int(
+            config["estimation"]["minimum_labeled_weeks"]
+        ),
+        "regime_mean_pseudo_weeks": float(
+            config["estimation"]["regime_means"]["pseudo_weeks"]
+        ),
+        "covariance_annualization_factor": float(
+            config["optimization"]["covariance_annualization_factor"]
+        ),
         "rebalance_frequency": "weekly",
         "methods": list(public_methods),
+        "exploratory_anchored_strategy": {
+            "method": ANCHORED_METHOD,
+            "role": "exploratory_not_promoted",
+            "replaces_promoted_baseline": False,
+            "construction": "0.75 * pooled target + 0.25 * posterior target",
+            "pooled_core_fraction": ANCHORED_CORE_FRACTION,
+            "posterior_sleeve_fraction": POSTERIOR_SLEEVE_FRACTION,
+            "transaction_cost_policy": "simulate_consolidated_target_path",
+        },
         "performance": published_performance.to_dict(orient="records"),
         "paired_block_bootstrap_comparisons": uncertainty.to_dict(orient="records"),
         "sensitivity_design": "one_parameter_at_a_time_not_used_for_baseline_selection",
         "warnings": [
-            "The promoted baseline was selected on the same causal history; this is not a fresh holdout.",
+            "The promoted baseline was selected on the same causal history; "
+            "this is not a fresh holdout.",
             "Adjusted ETF history is mutable provider data, not point-in-time market data.",
-            "Weekly trading raises turnover and uses a fixed five-basis-point one-way cost approximation.",
-            "The latest target is excluded from performance when its next weekly execution open is unavailable.",
+            "Weekly trading raises turnover and uses a fixed five-basis-point "
+            "one-way cost approximation.",
+            "The source-truncated 2007-12-31 anchor is excluded from weekly estimation.",
+            "The latest target is excluded from performance when its next weekly "
+            "execution open is unavailable.",
+            "The 25% posterior sleeve was requested after reviewing the same-history "
+            "baseline results and is exploratory, not an independently validated choice.",
+            "The convex target blend inherits linear allocation caps but is not a "
+            "separate optimizer solution under one common covariance estimate.",
         ],
     }
     _write_json(summary, paths["summary"])
@@ -1144,6 +1612,7 @@ def build_m02_allocation_backtest(
     )
     stage_implementation_paths = [
         root / "src/regime_allocation/portfolio/m02_pipeline.py",
+        root / "src/regime_allocation/portfolio/m02_estimation.py",
         root / "src/regime_allocation/portfolio/m02_weekly.py",
         root
         / "src/regime_allocation/models/m02_soft_composite/weekly_decision_replay.py",
@@ -1198,7 +1667,33 @@ def build_m02_allocation_backtest(
         "allocation_specification_count": len(specifications),
         "pooled_mean_ablation_included": True,
         "benchmark_count": len(BENCHMARK_METHODS),
+        "alternative_strategy_count": 1,
+        "anchored_active_sleeve": {
+            "method": ANCHORED_METHOD,
+            "role": "exploratory_not_promoted",
+            "replaces_promoted_baseline": False,
+            "construction": "convex_combination_of_weekly_targets",
+            "pooled_core_method": POOLED_METHOD,
+            "pooled_core_fraction": ANCHORED_CORE_FRACTION,
+            "posterior_sleeve_method": BASELINE_METHOD,
+            "posterior_sleeve_fraction": POSTERIOR_SLEEVE_FRACTION,
+            "transaction_cost_policy": "simulate_consolidated_target_path",
+        },
         "periods_per_year": PERIODS_PER_YEAR,
+        "horizon_alignment": {
+            "estimation_return_frequency": config["estimation"]["return_frequency"],
+            "holding_return_frequency": "weekly_open_to_open",
+            "aligned": True,
+            "minimum_labeled_weeks": int(
+                config["estimation"]["minimum_labeled_weeks"]
+            ),
+            "regime_mean_pseudo_weeks": float(
+                config["estimation"]["regime_means"]["pseudo_weeks"]
+            ),
+            "covariance_annualization_factor": float(
+                config["optimization"]["covariance_annualization_factor"]
+            ),
+        },
         "output_files": [
             _declaration(root, paths[name]) for name in generated_names
         ],

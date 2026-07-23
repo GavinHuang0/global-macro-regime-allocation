@@ -1,16 +1,18 @@
 """Causal Model 02 inputs for weekly portfolio decisions.
 
 This module deliberately stops at input alignment.  It converts released Model
-02 composite scores into the monthly hard labels required by the existing
-return estimator, selects one causal current-regime marginal for each requested
-calendar week, and derives first-common-session weekly execution dates from a
-long ETF price panel.  Portfolio estimation, optimization, and accounting live
-elsewhere.
+02 composite scores into monthly hard labels, selects one causal current-regime
+marginal for each requested calendar week, and derives first-common-session
+weekly execution dates from a long ETF price panel.  The weekly return
+estimator associates each Monday-anchored holding with the hard label for the
+calendar month containing that Monday.  Portfolio estimation, optimization,
+and accounting live elsewhere.
 
 Calendar weeks are identified by their Monday date.  A weekly signal may have
 been recorded before that Monday, but never after it.  Execution occurs on the
-first common price date in the week and a completed holding exits at the first
-common price date in the immediately following week.
+first common adjusted open in the week and a completed holding exits at the
+first common adjusted open in the immediately following week.  The allocation
+stage omits the leading, partial 2007-12-31 week in the available ETF history.
 """
 
 from __future__ import annotations
@@ -90,7 +92,9 @@ def derive_m02_regime_history(composite_scores: pd.DataFrame) -> pd.DataFrame:
 
     Incomplete warm-up rows are omitted.  A zero score belongs to the ``up``
     side of its axis, matching Model 02's hard-quadrant evaluation helper.
-    Output columns intentionally match the Model 01 causal return estimator.
+    The weekly estimator assigns each holding the label for the calendar month
+    containing its Monday reference week, and separately enforces that both
+    the completed return and this label were available by its fit cutoff.
     """
 
     required = (
@@ -304,7 +308,9 @@ def build_weekly_execution_schedule(
     The last available week is retained with a missing ``end_date`` and
     ``is_complete=False`` so callers can publish its live target.  A missing
     week inside the observed common-price calendar is rejected rather than
-    silently creating a multi-week holding period.
+    silently creating a multi-week holding period.  Callers are responsible
+    for excluding a leading partial calendar week, such as the 2007-12-31
+    anchor in the Model 02 ETF history, from estimator observations.
     """
 
     _require_columns(prices, ("date", "ticker"), name="price table")

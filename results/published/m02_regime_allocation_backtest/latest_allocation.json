@@ -1,17 +1,43 @@
 {
   "baseline_parameters": {
     "annualized_volatility_cap": 0.1,
-    "minimum_labeled_months": 60,
+    "estimation_return_frequency": "weekly_open_to_open",
+    "minimum_labeled_weeks": 260,
     "per_asset_transaction_cost": 0.0005,
     "rebalance_frequency": "weekly",
-    "regime_mean_pseudo_months": 24.0
+    "regime_mean_pseudo_weeks": 104.0
   },
   "binding_constraints": "group:equity_and_high_yield|cap:SPY|lower:IEF|lower:TIP|lower:BIL|cap:GLD",
-  "estimated_annualized_volatility": 0.09615698366602422,
-  "estimated_monthly_return": 0.007096268855085829,
-  "estimated_rebalance_cost": 3.815410497820887e-06,
+  "estimated_annualized_volatility": 0.09854869897913945,
+  "estimated_rebalance_cost": 3.815410497827174e-06,
+  "estimated_weekly_return": 0.0017245331390623553,
   "execution_assumption": "first_common_us_session_adjusted_open_in_signal_week",
   "execution_date": "2026-07-13T00:00:00",
+  "exploratory_anchored_strategy": {
+    "method": "pooled_anchor_posterior_25pct",
+    "pooled_core_fraction": 0.75,
+    "posterior_sleeve_fraction": 0.25,
+    "replaces_promoted_baseline": false,
+    "role": "exploratory_not_promoted",
+    "target_weights": [
+      {
+        "ticker": "GLD",
+        "weight": 0.24999999999999886
+      },
+      {
+        "ticker": "HYG",
+        "weight": 0.1500000000000004
+      },
+      {
+        "ticker": "LQD",
+        "weight": 0.25000000000000105
+      },
+      {
+        "ticker": "SPY",
+        "weight": 0.34999999999999953
+      }
+    ]
+  },
   "holding_period_complete": false,
   "latest_price_date": "2026-07-17T00:00:00",
   "mapping_reference_month": "2026-05-01T00:00:00",
@@ -45,19 +71,19 @@
   "target_weights": [
     {
       "ticker": "SPY",
-      "weight": 0.3499999999999997
+      "weight": 0.3500000000000002
     },
     {
       "ticker": "HYG",
-      "weight": 0.15000000000000135
+      "weight": 0.14999999999999988
     },
     {
       "ticker": "GLD",
-      "weight": 0.24999999999999994
+      "weight": 0.2500000000000002
     },
     {
       "ticker": "LQD",
-      "weight": 0.2499999999999991
+      "weight": 0.2499999999999998
     }
   ],
   "universe_note": "Compact US cross-asset ETF universe; AGG is benchmark-only and receives zero optimized-strategy weight."
