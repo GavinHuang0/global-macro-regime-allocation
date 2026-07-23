@@ -1,4 +1,4 @@
-# Model 02 reduced-core feature revision
+# Archived Model 02 reduced-core feature revision
 
 This document records the locked Model 02 experiment that removes two weak
 legacy observation models, tests import prices as a direct replacement for

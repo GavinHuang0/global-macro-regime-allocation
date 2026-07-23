@@ -1,0 +1,189 @@
+schema_version: 1
+model_id: m02_soft_composite
+stage_id: frozen_posterior_expanded_universe_backtest
+description: >-
+  Exploratory all-local-ETF allocation diagnostic using the hash-frozen Model
+  02 weekly posterior. The stage expands the optimized universe from seven to
+  all twelve ETFs in the frozen market-data manifest and evaluates only the
+  posterior optimizer, pooled optimizer, equal weight, and static 60/40.
+
+frozen_upstream:
+  manifest: data/manifests/m02_regime_allocation_backtest.json
+  manifest_sha256: 5821824dcfe6a82347d1df176467b74d0199cb7724bb08f5e07daf08801fbc4a
+  signal_table: data/processed/m02_regime_allocation_backtest/signal_table.csv
+  signal_table_sha256: 8cb4d27056ec5b024ad5e2cbf4549429da98def25b8602e91275731e8046111f
+  optimizer_audit: data/processed/m02_regime_allocation_backtest/optimizer_audit.csv
+  optimizer_audit_sha256: a411c976ac740735c59ffc463922b482818e0261d28dfe50f021a8e98d04b303
+  regime_estimate_audit: data/processed/m02_regime_allocation_backtest/regime_estimate_audit.csv
+  regime_estimate_audit_sha256: 24977cb5f22926c850e35b8cb9fc1ab2d6ed78870e6cc383c9e12dea72fec07f
+  original_performance: results/published/m02_regime_allocation_backtest/performance_summary.csv
+  original_performance_sha256: 6a9fb26519733d233c20637340fe04f05aa0b962e1fa0f6895e8bfed88f58255
+  original_weekly_returns: results/published/m02_regime_allocation_backtest/weekly_returns.csv
+  original_weekly_returns_sha256: ddadb9b8da42b9bb14ffe7bd42e13922db47cfad917a7a201767553e35b00973
+  price_history: data/processed/us_cross_asset_etf_universe_v1/etf_daily_prices_long.csv
+  price_history_sha256: 7cbd321c5af2662065edfc3a5c3c1cdb6101bda10de7862bc09c09041bdcb7f1
+  composite_scores: data/processed/m02_soft_composite/composite_scores.csv
+  composite_scores_sha256: e49033e74d711a886267d195cf01f03778bed00534d02f47e96cea91d73eb1eb
+
+market_data:
+  manifest: data/manifests/us_cross_asset_etf_universe_v1.json
+  manifest_sha256: b806212f0db312f0315ae8119021612f17f211a3314be0d1966582d033556a69
+  universe_rule: all_tickers_in_frozen_local_market_data_manifest
+  external_retrieval_used: false
+  common_history_required: true
+
+universe:
+  strategy_assets:
+    - SPY
+    - IEF
+    - TIP
+    - LQD
+    - HYG
+    - BIL
+    - GLD
+    - DBC
+    - UUP
+    - TLT
+    - USO
+    - AGG
+  original_strategy_assets:
+    - SPY
+    - IEF
+    - TIP
+    - HYG
+    - BIL
+    - GLD
+    - LQD
+  newly_admitted_assets:
+    - DBC
+    - UUP
+    - TLT
+    - USO
+    - AGG
+  currency: USD
+
+timing:
+  formal_backtest_start: 2018-01-01
+  formal_backtest_end: 2026-07-06
+  latest_live_target_week: 2026-07-13
+  target_period: calendar_week_monday
+  execution: first_common_us_session_adjusted_open_in_signal_week
+  holding_period: first_weekly_session_open_to_next_weekly_session_open
+  estimation_return_cutoff: holding_period_end_on_or_before_prior_day
+  posterior_refit: false
+
+estimation:
+  return_frequency: weekly_open_to_open
+  minimum_labeled_weeks: 260
+  regime_mean_pseudo_weeks: 104.0
+  covariance_estimator: ledoit_wolf
+  covariance_annualization_factor: 52.0
+
+optimization:
+  objective: maximize_one_week_expected_return_net_of_estimated_trading_cost
+  long_only: true
+  fully_invested: true
+  annualized_volatility_cap: 0.10
+  transaction_cost: 0.0005
+  asset_caps:
+    SPY: 0.35
+    IEF: 0.50
+    TIP: 0.40
+    LQD: 0.40
+    HYG: 0.25
+    BIL: 1.00
+    GLD: 0.25
+    DBC: 0.25
+    UUP: 0.25
+    TLT: 0.25
+    USO: 0.10
+    AGG: 0.50
+  group_caps:
+    equity_and_high_yield:
+      assets: [SPY, HYG]
+      maximum: 0.50
+    corporate_credit:
+      assets: [HYG, LQD]
+      maximum: 0.50
+    broad_rate_sensitive:
+      assets: [IEF, TIP, LQD, TLT, AGG]
+      maximum: 0.75
+    nominal_treasury_and_aggregate:
+      assets: [IEF, TLT, AGG]
+      maximum: 0.60
+    commodity_complex:
+      assets: [GLD, DBC, USO]
+      maximum: 0.40
+    energy_and_broad_commodities:
+      assets: [DBC, USO]
+      maximum: 0.30
+  solver:
+    method: SLSQP
+    tolerance: 1.0e-12
+    maximum_iterations: 2000
+    feasibility_tolerance: 1.0e-7
+    fallback_order:
+      - hold_pretrade_if_feasible
+      - constrained_minimum_variance
+      - all_BIL
+
+methods:
+  - posterior_optimized
+  - pooled_mean_optimizer
+  - equal_weight
+  - static_60_spy_40_agg
+
+benchmarks:
+  pooled_mean_optimizer:
+    constraints_and_costs: same_as_posterior_optimizer
+  equal_weight:
+    assets: all_twelve_strategy_assets
+    weight_per_asset: 0.08333333333333333
+    rebalance: weekly
+  static_60_spy_40_agg:
+    equity_asset: SPY
+    equity_weight: 0.60
+    bond_asset: AGG
+    bond_weight: 0.40
+    rebalance: weekly
+
+evaluation:
+  periods_per_year: 52
+  uncertainty:
+    primary_comparison: posterior_optimized_minus_pooled_mean_optimizer
+    comparator_methods:
+      - pooled_mean_optimizer
+      - static_60_spy_40_agg
+      - equal_weight
+    method: paired_circular_block_bootstrap
+    block_length_weeks: 26
+    resamples: 10000
+    confidence_level: 0.95
+    random_seed: 20260718
+  universe_change:
+    compare_against_frozen_seven_etf_results: true
+    practical_materiality_threshold_annual_return: 0.0025
+    evidence_rule: >-
+      positive_point_estimate_and_positive_lower_two_sided_95pct_confidence_bound
+
+outputs:
+  processed_dir: data/processed/m02_expanded_universe_backtest
+  published_dir: results/published/m02_expanded_universe_backtest
+  manifest: data/manifests/m02_expanded_universe_backtest.json
+  holding_returns: weekly_holding_period_returns.csv
+  regime_estimate_audit: regime_estimate_audit.csv
+  optimizer_audit: optimizer_audit.csv
+  weekly_weights: weekly_weights.csv
+  weekly_returns: weekly_returns.csv
+  daily_nav: daily_nav.csv.gz
+  performance: performance_summary.csv
+  strategy_uncertainty: strategy_uncertainty.csv
+  universe_comparison: universe_comparison.csv
+  universe_change_uncertainty: universe_change_uncertainty.csv
+  allocation_diagnostics: allocation_diagnostics.csv
+  asset_utilization: asset_utilization.csv
+  asset_return_diagnostics: asset_return_diagnostics.csv
+  risk_estimator_change: risk_estimator_change.csv
+  posterior_pooled_distance: posterior_pooled_distance.csv
+  latest_allocation: latest_allocation.json
+  summary: expanded_universe_summary.json

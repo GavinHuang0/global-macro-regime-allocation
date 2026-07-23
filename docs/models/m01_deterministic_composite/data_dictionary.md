@@ -1,314 +1,154 @@
 # Model 01 data dictionary
 
-The event-driven filter adds checkpoint, likelihood-fit, forecast, evaluation,
-and sensitivity artifacts under `data/processed/m01_bayesian_filter/`, plus
-small public summaries under `results/published/m01_bayesian_filter/`. Their
-stage-specific contracts are defined in
-[`bayesian_filter.md`](bayesian_filter.md#13-output-and-audit-contract); the
-source, regime, and transition tables remain defined below.
+This document maps Model 01's machine artifacts to their roles. Detailed
+mathematics live in the stage specifications; configurations and manifests are
+the authoritative serialization and provenance contracts.
 
-Mathematical symbols follow the shared convention in
-[bayesian_filter.md](bayesian_filter.md#notation): $m$ is a reference month,
-$d$ is a knowledge or publication date, $e$ is an event, $b$ is a release
-block, $R_m$ is the monthly regime, and $s$ is a candidate four-month path.
-Field names remain literal code identifiers and are shown in backticks.
+## Conventions
 
-## Source components
+\(m\) is a reference month, \(d\) an information cutoff,
+\(r\in\mathcal R\) a quadrant, and \(p_{m,r\mid d}\) its posterior
+probability. Portfolio artifacts use rebalance index \(t\), return vector
+\(\mathbf x_t\), pretrade and target weights \(\mathbf w_t^{-}\) and
+\(\mathbf w_t\), moments \(\boldsymbol\mu_t\) and
+\(\boldsymbol\Sigma_t\), and realized cost \(K_t\). Literal field names and
+paths appear in backticks.
 
-| Component | FRED/ALFRED series | Release | Earliest vintage used | Axis | Frozen transformation |
-|---|---|---:|---|---|---|
-| `payrolls` | `PAYEMS` | 50 | 1990-01-01 global floor | Growth | Same-vintage level difference |
-| `industrial_production` | `INDPRO` | 13 | 1990-01-01 global floor | Growth | Same-vintage monthly log change |
-| `consumer_activity` | `PCEC96` | 54 | 1990-01-01 global floor | Growth | Same-vintage monthly log change |
-| `unemployment_rate` | `UNRATE` | 50 | 1990-01-01 global floor | Growth | Negative same-vintage level difference |
-| `core_cpi` | `CPILFESL` | 10 | 1996-12-12 | Inflation | Same-vintage monthly log change |
-| `core_pce` | `PCEPILFE` | 54 | 2000-08-01 | Inflation | Same-vintage monthly log change |
-| `producer_prices` | `PPILFE`, then `WPSFD4131` | 46 | 1996-12-11; 2015-03-13 | Inflation | Same-vintage monthly log change |
-| `average_hourly_earnings` | `AHETPI` | 50 | 1999-08-06 | Inflation | Same-vintage monthly log change |
+## Deterministic regime data
 
-All series are monthly and seasonally adjusted. The primary FRED API provider
-uses output type 4 to identify series-specific initial-release dates, then uses
-output type 2 to retrieve full level snapshots at those dates. The retained
-keyless provider instead gets candidate dates from the associated release
-family's ALFRED calendar and retrieves snapshots from the historical graph CSV
-endpoint. A release-family calendar can include a date on which another series
-changed; this is harmless because the extractor selects the earliest dated
-snapshot containing the target observation.
+Configuration:
+[`m01_deterministic_composite.yaml`](../../../configs/models/m01_deterministic_composite.yaml)
 
-At the first selected archive snapshot, only the latest visible reference
-period is eligible. Older periods exposed by that snapshot are archive-bootstrap
-history rather than first releases. This policy is recorded as
-`archive_start_latest_only` and its exclusions are counted per raw matrix in the
-deterministic manifest.
+Manifest:
+[`m01_deterministic_composite.json`](../../../data/manifests/m01_deterministic_composite.json)
 
-Responses are requested in bounded vintage batches, validated against the exact
-requested vintage set, and merged into a deterministic normalized ZIP cache.
-The cache is not a byte-for-byte provider response.
+| Artifact | Location | Core contract |
+|---|---|---|
+| `first_release_components_long.csv` | `data/processed/m01_deterministic_composite/` | One component/reference-month row with `series_id`, `release_date`, same-vintage levels, transformation, value, lag, and source |
+| `composite_features_and_regimes.csv` | `data/processed/m01_deterministic_composite/` | Component z-scores, raw and smoothed axis scores, `regime_id`, `label_available_at`, and `data_status` |
+| `regime_history.csv` | `results/published/m01_deterministic_composite/` | Compact public score, regime, availability, and status history |
+| `latest_confirmed.json` | `results/published/m01_deterministic_composite/` | Latest fully classified month and scores |
 
-## `first_release_components_long.csv`
+The principal regime fields are:
 
 | Field | Meaning |
 |---|---|
-| `reference_month` | Month the observation measures, normalized to month start |
-| `component` | Stable semantic component name |
-| `series_id` | Provider series identifier used for that row |
-| `release_date` | Earliest selected point-in-time vintage containing the current month |
-| `current_value` | Current-month level in that first-release vintage |
-| `previous_value_as_of_release` | Prior-month level in the same vintage |
-| `transform` | `difference`, `negative_difference`, or `log_difference` |
-| `transformed_value` | Frozen first-release monthly feature |
-| `release_lag_days` | Calendar days from reference month end to release date |
-| `source_url` | Public, credential-free FRED series page |
-
-## `composite_features_and_regimes.csv`
-
-For each component `k`:
-
-- `{k}_transformed`: frozen monthly feature;
-- `{k}_z`: strictly lagged expanding z-score.
-
-Axis and label fields:
-
-| Field | Meaning |
-|---|---|
-| `growth_raw` | Equal-weight mean of four growth z-scores |
-| `inflation_raw` | Equal-weight mean of four inflation z-scores |
-| `growth_smoothed` | Trailing three-month growth composite |
-| `inflation_smoothed` | Trailing three-month inflation composite |
-| `label_available_at` | Latest release date among every component observation required by the expanding standardization history and trailing three-month composite; computed cumulatively through the reference month |
+| `reference_month` | Economic month, normalized to month start |
+| `growth_raw`, `inflation_raw` | Equal-weight four-component axis scores |
+| `growth_smoothed`, `inflation_smoothed` | Trailing three-month Model 01 scores |
 | `regime_id` | Stable quadrant identifier |
-| `regime_label` | Human-readable regime name |
-| `data_status` | `classified`, `missing_component_feature`, or `unavailable_trailing_window` in the public history |
+| `label_available_at` | First date on which every prerequisite was available |
+| `data_status` | Classification or explicit unavailable reason |
 
-## `transition_pairs.csv`
+## Transition data
 
-`data/processed/m01_deterministic_composite/transition_pairs.csv` is the
-pair-level audit trail used to learn the transition matrix. It contains every
-adjacent row pair considered by the transition build, including exclusions.
+Configuration:
+[`m01_deterministic_composite_transition.yaml`](../../../configs/models/m01_deterministic_composite_transition.yaml)
 
-| Field | Meaning |
+| Artifact | Location | Core contract |
+|---|---|---|
+| `transition_pairs.csv` | `data/processed/m01_deterministic_composite/` | Every adjacent candidate pair, label dates, inclusion flag, and exclusion reason |
+| `transition_model.json` | `results/published/m01_deterministic_composite/` | State order, cutoff, counts, Dirichlet parameters, posterior-predictive matrix, intervals, hashes, and diagnostics |
+| `transition_matrix.csv` | `results/published/m01_deterministic_composite/` | Long-form 16-cell view of counts, probabilities, and intervals |
+| `latest_transition_prior.json` | `results/published/m01_deterministic_composite/` | Transition-only prior for the month after the latest eligible confirmed state |
+
+Consumers must use the serialized `state_order`; they must not infer matrix
+position from alphabetical ordering. `mle_probability` is diagnostic.
+`posterior_predictive_probability` is the production transition law.
+
+## Leading-evidence data
+
+Configuration:
+[`m01_non_defining_release_evidence.yaml`](../../../configs/models/m01_non_defining_release_evidence.yaml)
+
+Manifest:
+[`m01_non_defining_release_evidence.json`](../../../data/manifests/m01_non_defining_release_evidence.json)
+
+All files live under
+`data/processed/m01_non_defining_release_evidence/`.
+
+| Artifact | Core contract |
 |---|---|
-| `source_reference_month` | Earlier reference month in the candidate pair |
-| `destination_reference_month` | Later reference month in the candidate pair |
-| `source_regime_id` | Deterministic regime ID for the source month, when available |
-| `destination_regime_id` | Deterministic regime ID for the destination month, when available |
-| `source_label_available_at` | Date on which the source label became knowable |
-| `destination_label_available_at` | Date on which the destination label became knowable |
-| `pair_available_at` | Later of the two label-availability dates |
-| `included` | Whether the pair contributes to the fitted count matrix |
-| `exclusion_reason` | Empty for an included pair; otherwise the failed eligibility rule |
+| `first_release_observations.csv` | Acquired first appearances, release/reference dates, values, provider, lag, and feature eligibility |
+| `non_defining_release_events.csv` | Full long event table, including warm-up and unusable rows |
+| `non_defining_release_features.csv` | Available-only feature subset consumed by inference |
 
-A pair is included only if the reference months are exactly one calendar month
-apart, both regimes are nonmissing, and both labels are available by the
-knowledge cutoff. A missing block is never bridged. The audit table is a local
-processed artifact and is ignored by Git.
+Stable event fields include `event_id`, `event_group_id`, `release_block`,
+`release_date`, `reference_date`, `reference_month`, `feature_name`,
+`series_id`, `transformed_value`, `feature_value`, and `feature_status`.
+Claims rows additionally retain expanding AR counts, coefficients, forecasts,
+and innovations.
 
-## `transition_model.json`
+## Bayesian-filter data
 
-`results/published/m01_deterministic_composite/transition_model.json` is the
-authoritative machine-readable transition artifact. The independently hashed
-stage configuration is
-`configs/models/m01_deterministic_composite_transition.yaml`; transition
-settings are not hidden inside the deterministic data configuration. Its
-schema contains:
+Configuration:
+[`m01_event_driven_bayesian_filter.yaml`](../../../configs/models/m01_event_driven_bayesian_filter.yaml)
 
-| Field or block | Meaning |
+Manifest:
+[`m01_event_driven_bayesian_filter.json`](../../../data/manifests/m01_event_driven_bayesian_filter.json)
+
+Detailed files under `data/processed/m01_bayesian_filter/` are:
+
+| Artifact | Core contract |
 |---|---|
-| `schema_version` | Version of this artifact's serialization contract |
-| `model_id` | Stable owning model ID, `m01_deterministic_composite` |
-| `stage_id` | Stable transition-stage identifier, `fixed_first_order_transition` |
-| `generated_at_utc` | Build timestamp; distinct from the information cutoff |
-| `knowledge_cutoff` | Latest date on which an input label may be known for this fit |
-| `state_order` | Frozen row and column order, with stable regime IDs and labels |
-| `source` | Regime-history path, SHA-256, and row count |
-| `configuration` | Exact transition-configuration path and SHA-256 |
-| `transition_specification` | First-order and time-homogeneous flags, expanding-window rule, $\alpha=0.5$, and credible-interval level |
-| `diagnostics` | History and adjacent-pair counts, included transitions, exclusions by reason, and latest eligible destination month |
-| `counts` | $4\times4$ nested matrix of eligible $N_{ij}$ counts |
-| `mle_probabilities` | Nested unsmoothed diagnostic matrix $N_{ij}/N_i$; not the production transition law |
-| `posterior_parameters` | Nested matrix of Dirichlet parameters $N_{ij}+0.5$ |
-| `posterior_predictive` | Nested Dirichlet-smoothed matrix used by Model 01 |
-| `marginal_credible_intervals` | Interval level, lower and upper nested matrices, and interpretation |
-| `published_files` | Paths of the matrix CSV and latest transition-only prior published with the model artifact |
+| `checkpoint_index.csv` | Saved state identity, information date, phase, path months, associated event/confirmation, and normalization |
+| `joint_path_checkpoints.csv.gz` | Exactly 256 path-probability rows per checkpoint |
+| `marginal_checkpoints.csv` | Four quadrant marginals for each path coordinate and next-month transition forecast |
+| `event_update_audit.csv` | Event status, fit identity, likelihoods, prior/posterior marginals, and update diagnostics |
+| `likelihood_fit_audit.csv` | Causal counts, means, covariance, Student-\(t\) shape, and numerical checks |
+| `forecast_predictions.csv` | Forecasts, eventual labels, and explicit scoring eligibility |
+| `evaluation_metrics.csv`, `calibration_bins.csv` | Proper scores, classification metrics, entropy, and reliability inputs |
+| `sensitivity_specifications.csv`, `sensitivity_metrics.csv` | Prespecified one-at-a-time variants and matched results |
 
-Matrices are accompanied by `state_order`; their positional indices must never
-be interpreted without it. The raw MLE may contain zero probabilities and is
-published only as a diagnostic. The `posterior_predictive` block is the fitted
-transition law.
+Public counterparts under `results/published/m01_bayesian_filter/` are
+[`latest_posterior.json`](../../../results/published/m01_bayesian_filter/latest_posterior.json),
+[`evaluation_summary.json`](../../../results/published/m01_bayesian_filter/evaluation_summary.json),
+and
+[`sensitivity_metrics.csv`](../../../results/published/m01_bayesian_filter/sensitivity_metrics.csv).
 
-## `transition_matrix.csv`
+## ETF and allocation data
 
-`results/published/m01_deterministic_composite/transition_matrix.csv` is a
-long-form, human-reviewable view with 16 rows, one for every directed state
-pair.
-
-| Field | Meaning |
-|---|---|
-| `from_regime_id` | Stable origin regime ID |
-| `from_regime_label` | Human-readable origin regime label |
-| `to_regime_id` | Stable destination regime ID |
-| `to_regime_label` | Human-readable destination regime label |
-| `transition_count` | Eligible raw count $N_{ij}$ |
-| `from_row_total` | Total eligible outgoing transitions $N_i$ |
-| `mle_probability` | Unsmoothed diagnostic probability |
-| `posterior_parameter` | Dirichlet posterior parameter $N_{ij}+0.5$ |
-| `posterior_predictive_probability` | Production probability $(N_{ij}+0.5)/(N_i+2)$ |
-| `credible_interval_level` | Marginal interval mass, fixed at 0.95 |
-| `credible_interval_lower` | Lower endpoint of the marginal 95% credible interval |
-| `credible_interval_upper` | Upper endpoint of the marginal 95% credible interval |
-
-Long form avoids unlabeled positional matrices and makes every probability easy
-to review or compare across builds.
-
-## `latest_transition_prior.json`
-
-`results/published/m01_deterministic_composite/latest_transition_prior.json`
-contains the transition-only prior for the month immediately after the latest
-eligible confirmed regime.
-
-| Field | Meaning |
-|---|---|
-| `schema_version` | Version of the prior serialization contract |
-| `model_id` | Owning Model 01 ID |
-| `stage_id` | `fixed_first_order_transition` |
-| `status` | `transition_only_prior` |
-| `knowledge_cutoff` | Information date used to fit the matrix and select the conditioning label |
-| `source_reference_month` | Latest eligible confirmed reference month |
-| `target_reference_month` | Calendar month immediately after the source month |
-| `conditioning_regime_id` | Confirmed deterministic source regime ID |
-| `conditioning_regime_label` | Human-readable source label |
-| `probabilities` | Four ordered destination records containing regime ID, label, and probability |
-| `probability_sum` | Explicit normalization diagnostic |
-| `interpretation` | Machine-readable warning that no event likelihood has been applied |
-
-This file is one posterior-predictive matrix row. It is not a four-month joint
-distribution and does not incorporate event-level likelihoods, market data, or
-current-month release evidence. It must not be described as a Bayesian
-posterior or an investable recommendation.
-
-## Publication outputs
-
-`results/published/m01_deterministic_composite/regime_history.csv` contains only
-axis scores, deterministic labels, availability dates, and explicit data-status
-flags. It excludes raw provider levels and retains the four unavailable months
-from October 2025 through January 2026. `latest_confirmed.json` is a compact
-machine-readable snapshot of the newest fully classified reference month.
-
-The transition build publishes `transition_model.json`,
-`transition_matrix.csv`, and `latest_transition_prior.json` alongside those
-regime outputs. The first is the authoritative specification and fit summary,
-the second is a reviewable cell-level representation, and the third is an
-explicitly transition-only next-month prior.
-
-## Bayesian-filter artifacts
-
-The likelihood and filter stage is defined in
-[`bayesian_filter.md`](bayesian_filter.md) and writes local audit tables under
-`data/processed/m01_bayesian_filter/`.
-
-### `checkpoint_index.csv`
-
-Each row identifies one baseline state snapshot. Important fields include the
-checkpoint and parent IDs, information date, within-day phase, checkpoint type,
-four-month anchor and coordinates, associated event or confirmation IDs,
-transition-training cutoff, included transition-pair count, joint probability
-sum, normalization error, and whether leading evidence was enabled.
-
-### `joint_path_checkpoints.csv.gz`
-
-Every checkpoint has exactly 256 rows. The four `month_*` columns identify the
-path coordinates, the four `regime_*` columns identify one candidate state
-path in canonical order, and `probability` stores its normalized mass.
-
-### `marginal_checkpoints.csv`
-
-This long table contains the four-state marginal for each retained path month
-and an additional one-month transition forecast. `relative_month` is -3 through
-0 for path coordinates and 1 for the transition forecast. Entropy, MAP regime,
-and MAP probability are repeated as explicit diagnostics.
-
-### `event_update_audit.csv`
-
-One row represents one release vector. It records block, event IDs, release and
-reference dates, target path axis, causal training count, fit or skip status,
-four regime log likelihoods when applied, prior and posterior marginals, the
-atomic day's predictive normalizer, entropy change, and KL divergence.
-
-### `likelihood_fit_audit.csv`
-
-Each distinct causal block fit records its cutoff, complete-vector and regime
-counts, pooled and shrunken means, shared covariance, Student-t shape matrix,
-Ledoit-Wolf or sensitivity shrinkage, residual-scale multiplier, and minimum
-covariance eigenvalue. Nested numeric objects are deterministic JSON strings.
-
-### Forecast and evaluation tables
-
-`forecast_predictions.csv` stores fixed checkpoint and ICSA-release forecasts
-for the baseline, transition-only model, and every sensitivity specification.
-It includes eventual truth, target availability, and an explicit evaluation
-eligibility reason. `evaluation_metrics.csv` and `calibration_bins.csv` contain
-paired proper scores, hard-label diagnostics, axis scores, entropy, transition-
-only skill, and both top-label and classwise reliability tables.
-
-`sensitivity_specifications.csv` freezes every one-at-a-time alternative;
-`sensitivity_metrics.csv` records the corresponding matched-sample results.
-The tracked manifest hashes every local artifact.
-
-Small public outputs live under `results/published/m01_bayesian_filter/`:
-
-- `latest_posterior.json` contains four path marginals and a next-month
-  transition forecast with confirmation status;
-- `evaluation_summary.json` contains metric definitions and fixed-checkpoint
-  baseline comparisons;
-- `sensitivity_metrics.csv` contains the full published sensitivity summary.
-
-`data/manifests/m01_deterministic_composite.json` records the configuration
-hash, raw ZIP hashes, coverage, generated-file paths and hashes, requested and
-selected providers, the provider associated with each cache, and whether each
-matrix was newly downloaded or reused. Credentials and credential-derived
-identifiers are excluded.
-
-## ETF market-data artifacts
-
-The Yahoo Finance snapshot is independent of the macro provider and is frozen
-by `data/manifests/us_cross_asset_etf_universe_v1.json`. The requested interval
-is 1 January 2008 through 18 July 2026, with the last observed US session on
-17 July 2026.
-
-| Artifact | Contract |
-|---|---|
-| `etf_daily_prices_long.csv` | One ticker/session row with raw and adjustment-consistent open/close fields used by execution and marking |
-| `etf_daily_total_returns_wide.csv` | Adjusted-close daily total returns in ticker-wide form |
-| `etf_monthly_total_returns_wide.csv` | Completed calendar-month adjusted total returns in ticker-wide form |
-| `etf_corporate_actions.csv` | Provider dividend and split events retained for audit |
-| `us_cross_asset_etf_universe_v1.json` | Retrieval cutoff, row counts, raw/processed hashes, adjustment tests, and provider caveats |
-
+The market-data manifest is
+[`us_cross_asset_etf_universe_v1.json`](../../../data/manifests/us_cross_asset_etf_universe_v1.json).
 The strategy uses `SPY`, `IEF`, `TIP`, `HYG`, `BIL`, `GLD`, and `LQD`;
-`AGG` is benchmark-only. `DBC`, `UUP`, `TLT`, and `USO` remain in the acquired
-research universe but are not traded by frozen Model 01.
+`AGG` is benchmark-only.
 
-## Allocation and backtest artifacts
+Allocation configuration:
+[`m01_regime_allocation_backtest.yaml`](../../../configs/models/m01_regime_allocation_backtest.yaml)
 
-Local detailed artifacts live in
-`data/processed/m01_regime_allocation_backtest/`. Small public counterparts
-live in `results/published/m01_regime_allocation_backtest/`.
+Manifest:
+[`m01_regime_allocation_backtest.json`](../../../data/manifests/m01_regime_allocation_backtest.json)
 
-| Artifact | Meaning |
+Detailed files under
+`data/processed/m01_regime_allocation_backtest/` include:
+
+| Artifact | Core contract |
 |---|---|
-| `signal_table.csv` | Causal month-start posterior selected for each target month |
-| `holding_period_returns.csv` | Common adjusted-open-to-adjusted-open ETF returns and exact holding dates |
-| `regime_estimate_audit.csv` | Eligible return/label counts, pooled and regime means, shrunk means, and covariance inputs at every signal |
-| `optimizer_audit.csv` | Expected moments, pretrade estimate, solver outcome, costs, constraints, and feasibility residuals |
-| `monthly_weights.csv` | Long-form target weights for every method, including the incomplete latest target |
-| `monthly_strategy_returns.csv` | Gross return, realized turnover/cost, net return, and NAV accounting for complete holdings |
-| `daily_nav.csv.gz` | Pre-trade open, post-trade open, close, and terminal-open NAV checkpoints used for drawdown |
-| `performance_metrics.csv` | Full return, risk, drawdown, turnover, and cost metrics |
-| `comparison_uncertainty.csv` | Paired circular block-bootstrap comparisons with the posterior strategy |
-| `sensitivity_metrics.csv` | Frozen mean-shrinkage, volatility-cap, concentration-cap, and cost-policy variants |
-| `legacy_sharpe_audit.csv` | Causal same-regime observations and score-to-weight calculation for the legacy comparator |
+| `signal_table.csv` | Selected month-start posterior for each portfolio reference month |
+| `holding_period_returns.csv` | Common adjusted-open holding returns and dates |
+| `regime_estimate_audit.csv` | Eligible samples, conditional means, shrinkage, and covariance inputs |
+| `optimizer_audit.csv` | Moments, pretrade estimate, solver outcome, constraints, and feasibility |
+| `monthly_weights.csv` | Long-form targets by method |
+| `monthly_strategy_returns.csv` | Gross return, turnover, cost, net return, and NAV |
+| `daily_nav.csv.gz` | Pretrade open, post-trade open, close, and terminal-open NAV points |
+| `performance_metrics.csv` | Return, risk, drawdown, turnover, and cost metrics |
+| `comparison_uncertainty.csv` | Paired circular block-bootstrap comparisons |
+| `sensitivity_metrics.csv` | Prespecified policy variants |
 
-The tracked `m01_regime_allocation_backtest.json` manifest hashes the
-configuration, implementation files, upstream inputs, all detailed outputs,
-and all public summaries. `latest_allocation.json` may describe a target whose
-holding period is not yet complete; that target is explicitly excluded from
-performance until the next execution open exists.
+Public files under `results/published/m01_regime_allocation_backtest/` include
+[`latest_allocation.json`](../../../results/published/m01_regime_allocation_backtest/latest_allocation.json),
+[`backtest_summary.json`](../../../results/published/m01_regime_allocation_backtest/backtest_summary.json),
+[`performance_summary.csv`](../../../results/published/m01_regime_allocation_backtest/performance_summary.csv),
+[`monthly_returns.csv`](../../../results/published/m01_regime_allocation_backtest/monthly_returns.csv),
+[`monthly_weights.csv`](../../../results/published/m01_regime_allocation_backtest/monthly_weights.csv),
+[`comparison_uncertainty.csv`](../../../results/published/m01_regime_allocation_backtest/comparison_uncertainty.csv),
+and
+[`sensitivity_metrics.csv`](../../../results/published/m01_regime_allocation_backtest/sensitivity_metrics.csv).
+
+## Provenance and security
+
+Manifests record configuration, input, implementation, and output hashes where
+applicable. Raw and detailed processed data remain local research artifacts;
+compact publication files are tracked separately. Provider credentials are
+read from the environment and are never serialized into cache identities,
+manifests, URLs, or logs.

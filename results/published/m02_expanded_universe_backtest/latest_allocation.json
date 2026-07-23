@@ -1,0 +1,171 @@
+{
+  "execution_date": "2026-07-13T00:00:00",
+  "holding_period_complete": false,
+  "market_data_coverage": {
+    "first_date": "2008-01-02T00:00:00",
+    "identical_calendar": true,
+    "last_date": "2026-07-17T00:00:00",
+    "manifest": "data/manifests/us_cross_asset_etf_universe_v1.json",
+    "rows_per_ticker": 4664,
+    "ticker_count": 12
+  },
+  "model_id": "m02_soft_composite",
+  "optimizer_estimates": {
+    "pooled_mean_optimizer": {
+      "estimated_annualized_volatility": 0.09718288654365025,
+      "expected_weekly_return": 0.001675153637120345
+    },
+    "posterior_optimized": {
+      "estimated_annualized_volatility": 0.09832861811884672,
+      "expected_weekly_return": 0.0017163007190899911
+    }
+  },
+  "posterior": [
+    {
+      "probability": 0.261969745469979,
+      "regime_id": "growth_up_inflation_up"
+    },
+    {
+      "probability": 0.3457049357221775,
+      "regime_id": "growth_down_inflation_up"
+    },
+    {
+      "probability": 0.2292275634644496,
+      "regime_id": "growth_up_inflation_down"
+    },
+    {
+      "probability": 0.1630977553433938,
+      "regime_id": "growth_down_inflation_down"
+    }
+  ],
+  "posterior_refit": false,
+  "reference_week": "2026-07-13T00:00:00",
+  "schema_version": 1,
+  "signal_date": "2026-07-13T00:00:00",
+  "stage_id": "frozen_posterior_expanded_universe_backtest",
+  "status": "exploratory_research_output_not_investment_advice",
+  "targets": {
+    "equal_weight": [
+      {
+        "ticker": "SPY",
+        "weight": 0.08333333333333333
+      },
+      {
+        "ticker": "IEF",
+        "weight": 0.08333333333333333
+      },
+      {
+        "ticker": "TIP",
+        "weight": 0.08333333333333333
+      },
+      {
+        "ticker": "LQD",
+        "weight": 0.08333333333333333
+      },
+      {
+        "ticker": "HYG",
+        "weight": 0.08333333333333333
+      },
+      {
+        "ticker": "BIL",
+        "weight": 0.08333333333333333
+      },
+      {
+        "ticker": "GLD",
+        "weight": 0.08333333333333333
+      },
+      {
+        "ticker": "DBC",
+        "weight": 0.08333333333333333
+      },
+      {
+        "ticker": "UUP",
+        "weight": 0.08333333333333333
+      },
+      {
+        "ticker": "TLT",
+        "weight": 0.08333333333333333
+      },
+      {
+        "ticker": "USO",
+        "weight": 0.08333333333333333
+      },
+      {
+        "ticker": "AGG",
+        "weight": 0.08333333333333333
+      }
+    ],
+    "pooled_mean_optimizer": [
+      {
+        "ticker": "SPY",
+        "weight": 0.3499999999999996
+      },
+      {
+        "ticker": "LQD",
+        "weight": 0.19562250333633324
+      },
+      {
+        "ticker": "HYG",
+        "weight": 0.15000000000000094
+      },
+      {
+        "ticker": "GLD",
+        "weight": 0.24999999999999914
+      },
+      {
+        "ticker": "TLT",
+        "weight": 0.05437749666366712
+      }
+    ],
+    "posterior_optimized": [
+      {
+        "ticker": "SPY",
+        "weight": 0.3499999999999994
+      },
+      {
+        "ticker": "LQD",
+        "weight": 0.22645374210215566
+      },
+      {
+        "ticker": "HYG",
+        "weight": 0.15000000000000038
+      },
+      {
+        "ticker": "GLD",
+        "weight": 0.2499999999999996
+      },
+      {
+        "ticker": "DBC",
+        "weight": 0.0004454721909863822
+      },
+      {
+        "ticker": "TLT",
+        "weight": 0.023100785706858407
+      }
+    ],
+    "static_60_spy_40_agg": [
+      {
+        "ticker": "SPY",
+        "weight": 0.6
+      },
+      {
+        "ticker": "AGG",
+        "weight": 0.4
+      }
+    ]
+  },
+  "universe": [
+    "SPY",
+    "IEF",
+    "TIP",
+    "LQD",
+    "HYG",
+    "BIL",
+    "GLD",
+    "DBC",
+    "UUP",
+    "TLT",
+    "USO",
+    "AGG"
+  ]
+}

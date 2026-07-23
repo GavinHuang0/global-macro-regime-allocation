@@ -1,4 +1,4 @@
-# Model 02 existing-block attribution
+# Archived Model 02 existing-block attribution
 
 This document records the causal add-one and leave-one-out attribution of the
 non-defining evidence already used by `student_t_7_combined`. The experiment

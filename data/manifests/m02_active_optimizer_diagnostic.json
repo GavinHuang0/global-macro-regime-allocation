@@ -1,0 +1,240 @@
+{
+  "active_method": "pooled_relative_posterior_active_te100bp",
+  "active_weeks": 445,
+  "configuration": "configs/models/m02_active_optimizer_diagnostic.yaml",
+  "configuration_sha256": "7c8ca3e00cf2d7974bed7d177e8d342481a80e75915bf55fe0bbedd67448630e",
+  "credential_policy": "This offline diagnostic reads only hash-verified local artifacts and never reads credentials or downloads data.",
+  "frozen_posterior_signal": {
+    "path": "data/processed/m02_regime_allocation_backtest/signal_table.csv",
+    "refit": false,
+    "sha256": "8cb4d27056ec5b024ad5e2cbf4549429da98def25b8602e91275731e8046111f"
+  },
+  "frozen_upstream_manifest": {
+    "path": "data/manifests/m02_regime_allocation_backtest.json",
+    "sha256": "5821824dcfe6a82347d1df176467b74d0199cb7724bb08f5e07daf08801fbc4a"
+  },
+  "generated_at_utc": "2026-07-23T05:40:12.298609+00:00",
+  "implementation_files": [
+    {
+      "bytes": 46085,
+      "path": "src/regime_allocation/portfolio/m02_active_diagnostic.py",
+      "sha256": "5bc890bb63afea893b60ee662761558fb96371fd46992b914314dd6824c720d1"
+    },
+    {
+      "bytes": 22582,
+      "path": "src/regime_allocation/portfolio/m02_active_optimization.py",
+      "sha256": "b3820519cd65495b8e787601fd8e25739ef9256cf57285878acf0fb042640789"
+    },
+    {
+      "bytes": 1092,
+      "path": "src/regime_allocation/cli/build_m02_active_diagnostic.py",
+      "sha256": "6d30f3adda997da09225185b8bdcd949398947e0b61f950ed1bc4af965b36bda"
+    },
+    {
+      "bytes": 9149,
+      "path": "src/regime_allocation/portfolio/m02_estimation.py",
+      "sha256": "7a1036cfad44cc4216057b2c105ff44b59f7bada363c34bd13b94374ca64484c"
+    },
+    {
+      "bytes": 15801,
+      "path": "src/regime_allocation/portfolio/m02_weekly.py",
+      "sha256": "7bf542138fa2d809ac42255594dbce3f46406bc0f32180611b19ec75ab616f56"
+    },
+    {
+      "bytes": 72284,
+      "path": "src/regime_allocation/portfolio/m02_pipeline.py",
+      "sha256": "49990e08dbf9cfc443f5bc38199f7a38ff34b0b2b29e27fa01fc77a9c557d07c"
+    },
+    {
+      "bytes": 24333,
+      "path": "src/regime_allocation/portfolio/estimation.py",
+      "sha256": "8d3b777b17428b4cf35f9d057d3fb8b0fc52e714a0a63d15e4e83d921729095b"
+    },
+    {
+      "bytes": 45668,
+      "path": "src/regime_allocation/portfolio/pipeline.py",
+      "sha256": "0ff0070f94bd28ef0ae54a33b3d4497cfd9a5e5864d241af45cc02d04da131d8"
+    },
+    {
+      "bytes": 28425,
+      "path": "src/regime_allocation/backtest/engine.py",
+      "sha256": "92661e784249017827e4ae6ae3f972a08f20817b957f02aa82c52fb94e4ec2a3"
+    },
+    {
+      "bytes": 14575,
+      "path": "src/regime_allocation/backtest/metrics.py",
+      "sha256": "5bb992afc4cb7fc01b8d0404b5715fa488f22b611fe73de59073360d5027e293"
+    }
+  ],
+  "inputs": [
+    {
+      "bytes": 4430,
+      "path": "configs/models/m02_active_optimizer_diagnostic.yaml",
+      "sha256": "7c8ca3e00cf2d7974bed7d177e8d342481a80e75915bf55fe0bbedd67448630e"
+    },
+    {
+      "bytes": 13132,
+      "path": "data/manifests/m02_regime_allocation_backtest.json",
+      "sha256": "5821824dcfe6a82347d1df176467b74d0199cb7724bb08f5e07daf08801fbc4a"
+    },
+    {
+      "bytes": 182931,
+      "path": "data/processed/m02_regime_allocation_backtest/signal_table.csv",
+      "sha256": "8cb4d27056ec5b024ad5e2cbf4549429da98def25b8602e91275731e8046111f"
+    },
+    {
+      "bytes": 8496629,
+      "path": "data/processed/m02_regime_allocation_backtest/weekly_weights.csv",
+      "sha256": "3a8682d0f9927204b086fc53d42a09ccb922ff8f6422b6d1fa775cdf28b0fc36"
+    },
+    {
+      "bytes": 3003106,
+      "path": "data/processed/m02_regime_allocation_backtest/optimizer_audit.csv",
+      "sha256": "a411c976ac740735c59ffc463922b482818e0261d28dfe50f021a8e98d04b303"
+    },
+    {
+      "bytes": 10573889,
+      "path": "data/processed/us_cross_asset_etf_universe_v1/etf_daily_prices_long.csv",
+      "sha256": "7cbd321c5af2662065edfc3a5c3c1cdb6101bda10de7862bc09c09041bdcb7f1"
+    },
+    {
+      "bytes": 126386,
+      "path": "data/processed/m02_soft_composite/composite_scores.csv",
+      "sha256": "e49033e74d711a886267d195cf01f03778bed00534d02f47e96cea91d73eb1eb"
+    }
+  ],
+  "model_id": "m02_soft_composite",
+  "oracle_method": "oracle_regime_pooled_relative_active_te100bp",
+  "oracle_primary_weeks": 405,
+  "oracle_triggered": true,
+  "output_files": [
+    {
+      "bytes": 659068,
+      "path": "data/processed/m02_active_optimizer_diagnostic/active_weekly_weights.csv",
+      "sha256": "b35235162936a31b587362be88a088e2db9d68bfd90ded9c3e5f39726928d654"
+    },
+    {
+      "bytes": 276920,
+      "path": "data/processed/m02_active_optimizer_diagnostic/active_weekly_returns.csv",
+      "sha256": "77ef5447008082516e95acd868b9816ddc5d91a8d77c1be37063d89744f21471"
+    },
+    {
+      "bytes": 126010,
+      "path": "data/processed/m02_active_optimizer_diagnostic/active_daily_nav.csv.gz",
+      "sha256": "6ff045c4165d04985a8ecb191c5f89de61f9fcdc34588de785257160536991b6"
+    },
+    {
+      "bytes": 565622,
+      "path": "data/processed/m02_active_optimizer_diagnostic/active_optimizer_audit.csv",
+      "sha256": "433aa20c5ec671fd87cf79e12b8a46de93182c7984f814a47805bc7145d28508"
+    },
+    {
+      "bytes": 1475,
+      "path": "data/processed/m02_active_optimizer_diagnostic/active_performance.csv",
+      "sha256": "1f4ba2c6846968ec59c38628d4d81680aaba223f7801bd214a52f92998924243"
+    },
+    {
+      "bytes": 920,
+      "path": "data/processed/m02_active_optimizer_diagnostic/active_uncertainty.csv",
+      "sha256": "fe648d5e3e9ccb0ab8a5dfb9a27538b7ea35de2c97719816dab20ab8dcaa7e1a"
+    },
+    {
+      "bytes": 659068,
+      "path": "results/published/m02_active_optimizer_diagnostic/active_weekly_weights.csv",
+      "sha256": "b35235162936a31b587362be88a088e2db9d68bfd90ded9c3e5f39726928d654"
+    },
+    {
+      "bytes": 276920,
+      "path": "results/published/m02_active_optimizer_diagnostic/active_weekly_returns.csv",
+      "sha256": "77ef5447008082516e95acd868b9816ddc5d91a8d77c1be37063d89744f21471"
+    },
+    {
+      "bytes": 1475,
+      "path": "results/published/m02_active_optimizer_diagnostic/active_performance.csv",
+      "sha256": "1f4ba2c6846968ec59c38628d4d81680aaba223f7801bd214a52f92998924243"
+    },
+    {
+      "bytes": 920,
+      "path": "results/published/m02_active_optimizer_diagnostic/active_uncertainty.csv",
+      "sha256": "fe648d5e3e9ccb0ab8a5dfb9a27538b7ea35de2c97719816dab20ab8dcaa7e1a"
+    },
+    {
+      "bytes": 52085,
+      "path": "data/processed/m02_active_optimizer_diagnostic/oracle_truth_audit.csv",
+      "sha256": "84371311f4e3fcd7fb20718d105c1700f804c1ad636915035ac3a79dfbcde76f"
+    },
+    {
+      "bytes": 690210,
+      "path": "data/processed/m02_active_optimizer_diagnostic/oracle_weekly_weights.csv",
+      "sha256": "a4ec7027b58ffde9b047f86505032ffba22635ec4820c0a051a7d36808e3c18e"
+    },
+    {
+      "bytes": 342926,
+      "path": "data/processed/m02_active_optimizer_diagnostic/oracle_weekly_returns.csv",
+      "sha256": "6f8419a5a48e6736993bf4be643ebd3bf43daf0192c9061627e73964c1c1d3c3"
+    },
+    {
+      "bytes": 153307,
+      "path": "data/processed/m02_active_optimizer_diagnostic/oracle_daily_nav.csv.gz",
+      "sha256": "3f072f395c18079b7e6856d6cba1812930d8f049ddce1e0beef0593caa40e1ef"
+    },
+    {
+      "bytes": 530386,
+      "path": "data/processed/m02_active_optimizer_diagnostic/oracle_optimizer_audit.csv",
+      "sha256": "e3c39123620508e38c367fa24e2b8e5cf274fc0bd9672c15214370ebb6e44cfa"
+    },
+    {
+      "bytes": 1891,
+      "path": "data/processed/m02_active_optimizer_diagnostic/oracle_performance.csv",
+      "sha256": "ae6e3497cc8955b3911dc536eb854fdce87abd235df08c6ad21b3c86db4c98ce"
+    },
+    {
+      "bytes": 1525,
+      "path": "data/processed/m02_active_optimizer_diagnostic/oracle_uncertainty.csv",
+      "sha256": "7f0ec591e0a17e94ddf1e5fa27c38fd0ab907ef0d3c9b1d981ccde4b3aa1b5f1"
+    },
+    {
+      "bytes": 724,
+      "path": "data/processed/m02_active_optimizer_diagnostic/oracle_regime_attribution.csv",
+      "sha256": "354c3a8337758c79457e3a45e77c4f8be9456b24882e1e7d80a1081d0dce257d"
+    },
+    {
+      "bytes": 52085,
+      "path": "results/published/m02_active_optimizer_diagnostic/oracle_truth_audit.csv",
+      "sha256": "84371311f4e3fcd7fb20718d105c1700f804c1ad636915035ac3a79dfbcde76f"
+    },
+    {
+      "bytes": 690210,
+      "path": "results/published/m02_active_optimizer_diagnostic/oracle_weekly_weights.csv",
+      "sha256": "a4ec7027b58ffde9b047f86505032ffba22635ec4820c0a051a7d36808e3c18e"
+    },
+    {
+      "bytes": 342926,
+      "path": "results/published/m02_active_optimizer_diagnostic/oracle_weekly_returns.csv",
+      "sha256": "6f8419a5a48e6736993bf4be643ebd3bf43daf0192c9061627e73964c1c1d3c3"
+    },
+    {
+      "bytes": 1891,
+      "path": "results/published/m02_active_optimizer_diagnostic/oracle_performance.csv",
+      "sha256": "ae6e3497cc8955b3911dc536eb854fdce87abd235df08c6ad21b3c86db4c98ce"
+    },
+    {
+      "bytes": 1525,
+      "path": "results/published/m02_active_optimizer_diagnostic/oracle_uncertainty.csv",
+      "sha256": "7f0ec591e0a17e94ddf1e5fa27c38fd0ab907ef0d3c9b1d981ccde4b3aa1b5f1"
+    },
+    {
+      "bytes": 724,
+      "path": "results/published/m02_active_optimizer_diagnostic/oracle_regime_attribution.csv",
+      "sha256": "354c3a8337758c79457e3a45e77c4f8be9456b24882e1e7d80a1081d0dce257d"
+    },
+    {
+      "bytes": 20594,
+      "path": "results/published/m02_active_optimizer_diagnostic/diagnostic_summary.json",
+      "sha256": "185a7b3a512c187fc44372cbe2b33f76a7ab55262fa8a1c8cbec55f6a497edab"
+    }
+  ],
+  "schema_version": 1,
+  "significance_gate_passed": false,
+  "stage_id": "benchmark_relative_active_optimizer_diagnostic"
+}

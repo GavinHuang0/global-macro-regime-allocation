@@ -1,4 +1,4 @@
-# Model 02 evidence-block experiments
+# Archived Model 02 evidence-block experiments
 
 This document records six point-in-time evidence changes tested around the
 selected `student_t_7_combined` inference model. The experiment does **not**

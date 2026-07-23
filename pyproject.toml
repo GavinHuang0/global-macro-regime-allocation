@@ -35,6 +35,7 @@ build-m02-existing-block-attribution = "regime_allocation.cli.build_m02_existing
 build-m02-feature-revision = "regime_allocation.cli.build_m02_feature_revision:main"
 build-m02-current-baseline = "regime_allocation.cli.build_m02_current_baseline:main"
 build-m02-backtest = "regime_allocation.cli.build_m02_backtest:main"
+build-m02-expanded-universe-backtest = "regime_allocation.cli.build_m02_expanded_universe_backtest:main"
 
 [project.optional-dependencies]
 dev = [

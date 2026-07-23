@@ -1,5 +1,10 @@
 # Model 01 closure audit
 
+> Archived development record. This document explains checks and corrections
+> made while closing Model 01; it is not part of the current model
+> specification. Current contracts are indexed in
+> [`docs/models/m01_deterministic_composite/README.md`](../../models/m01_deterministic_composite/README.md).
+
 ## Scope and outcome
 
 This audit closes the frozen Model 01 snapshot dated 18 July 2026. It reviewed

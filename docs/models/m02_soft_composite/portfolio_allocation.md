@@ -1,138 +1,220 @@
-# Model 02 weekly portfolio allocation and backtest specification
+# Model 02 promoted weekly allocation
 
-## Scope
+## Status and scope
 
-This stage applies the promoted Model 02 baseline,
-`student_t_7_reduced_core`, to the frozen Model 01 portfolio policy. Its
-machine-readable contract is
+`posterior_optimized` is the current promoted Model 02 allocation method. It
+consumes the promoted `student_t_7_reduced_core` inference probabilities and
+does not refit or alter the inference model. The allocation is published for
+continued research use and may be revised in a future version; Model 02 is not
+frozen.
+
+The machine-readable contract is
 [`m02_regime_allocation_backtest.yaml`](../../../configs/models/m02_regime_allocation_backtest.yaml),
-and its stage ID is `weekly_posterior_regime_allocation_backtest`.
+and the stage ID is `weekly_posterior_regime_allocation_backtest`.
 
-The intended experiment moves the forecast, rebalance, and holding clocks to
-the same weekly frequency while preserving frequency-equivalent Model 01
-policy choices. The seven strategy ETFs, benchmark-only `AGG`, Ledoit-Wolf
-covariance, 10% ex-ante volatility cap, position and group caps,
-five-basis-point one-way cost, comparators, and one-at-a-time sensitivities are
-otherwise identical to Model 01. The 60-month minimum and 24-pseudo-month mean
-shrinkage become 260 completed weeks and 104 pseudo-weeks, respectively.
+The macro state remains monthly. The posterior is sampled weekly, while the
+return-estimation, rebalance, and holding periods are all one week. “Weekly
+allocation” therefore does not mean that the inference model forecasts a
+weekly macro regime.
 
-## Weekly causal signal and execution
+## Universe
 
-Each reference week is identified by its calendar Monday. The promoted filter
-is replayed causally and sampled on that Monday immediately after a deterministic
-month roll, when applicable, but before any same-day release, partial defining
-update, exact-score confirmation, or probability-map vintage. The probability
-map is restricted to information available strictly before the Monday signal.
+The optimizer trades seven US-listed ETFs:
 
-The target marginal is the newest month in Model 02's four-month joint state.
-The target trades at the first common adjusted open for all eight simulation
-assets in the Monday-anchored week and exits at the next week's first common
-adjusted open. A Monday holiday therefore delays execution to Tuesday without
-adding Monday releases to the saved signal. This is the weekly analogue of
-Model 01 retaining its first-calendar-day signal across a weekend or holiday.
+| ETF | Primary exposure | Maximum weight |
+|---|---|---:|
+| `SPY` | US large-cap equity | 35% |
+| `IEF` | Intermediate nominal Treasury duration | 50% |
+| `TIP` | Inflation-linked Treasury exposure | 40% |
+| `HYG` | High-yield corporate credit | 25% |
+| `BIL` | Treasury-bill and cash proxy | 100% |
+| `GLD` | Gold | 25% |
+| `LQD` | Investment-grade corporate credit | 40% |
 
-The ETF history begins partway through the Monday-anchored week of 31 December
-2007. That leading partial week is excluded from estimation rather than being
-treated as a complete weekly holding period.
+The group caps are 50% for `SPY` plus `HYG`, 50% for `HYG` plus `LQD`, and
+75% for `IEF` plus `TIP` plus `LQD`. `AGG` is available only to the static
+60/40 comparator.
 
-The first formal signal is 1 January 2018. The final week is published as a
-live research target when its next weekly execution open is unavailable, but
-it is excluded from every performance statistic.
+Provider-adjusted ETF prices are used as total-return proxies. They are not
+point-in-time price vintages and may change after provider corrections.
 
-## Return estimation and Model 02 labels
+## Weekly signal and execution
 
-Each estimator observation is the adjusted-open return from the first common
-session in one Monday-anchored week to the first common session in the next.
-The observation receives the hard regime label for the calendar month
-containing its Monday `reference_week`. A weekly observation enters a fit only
-when both its ending execution open and that month's exact-score label were
-available by the Sunday immediately before the current Monday signal. This
-dual-availability rule excludes both unfinished holdings and labels learned
-too late.
+Let $t$ index a Monday-anchored holding period, $m(t)$ be the calendar month
+containing that Monday, $d_t^{\mathrm{sig}}$ the Monday signal date, and
+$d_t^{\mathrm{exe}}$ the first common adjusted open in that week.
 
-Every fit requires at least 260 eligible labeled weeks. Each regime mean is
-shrunk toward the pooled weekly mean with 104 pseudo-weeks, the exact
-frequency equivalents of Model 01's 60-month minimum and 24 pseudo-months.
-The covariance is estimated from the same causally eligible weekly sample and
-annualized by 52.
-
-Model 02 does not publish hard regimes as its inference output. For this
-portfolio-only estimation layer, each completed exact composite score receives
-the quadrant implied by the signs of its growth and inflation scores; zero is
-assigned to the corresponding “up” side, matching Model 02's evaluation
-helper. The label becomes usable only on `score_available_at`. These labels
-train historical return moments; the current allocation always integrates the
-full promoted soft probability vector and never replaces it with a MAP state.
-
-## Optimization, comparators, and costs
-
-At every weekly signal, the posterior-weighted shrunk weekly means and shared
-within-regime plus between-regime covariance enter the same long-only Model 01
-optimizer. Its return term is the expected one-week portfolio return, and its
-turnover penalty is the estimated cost of the single rebalance needed to reach
-the candidate target. All individual and group caps, SLSQP tolerances, and the
-fallback order—feasible pretrade holdings, constrained minimum variance, then
-all `BIL`—are unchanged.
-
-Pretrade target formation uses the previous weekly execution open and the last
-adjusted close strictly before the Monday signal. Realized accounting drifts
-the prior holdings to the actual new execution open. The cost rate is
+The inference replay is sampled immediately after a deterministic month roll,
+when applicable, and before every same-day release, partial defining update,
+exact-score observation, or probability-map update. The allocation probability
+vector is
 
 $$
-K_t=\sum_a 0.0005\left|w_{t,a}-w_{t,a}^{-,\mathrm{exec}}\right|,
+\boldsymbol p_{m(t)\mid d_t^-}
+=\left(p_{m(t),r\mid d_t^-}\right)_{r\in\mathcal R},
 $$
 
-and the net weekly return is `(1 - K_t) * (1 + gross_return) - 1`. The initial
-formation trade is charged. Equal weight, legacy Sharpe-MAP, static 60/40, and
-the pooled-mean optimizer rebalance on the same weekly dates and pay the same
-realized costs.
+in the canonical quadrant order documented in
+[`inference.md`](inference.md). The $d_t^-$ cutoff means that no information
+published on the Monday signal date is used.
 
-### Exploratory pooled anchor
+The portfolio executes at $d_t^{\mathrm{exe}}$ and exits at
+$d_{t+1}^{\mathrm{exe}}$. A Monday market holiday therefore delays execution
+without adding Monday releases to the target. A live target whose next
+execution open is unavailable is published but excluded from performance.
 
-The published comparison also includes the derived target
-`pooled_anchor_posterior_25pct`:
+For asset $a$, the simple weekly holding return is
 
 $$
-w_t^{\mathrm{anchor}}
-=0.75w_t^{\mathrm{pooled}}+0.25w_t^{\mathrm{posterior}}.
+x_{t,a}
+=\frac{P_{a,d_{t+1}^{\mathrm{exe}}}^{\mathrm{adj,open}}}
+       {P_{a,d_t^{\mathrm{exe}}}^{\mathrm{adj,open}}}-1.
 $$
 
-This construction leaves the original posterior and pooled-mean strategies
-unchanged. It is simulated as its own consolidated portfolio, with its own
-holdings drift between execution opens and its own trades to the next blended
-target. The same five-basis-point one-way cost is charged on that realized
-anchor turnover; its backtest is not a weighted average of the two source
-strategies' reported net returns.
+Missing execution prices are not forward-filled.
 
-As a convex combination of two feasible long-only targets, the anchor inherits
-the linear full-investment, asset-cap, and group-cap constraints. It is not a
-separate optimizer solution, however, and no 10% ex-ante volatility constraint
-has been independently audited for the blend under one common covariance
-estimate. The 25% posterior sleeve was introduced after reviewing the
-corrected same-history results. It is therefore exploratory, post-result, and
-non-promoted; it does not replace the corrected posterior baseline.
+## Causal return estimation
 
-## Evaluation and artifacts
+Each historical weekly return receives the retrospective quadrant implied by
+the signs of the completed Model 02 scores for $m(t)$. Exact zero belongs to
+the nonnegative side. This hard quadrant is used only to train return moments;
+the current allocation always integrates the full soft probability vector.
 
-Performance metrics use 52 periods per year. Paired uncertainty uses the same
-circular-block design and 10,000 resamples as Model 01, with 26-week blocks as
-the frequency-equivalent of six months. The selected baseline was promoted
-after same-history development, so the backtest is descriptive and is not an
-untouched holdout. The exploratory anchor receives paired comparisons against
-both the posterior baseline and pooled-mean ablation, but those intervals do
-not turn its post-result 25% sleeve into a prespecified test.
+A historical week enters a fit only when both its ending execution open and
+the completed score’s `score_available_at` date are available through the
+Sunday before the current Monday signal. Every fit requires at least 260 common
+labeled weeks.
 
-Detailed artifacts live in `data/processed/m02_regime_allocation_backtest/`.
-Public results live in `results/published/m02_regime_allocation_backtest/`, and
-[`m02_regime_allocation_backtest.json`](../../../data/manifests/m02_regime_allocation_backtest.json)
-hashes the promoted-baseline lineage, policy template, implementation, inputs,
-and outputs.
+Let $\overline{\boldsymbol\mu}_t$ be the pooled weekly mean,
+$\overline{\boldsymbol\mu}_{t,r}$ the sample mean for quadrant $r$, and
+$n_{t,r}$ its eligible count. The conditional mean uses 104 pooled
+pseudo-weeks:
 
-The principal limitations remain uncertain expected returns, mutable adjusted
-ETF history, a selected narrow universe, idealized opening execution, fixed
-costs without market impact or taxes, plug-in regime probabilities and return
-moments, and a finite sample with few independent macro cycles. Several weekly
-observations share each monthly hard label, so the larger observation count
-does not create an equivalent number of independent macro regimes. Weekly
-trading also creates more opportunities for target instability and cost
-accumulation.
+$$
+\widetilde{\boldsymbol\mu}_{t,r}
+=\frac{
+n_{t,r}\overline{\boldsymbol\mu}_{t,r}
++104\overline{\boldsymbol\mu}_t
+}{
+n_{t,r}+104
+}.
+$$
+
+Residuals around the unshrunk quadrant means produce one shared Ledoit–Wolf
+within-quadrant covariance $\boldsymbol C_t$. The posterior return moments are
+
+$$
+\boldsymbol\mu_t^{\mathrm{post}}
+=\sum_{r\in\mathcal R}
+p_{m(t),r\mid d_t^-}\widetilde{\boldsymbol\mu}_{t,r},
+$$
+
+$$
+\boldsymbol B_t^{\mathrm{post}}
+=\sum_{r\in\mathcal R}p_{m(t),r\mid d_t^-}
+\left(
+\widetilde{\boldsymbol\mu}_{t,r}-\boldsymbol\mu_t^{\mathrm{post}}
+\right)
+\left(
+\widetilde{\boldsymbol\mu}_{t,r}-\boldsymbol\mu_t^{\mathrm{post}}
+\right)^\top,
+$$
+
+$$
+\boldsymbol\Sigma_t^{\mathrm{week}}
+=\boldsymbol C_t+\boldsymbol B_t^{\mathrm{post}},
+\qquad
+\boldsymbol\Sigma_t^{\mathrm{ann}}
+=52\boldsymbol\Sigma_t^{\mathrm{week}}.
+$$
+
+The expected return in the objective remains in one-week units.
+
+## Optimization and costs
+
+Let $\mathbf w_t$ be the target and
+$\widehat{\mathbf w}_t^-$ the causal pretrade estimate formed from the
+previous execution open and the last adjusted close strictly before the Monday
+signal. The optimizer solves
+
+$$
+\max_{\mathbf w_t}
+\quad
+\left(\boldsymbol\mu_t^{\mathrm{post}}\right)^\top\mathbf w_t
+-\sum_a 0.0005
+\left|w_{t,a}-\widehat w_{t,a}^-\right|
+$$
+
+subject to full investment, long-only weights, the individual and group caps
+above, and
+
+$$
+\mathbf w_t^\top
+\boldsymbol\Sigma_t^{\mathrm{ann}}
+\mathbf w_t
+\le 0.10^2.
+$$
+
+The 10% annualized volatility ceiling constrains the causal covariance estimate;
+it does not guarantee realized volatility. SLSQP solutions are independently
+checked. The fallback order is feasible pretrade holdings, constrained minimum
+variance, then 100% `BIL`; the run fails if none is feasible.
+
+At the execution open, let $\mathbf w_t^{-,\mathrm{exe}}$ be the previous
+holdings after realized drift. The charged cost and net weekly return are
+
+$$
+K_t
+=\sum_a0.0005
+\left|w_{t,a}-w_{t,a}^{-,\mathrm{exe}}\right|,
+$$
+
+$$
+r_t^{\mathrm{net}}
+=(1-K_t)
+\left(1+\mathbf w_t^\top\mathbf x_t\right)-1.
+$$
+
+The initial formation trade is charged. Reported one-way turnover is half the
+$L^1$ traded notional.
+
+## Essential comparisons
+
+All comparators use the same weekly execution calendar and cost accounting:
+
+- `pooled_mean_optimizer` keeps the estimator, optimizer, covariance,
+  constraints, and costs but removes the current posterior from the return
+  moments;
+- `equal_weight` holds $1/7$ in each strategy ETF and rebalances weekly; and
+- `static_60_spy_40_agg` holds 60% `SPY` and 40% `AGG` and rebalances weekly.
+
+The pooled optimizer is the cleanest test of the posterior’s incremental
+allocation value because it changes the least.
+
+Performance uses 52 periods per year. Paired uncertainty uses 10,000 circular
+block-bootstrap resamples with 26-week blocks. These weekly settings are policy
+equivalents under the 12/52 annualization convention, not exact calendar
+equivalents of the Model 01 monthly settings.
+
+## Artifacts and limitations
+
+- [configuration](../../../configs/models/m02_regime_allocation_backtest.yaml)
+- [manifest](../../../data/manifests/m02_regime_allocation_backtest.json)
+- [latest allocation](../../../results/published/m02_regime_allocation_backtest/latest_allocation.json)
+- [performance summary](../../../results/published/m02_regime_allocation_backtest/performance_summary.csv)
+- [weekly returns](../../../results/published/m02_regime_allocation_backtest/weekly_returns.csv)
+- [weekly weights](../../../results/published/m02_regime_allocation_backtest/weekly_weights.csv)
+- [paired uncertainty](../../../results/published/m02_regime_allocation_backtest/comparison_uncertainty.csv)
+
+Rebuild from the repository root:
+
+```powershell
+python -m regime_allocation.cli.build_m02_backtest --project-root .
+```
+
+The main limitations are uncertain expected returns, repeated weekly
+observations sharing one monthly training quadrant, few independent macro
+cycles, a compact and overlapping ETF universe, mutable adjusted-price history,
+idealized opening execution, fixed costs without market impact or taxes, and
+plug-in inference and return parameters. The output is research, not investment
+advice.

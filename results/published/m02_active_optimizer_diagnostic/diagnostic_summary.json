@@ -1,0 +1,495 @@
+{
+  "active_optimizer": {
+    "annualized_total_volatility_cap": 0.1,
+    "annualized_tracking_error_cap": 0.01,
+    "asset_caps": {
+      "BIL": 1.0,
+      "GLD": 0.25,
+      "HYG": 0.25,
+      "IEF": 0.5,
+      "LQD": 0.4,
+      "SPY": 0.35,
+      "TIP": 0.4
+    },
+    "covariance": "causal_pooled_annualized_covariance",
+    "covariance_annualization_factor": 52.0,
+    "group_caps": {
+      "corporate_credit": {
+        "assets": [
+          "HYG",
+          "LQD"
+        ],
+        "maximum": 0.5
+      },
+      "equity_and_high_yield": {
+        "assets": [
+          "SPY",
+          "HYG"
+        ],
+        "maximum": 0.5
+      },
+      "rate_sensitive": {
+        "assets": [
+          "IEF",
+          "TIP",
+          "LQD"
+        ],
+        "maximum": 0.75
+      }
+    },
+    "incremental_expected_return": "posterior_minus_pooled",
+    "maximum_absolute_active_weight": 0.05,
+    "maximum_one_way_active_exposure": 0.1,
+    "method_id": "pooled_relative_posterior_active_te100bp",
+    "pooled_benchmark_method": "pooled_mean_optimizer",
+    "posterior_source_method": "posterior_optimized",
+    "replaces_promoted_baseline": false,
+    "role": "exploratory_not_promoted",
+    "solver": {
+      "fallback": "pooled_target",
+      "feasibility_tolerance": 1e-07,
+      "maximum_iterations": 2000,
+      "method": "SLSQP",
+      "tolerance": 1e-12
+    },
+    "transaction_cost": 0.0005
+  },
+  "active_performance": [
+    {
+      "annualized_cost_drag": 0.000295361213953349,
+      "annualized_one_way_turnover": 0.2688758230313814,
+      "annualized_volatility": 0.10503778623387233,
+      "average_one_way_turnover": 0.0051706889044496425,
+      "best_week": 0.10383794950772396,
+      "cagr": 0.09829384274557906,
+      "calmar_ratio": 0.4470595252859718,
+      "end_reference_week": "2026-07-06T00:00:00",
+      "gross_cagr": 0.09858920395953241,
+      "maximum_drawdown": -0.2198674610113791,
+      "maximum_one_way_turnover": 0.5,
+      "method": "pooled_mean_optimizer",
+      "positive_week_fraction": 0.604494382022472,
+      "sharpe_excess_bil": 0.709181878907595,
+      "sharpe_zero_rate": 0.9459723387596304,
+      "sortino_zero_rate": 1.4134858727242263,
+      "start_reference_week": "2018-01-01T00:00:00",
+      "sum_transaction_cost_rates": 0.0023009565624800906,
+      "total_return": 1.230780360761893,
+      "weeks": 445,
+      "worst_week": -0.11067539763709078
+    },
+    {
+      "annualized_cost_drag": 0.0002066715522086593,
+      "annualized_one_way_turnover": 0.18895246362555007,
+      "annualized_volatility": 0.09936053898145553,
+      "average_one_way_turnover": 0.0036337012235682707,
+      "best_week": 0.09889161411537661,
+      "cagr": 0.09358308589359732,
+      "calmar_ratio": 0.44821902862679536,
+      "end_reference_week": "2026-07-06T00:00:00",
+      "gross_cagr": 0.09378975744580598,
+      "maximum_drawdown": -0.2087887392472091,
+      "maximum_one_way_turnover": 0.5,
+      "method": "pooled_relative_posterior_active_te100bp",
+      "positive_week_fraction": 0.6,
+      "sharpe_excess_bil": 0.7005415473749171,
+      "sharpe_zero_rate": 0.9508637173931769,
+      "sortino_zero_rate": 1.4178537305933927,
+      "start_reference_week": "2018-01-01T00:00:00",
+      "sum_transaction_cost_rates": 0.0016169970444878804,
+      "total_return": 1.1502136646707122,
+      "weeks": 445,
+      "worst_week": -0.10710520231230769
+    },
+    {
+      "annualized_cost_drag": 0.0003077911804256761,
+      "annualized_one_way_turnover": 0.2807887934287509,
+      "annualized_volatility": 0.11622080141053281,
+      "average_one_way_turnover": 0.00539978448901444,
+      "best_week": 0.0936898226341234,
+      "cagr": 0.09595158249315006,
+      "calmar_ratio": 0.43573705257110046,
+      "end_reference_week": "2026-07-06T00:00:00",
+      "gross_cagr": 0.09625937367357573,
+      "maximum_drawdown": -0.22020524058484414,
+      "maximum_one_way_turnover": 0.5,
+      "method": "static_60_spy_40_agg",
+      "positive_week_fraction": 0.604494382022472,
+      "sharpe_excess_bil": 0.6328593222716693,
+      "sharpe_zero_rate": 0.8472192162449059,
+      "sortino_zero_rate": 1.2413546463523963,
+      "start_reference_week": "2018-01-01T00:00:00",
+      "sum_transaction_cost_rates": 0.002402904097611426,
+      "total_return": 1.1903942191641814,
+      "weeks": 445,
+      "worst_week": -0.10087979244149314
+    }
+  ],
+  "active_uncertainty": [
+    {
+      "annualized_mean_difference": -0.004884508843693865,
+      "annualized_mean_difference_ci_lower": -0.008133760926097201,
+      "annualized_mean_difference_ci_upper": -0.0016529507378339546,
+      "annualized_tracking_error": 0.007100725345726997,
+      "baseline_method": "pooled_relative_posterior_active_te100bp",
+      "block_length": 26,
+      "comparator_method": "pooled_mean_optimizer",
+      "confidence_level": 0.95,
+      "difference_definition": "baseline_minus_comparator_net_return",
+      "end_reference_week": "2026-07-06T00:00:00",
+      "information_ratio": -0.6878887164158821,
+      "n_resamples": 10000,
+      "naive_paired_t_statistic": -2.0123175710276726,
+      "probability_mean_difference_positive": 0.002,
+      "seed": 20260718,
+      "start_reference_week": "2018-01-01T00:00:00",
+      "weeks": 445
+    },
+    {
+      "annualized_mean_difference": -0.003986164824290012,
+      "annualized_mean_difference_ci_lower": -0.0316965141658635,
+      "annualized_mean_difference_ci_upper": 0.023635416578959966,
+      "annualized_tracking_error": 0.04737096323900916,
+      "baseline_method": "pooled_relative_posterior_active_te100bp",
+      "block_length": 26,
+      "comparator_method": "static_60_spy_40_agg",
+      "confidence_level": 0.95,
+      "difference_definition": "baseline_minus_comparator_net_return",
+      "end_reference_week": "2026-07-06T00:00:00",
+      "information_ratio": -0.08414785243394575,
+      "n_resamples": 10000,
+      "naive_paired_t_statistic": -0.24616220324029597,
+      "probability_mean_difference_positive": 0.3925,
+      "seed": 20260718,
+      "start_reference_week": "2018-01-01T00:00:00",
+      "weeks": 445
+    }
+  ],
+  "frozen_posterior": {
+    "maximum_recomputed_expected_mean_mismatch": 9.999054535747565e-17,
+    "posterior_refit": false,
+    "signal_table": "data/processed/m02_regime_allocation_backtest/signal_table.csv",
+    "signal_table_sha256": "8cb4d27056ec5b024ad5e2cbf4549429da98def25b8602e91275731e8046111f",
+    "upstream_manifest": "data/manifests/m02_regime_allocation_backtest.json",
+    "upstream_manifest_sha256": "5821824dcfe6a82347d1df176467b74d0199cb7724bb08f5e07daf08801fbc4a"
+  },
+  "latest_active_target": {
+    "reference_week": "2026-07-13T00:00:00",
+    "role": "exploratory_not_promoted",
+    "target_weights": [
+      {
+        "active_weight": 6.661338147750939e-16,
+        "pooled_benchmark_weight": 0.3499999999999993,
+        "ticker": "SPY",
+        "weight": 0.35
+      },
+      {
+        "active_weight": 7.102143711579497e-18,
+        "pooled_benchmark_weight": 0.0,
+        "ticker": "IEF",
+        "weight": 7.102143711579497e-18
+      },
+      {
+        "active_weight": 0.0419886796671495,
+        "pooled_benchmark_weight": 0.0,
+        "ticker": "TIP",
+        "weight": 0.0419886796671495
+      },
+      {
+        "active_weight": -0.025856979644459488,
+        "pooled_benchmark_weight": 0.1500000000000005,
+        "ticker": "HYG",
+        "weight": 0.124143020355541
+      },
+      {
+        "active_weight": 0.049060808883459844,
+        "pooled_benchmark_weight": 0.0,
+        "ticker": "BIL",
+        "weight": 0.049060808883459844
+      },
+      {
+        "active_weight": -0.022072121567096037,
+        "pooled_benchmark_weight": 0.2499999999999984,
+        "ticker": "GLD",
+        "weight": 0.22792787843290235
+      },
+      {
+        "active_weight": -0.0431203873390541,
+        "pooled_benchmark_weight": 0.2500000000000015,
+        "ticker": "LQD",
+        "weight": 0.2068796126609474
+      }
+    ]
+  },
+  "model_id": "m02_soft_composite",
+  "oracle_diagnostic": {
+    "comparators": [
+      "pooled_mean_optimizer",
+      "pooled_relative_posterior_active_te100bp",
+      "static_60_spy_40_agg"
+    ],
+    "estimator_training": "unchanged_causal_prior_day_information_only",
+    "method_id": "oracle_regime_pooled_relative_active_te100bp",
+    "oracle_information": "eventual_exact_current_month_hard_quadrant_only",
+    "performance": [
+      {
+        "annualized_cost_drag": 0.00036992831020032924,
+        "annualized_one_way_turnover": 0.3377538011685324,
+        "annualized_volatility": 0.09826124424075375,
+        "average_one_way_turnover": 0.006495265407087161,
+        "best_week": 0.09662807024057796,
+        "cagr": 0.09501278851002137,
+        "calmar_ratio": 0.46162311121547017,
+        "end_reference_week": "2025-09-29T00:00:00",
+        "gross_cagr": 0.0953827168202217,
+        "maximum_drawdown": -0.20582329220876594,
+        "maximum_one_way_turnover": 0.5,
+        "method": "oracle_regime_pooled_relative_active_te100bp",
+        "positive_week_fraction": 0.6074074074074074,
+        "sharpe_excess_bil": 0.7318637093271101,
+        "sharpe_zero_rate": 0.9736629510445528,
+        "sortino_zero_rate": 1.4590516174377028,
+        "start_reference_week": "2018-01-01T00:00:00",
+        "sum_transaction_cost_rates": 0.0026305824898703004,
+        "total_return": 1.0277520779227496,
+        "weeks": 405,
+        "worst_week": -0.10276770862562346
+      },
+      {
+        "annualized_cost_drag": 0.00028933760540317266,
+        "annualized_one_way_turnover": 0.26296958934694065,
+        "annualized_volatility": 0.10594594651488258,
+        "average_one_way_turnover": 0.005057107487441166,
+        "best_week": 0.10383794950772396,
+        "cagr": 0.10005561636586946,
+        "calmar_ratio": 0.4550724145611121,
+        "end_reference_week": "2025-09-29T00:00:00",
+        "gross_cagr": 0.10034495397127263,
+        "maximum_drawdown": -0.2198674610113791,
+        "maximum_one_way_turnover": 0.5,
+        "method": "pooled_mean_optimizer",
+        "positive_week_fraction": 0.6098765432098765,
+        "sharpe_excess_bil": 0.7295929772146923,
+        "sharpe_zero_rate": 0.9539190063421059,
+        "sortino_zero_rate": 1.4239539465046036,
+        "start_reference_week": "2018-01-01T00:00:00",
+        "sum_transaction_cost_rates": 0.002048128532413673,
+        "total_return": 1.1016304471334597,
+        "weeks": 405,
+        "worst_week": -0.11067539763709078
+      },
+      {
+        "annualized_cost_drag": 0.00020742161105058443,
+        "annualized_one_way_turnover": 0.18940838731441523,
+        "annualized_volatility": 0.10002875608392875,
+        "average_one_way_turnover": 0.0036424689868156776,
+        "best_week": 0.09889161411537661,
+        "cagr": 0.09490150319122015,
+        "calmar_ratio": 0.45453362826649046,
+        "end_reference_week": "2025-09-29T00:00:00",
+        "gross_cagr": 0.09510892480227073,
+        "maximum_drawdown": -0.2087887392472091,
+        "maximum_one_way_turnover": 0.5,
+        "method": "pooled_relative_posterior_active_te100bp",
+        "positive_week_fraction": 0.6049382716049383,
+        "sharpe_excess_bil": 0.7196382809103172,
+        "sharpe_zero_rate": 0.9572406541630128,
+        "sortino_zero_rate": 1.425818080761126,
+        "start_reference_week": "2018-01-01T00:00:00",
+        "sum_transaction_cost_rates": 0.0014751999396603495,
+        "total_return": 1.0261475938512405,
+        "weeks": 405,
+        "worst_week": -0.10710520231230769
+      },
+      {
+        "annualized_cost_drag": 0.000320939749065996,
+        "annualized_one_way_turnover": 0.2930519916406523,
+        "annualized_volatility": 0.11986658657678244,
+        "average_one_way_turnover": 0.005635615223858698,
+        "best_week": 0.0936898226341234,
+        "cagr": 0.09493898374868581,
+        "calmar_ratio": 0.4311386209362544,
+        "end_reference_week": "2025-09-29T00:00:00",
+        "gross_cagr": 0.09525992349775181,
+        "maximum_drawdown": -0.22020524058484414,
+        "maximum_one_way_turnover": 0.5,
+        "method": "static_60_spy_40_agg",
+        "positive_week_fraction": 0.6123456790123457,
+        "sharpe_excess_bil": 0.618675445061523,
+        "sharpe_zero_rate": 0.8173232726505089,
+        "sortino_zero_rate": 1.1898330596738784,
+        "start_reference_week": "2018-01-01T00:00:00",
+        "sum_transaction_cost_rates": 0.0022824241656627725,
+        "total_return": 1.0266878555862595,
+        "weeks": 405,
+        "worst_week": -0.10087979244149314
+      }
+    ],
+    "primary_end_week": "2025-09-29T00:00:00",
+    "primary_start_week": "2018-01-01T00:00:00",
+    "primary_weeks": 405,
+    "primary_window": "longest_contiguous_prefix_with_exact_regime_truth",
+    "regime_attribution": [
+      {
+        "annualized_mean_gross_difference_vs_pooled": -0.007221901594178838,
+        "annualized_mean_net_difference_vs_pooled": -0.007157955226866687,
+        "annualized_tracking_error_vs_pooled": 0.00737597645161135,
+        "information_ratio_vs_pooled": -0.970441713558205,
+        "oracle_regime_id": "growth_up_inflation_up",
+        "positive_net_week_fraction": 0.39690721649484534,
+        "weeks": 194
+      },
+      {
+        "annualized_mean_gross_difference_vs_pooled": -0.011772457226813166,
+        "annualized_mean_net_difference_vs_pooled": -0.011886973773940358,
+        "annualized_tracking_error_vs_pooled": 0.010332897472726714,
+        "information_ratio_vs_pooled": -1.150400824678225,
+        "oracle_regime_id": "growth_down_inflation_up",
+        "positive_net_week_fraction": 0.4094488188976378,
+        "weeks": 127
+      },
+      {
+        "annualized_mean_gross_difference_vs_pooled": 0.007412076115994904,
+        "annualized_mean_net_difference_vs_pooled": 0.006960168412504389,
+        "annualized_tracking_error_vs_pooled": 0.005307879660549783,
+        "information_ratio_vs_pooled": 1.3112897913332617,
+        "oracle_regime_id": "growth_up_inflation_down",
+        "positive_net_week_fraction": 0.5833333333333334,
+        "weeks": 48
+      },
+      {
+        "annualized_mean_gross_difference_vs_pooled": 0.01077253191657799,
+        "annualized_mean_net_difference_vs_pooled": 0.010584464186204906,
+        "annualized_tracking_error_vs_pooled": 0.017282585704213906,
+        "information_ratio_vs_pooled": 0.6124352204788523,
+        "oracle_regime_id": "growth_down_inflation_down",
+        "positive_net_week_fraction": 0.4166666666666667,
+        "weeks": 36
+      }
+    ],
+    "regime_runs": 58,
+    "risk_and_optimizer": "identical_to_frozen_posterior_active_test",
+    "role": "infeasible_lookahead_diagnostic",
+    "trigger": "significance_gate_failure",
+    "triggered": true,
+    "truth_months": 93,
+    "uncertainty": [
+      {
+        "annualized_mean_difference": -0.005390518984688829,
+        "annualized_mean_difference_ci_lower": -0.009177146874208914,
+        "annualized_mean_difference_ci_upper": -0.0016186806155967658,
+        "annualized_tracking_error": 0.009461160567587928,
+        "baseline_method": "oracle_regime_pooled_relative_active_te100bp",
+        "block_length": 26,
+        "comparator_method": "pooled_mean_optimizer",
+        "confidence_level": 0.95,
+        "difference_definition": "baseline_minus_comparator_net_return",
+        "end_reference_week": "2025-09-29T00:00:00",
+        "information_ratio": -0.5697524047055798,
+        "n_resamples": 10000,
+        "naive_paired_t_statistic": -1.5900544867324469,
+        "probability_mean_difference_positive": 0.002,
+        "seed": 20260718,
+        "start_reference_week": "2018-01-01T00:00:00",
+        "weeks": 405
+      },
+      {
+        "annualized_mean_difference": -7.82588681305398e-05,
+        "annualized_mean_difference_ci_lower": -0.003548848240767392,
+        "annualized_mean_difference_ci_upper": 0.0030342592411353965,
+        "annualized_tracking_error": 0.0063077073987102125,
+        "baseline_method": "oracle_regime_pooled_relative_active_te100bp",
+        "block_length": 26,
+        "comparator_method": "pooled_relative_posterior_active_te100bp",
+        "confidence_level": 0.95,
+        "difference_definition": "baseline_minus_comparator_net_return",
+        "end_reference_week": "2025-09-29T00:00:00",
+        "information_ratio": -0.012406864044857567,
+        "n_resamples": 10000,
+        "naive_paired_t_statistic": -0.03462484699998679,
+        "probability_mean_difference_positive": 0.4882,
+        "seed": 20260718,
+        "start_reference_week": "2018-01-01T00:00:00",
+        "weeks": 405
+      },
+      {
+        "annualized_mean_difference": -0.0022964177816195103,
+        "annualized_mean_difference_ci_lower": -0.02730260013080131,
+        "annualized_mean_difference_ci_upper": 0.022077765756418597,
+        "annualized_tracking_error": 0.04655263534414774,
+        "baseline_method": "oracle_regime_pooled_relative_active_te100bp",
+        "block_length": 26,
+        "comparator_method": "static_60_spy_40_agg",
+        "confidence_level": 0.95,
+        "difference_definition": "baseline_minus_comparator_net_return",
+        "end_reference_week": "2025-09-29T00:00:00",
+        "information_ratio": -0.04932949047122419,
+        "n_resamples": 10000,
+        "naive_paired_t_statistic": -0.13766783080543152,
+        "probability_mean_difference_positive": 0.4238,
+        "seed": 20260718,
+        "start_reference_week": "2018-01-01T00:00:00",
+        "weeks": 405
+      },
+      {
+        "annualized_mean_difference": -0.005312260116558289,
+        "annualized_mean_difference_ci_lower": -0.008733327540774714,
+        "annualized_mean_difference_ci_upper": -0.0018227207231243064,
+        "annualized_tracking_error": 0.007340244736541743,
+        "baseline_method": "pooled_relative_posterior_active_te100bp",
+        "block_length": 26,
+        "comparator_method": "pooled_mean_optimizer",
+        "confidence_level": 0.95,
+        "difference_definition": "baseline_minus_comparator_net_return",
+        "end_reference_week": "2025-09-29T00:00:00",
+        "information_ratio": -0.7237170295034453,
+        "n_resamples": 10000,
+        "naive_paired_t_statistic": -2.019736117623379,
+        "probability_mean_difference_positive": 0.0018,
+        "seed": 20260718,
+        "start_reference_week": "2018-01-01T00:00:00",
+        "weeks": 405
+      }
+    ],
+    "zero_score_classification": "up"
+  },
+  "schema_version": 1,
+  "significance_gate": {
+    "block_length_weeks": 26,
+    "bootstrap": "paired_circular_block",
+    "comparison_results": [
+      {
+        "annualized_mean_difference_ci_lower": -0.008133760926097201,
+        "comparator_method": "pooled_mean_optimizer",
+        "passed": false
+      },
+      {
+        "annualized_mean_difference_ci_lower": -0.0316965141658635,
+        "comparator_method": "static_60_spy_40_agg",
+        "passed": false
+      }
+    ],
+    "confidence_level": 0.95,
+    "on_fail": "run_realized_current_month_regime_oracle",
+    "oracle_triggered": true,
+    "pass_rule": "lower_two_sided_confidence_bound_strictly_above_zero_for_all_comparators",
+    "passed": false,
+    "random_seed": 20260718,
+    "required_comparators": [
+      "pooled_mean_optimizer",
+      "static_60_spy_40_agg"
+    ],
+    "resamples": 10000,
+    "return": "net_weekly_return",
+    "statistic": "annualized_arithmetic_mean_difference"
+  },
+  "stage_id": "benchmark_relative_active_optimizer_diagnostic",
+  "status": "historical_exploratory_diagnostic_not_investment_advice",
+  "warnings": [
+    "The posterior and upstream allocation artifacts are hash-frozen; this stage does not refit the Bayesian model.",
+    "The active specification and gate were selected after reviewing the same historical backtest and are exploratory, not confirmatory.",
+    "The oracle deliberately uses the eventually finalized current-month hard regime and is infeasible in real time.",
+    "The oracle changes only the regime probability vector; return-model training, covariance, optimizer, constraints, and costs remain unchanged.",
+    "The oracle primary window stops before the first missing exact regime truth and does not bridge gaps or forward-fill labels."
+  ]
+}

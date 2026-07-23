@@ -1,10 +1,11 @@
-"""Public primitives for Model 02's score, transition, and Bayesian filter.
+"""Public inference primitives for Model 02.
 
-Model 02 keeps the released growth/inflation score center continuous, evolves a
-rolling four-month joint Gaussian state with a causal VAR(1), updates the state
-from shrinkage-estimated linear-Gaussian release models, and adds mapping
-uncertainty only when reporting soft quadrant probabilities. Portfolio
-allocation remains outside this model package.
+The promoted ``student_t_7_reduced_core`` baseline evolves a rolling
+four-month joint Gaussian score state with a causal VAR(1), updates it from
+partial defining releases and causal Student-t release emissions, and adds
+mapping uncertainty only when reporting quadrant probabilities. Gaussian and
+alternative robust primitives remain available for retained comparisons.
+Portfolio allocation remains outside this model package.
 """
 
 from regime_allocation.models.m02_soft_composite.gaussian_emissions import (

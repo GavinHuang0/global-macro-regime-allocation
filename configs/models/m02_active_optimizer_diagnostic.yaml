@@ -1,0 +1,113 @@
+schema_version: 1
+model_id: m02_soft_composite
+stage_id: benchmark_relative_active_optimizer_diagnostic
+description: >-
+  Hash-frozen evaluation of a pooled-benchmark-relative Model 02 posterior
+  active optimizer, followed conditionally by an infeasible realized-regime
+  oracle diagnostic when the active strategy fails its locked significance
+  gate.
+
+frozen_upstream:
+  manifest: data/manifests/m02_regime_allocation_backtest.json
+  manifest_sha256: 5821824dcfe6a82347d1df176467b74d0199cb7724bb08f5e07daf08801fbc4a
+  signal_table: data/processed/m02_regime_allocation_backtest/signal_table.csv
+  signal_table_sha256: 8cb4d27056ec5b024ad5e2cbf4549429da98def25b8602e91275731e8046111f
+  weekly_weights: data/processed/m02_regime_allocation_backtest/weekly_weights.csv
+  weekly_weights_sha256: 3a8682d0f9927204b086fc53d42a09ccb922ff8f6422b6d1fa775cdf28b0fc36
+  optimizer_audit: data/processed/m02_regime_allocation_backtest/optimizer_audit.csv
+  optimizer_audit_sha256: a411c976ac740735c59ffc463922b482818e0261d28dfe50f021a8e98d04b303
+  price_history: data/processed/us_cross_asset_etf_universe_v1/etf_daily_prices_long.csv
+  price_history_sha256: 7cbd321c5af2662065edfc3a5c3c1cdb6101bda10de7862bc09c09041bdcb7f1
+  composite_scores: data/processed/m02_soft_composite/composite_scores.csv
+  composite_scores_sha256: e49033e74d711a886267d195cf01f03778bed00534d02f47e96cea91d73eb1eb
+
+universe:
+  strategy_assets: [SPY, IEF, TIP, HYG, BIL, GLD, LQD]
+  benchmark_only_assets: [AGG]
+
+active_optimizer:
+  method_id: pooled_relative_posterior_active_te100bp
+  role: exploratory_not_promoted
+  replaces_promoted_baseline: false
+  pooled_benchmark_method: pooled_mean_optimizer
+  posterior_source_method: posterior_optimized
+  incremental_expected_return: posterior_minus_pooled
+  covariance: causal_pooled_annualized_covariance
+  covariance_annualization_factor: 52.0
+  annualized_tracking_error_cap: 0.01
+  maximum_absolute_active_weight: 0.05
+  maximum_one_way_active_exposure: 0.10
+  annualized_total_volatility_cap: 0.10
+  transaction_cost: 0.0005
+  asset_caps:
+    SPY: 0.35
+    IEF: 0.50
+    TIP: 0.40
+    HYG: 0.25
+    BIL: 1.00
+    GLD: 0.25
+    LQD: 0.40
+  group_caps:
+    equity_and_high_yield:
+      assets: [SPY, HYG]
+      maximum: 0.50
+    corporate_credit:
+      assets: [HYG, LQD]
+      maximum: 0.50
+    rate_sensitive:
+      assets: [IEF, TIP, LQD]
+      maximum: 0.75
+  solver:
+    method: SLSQP
+    tolerance: 1.0e-12
+    maximum_iterations: 2000
+    feasibility_tolerance: 1.0e-7
+    fallback: pooled_target
+
+significance_gate:
+  required_comparators:
+    - pooled_mean_optimizer
+    - static_60_spy_40_agg
+  return: net_weekly_return
+  statistic: annualized_arithmetic_mean_difference
+  bootstrap: paired_circular_block
+  block_length_weeks: 26
+  resamples: 10000
+  confidence_level: 0.95
+  random_seed: 20260718
+  pass_rule: lower_two_sided_confidence_bound_strictly_above_zero_for_all_comparators
+  on_fail: run_realized_current_month_regime_oracle
+
+oracle_diagnostic:
+  method_id: oracle_regime_pooled_relative_active_te100bp
+  role: infeasible_lookahead_diagnostic
+  trigger: significance_gate_failure
+  oracle_information: eventual_exact_current_month_hard_quadrant_only
+  zero_score_classification: up
+  estimator_training: unchanged_causal_prior_day_information_only
+  risk_and_optimizer: identical_to_frozen_posterior_active_test
+  primary_window: longest_contiguous_prefix_with_exact_regime_truth
+  comparators:
+    - pooled_mean_optimizer
+    - pooled_relative_posterior_active_te100bp
+    - static_60_spy_40_agg
+
+outputs:
+  processed_dir: data/processed/m02_active_optimizer_diagnostic
+  published_dir: results/published/m02_active_optimizer_diagnostic
+  manifest: data/manifests/m02_active_optimizer_diagnostic.json
+  active_weights: active_weekly_weights.csv
+  active_returns: active_weekly_returns.csv
+  active_daily_nav: active_daily_nav.csv.gz
+  active_optimizer_audit: active_optimizer_audit.csv
+  active_performance: active_performance.csv
+  active_uncertainty: active_uncertainty.csv
+  oracle_truth_audit: oracle_truth_audit.csv
+  oracle_weights: oracle_weekly_weights.csv
+  oracle_returns: oracle_weekly_returns.csv
+  oracle_daily_nav: oracle_daily_nav.csv.gz
+  oracle_optimizer_audit: oracle_optimizer_audit.csv
+  oracle_performance: oracle_performance.csv
+  oracle_uncertainty: oracle_uncertainty.csv
+  oracle_regime_attribution: oracle_regime_attribution.csv
+  summary: diagnostic_summary.json

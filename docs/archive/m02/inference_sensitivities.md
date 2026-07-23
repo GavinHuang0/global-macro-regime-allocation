@@ -1,4 +1,4 @@
-# Model 02 inference baseline selection and robustness sensitivities
+# Archived Model 02 inference baseline selection and robustness sensitivities
 
 This document specifies the Model 02 inference-selection replay that adds partial
 score-defining releases, robust Student-$t$ observation models, robust VAR(1)
@@ -66,7 +66,7 @@ noise and is not used as measurement error for an exact released score.
 The baseline-selection replay does not alter the component transformations,
 strictly lagged standardization, mapping rule, evidence-event table, or
 four-month state representation documented in the
-[Model 02 specification](README.md).
+[current Model 02 specification](../../models/m02_soft_composite/README.md).
 
 ## 2. Partial score-defining releases
 
