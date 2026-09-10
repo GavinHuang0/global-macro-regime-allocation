@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release_id": "m02_weekly_live_v1",
-  "generated_at": "2026-09-10T01:53:47.602944+00:00",
+  "generated_at": "2026-09-10T02:19:46.886146+00:00",
   "signal_week": "2026-09-07",
   "information_cutoff": "2026-09-07T00:00:00-04:00",
   "execution_date": "2026-09-08",
@@ -38,7 +38,7 @@
     }
   },
   "sha256_inputs_configs_implementation": {
-    "components": "8d12132d1127aa5d1023a43222836a60641fc470b0d70e137ba5ee352630fd69",
+    "components": "4c4045099d589439e61abe5b154b951f97cff9df97125239f52ff283fb27895b",
     "configs/models/m01_deterministic_composite.yaml": "db688bf20b2e40cdc226922e29638c0831cc049d11e38c49c84260713ba3cafe",
     "configs/models/m01_deterministic_composite_transition.yaml": "9b2bff7f5470dce9a1c9eec23dde588128612ffbe6b125641b2c23568b76af2f",
     "configs/models/m01_event_driven_bayesian_filter.yaml": "fdf1087b5c61a4007883b1c61f89df6daf6ed06f949c4a119ed316905876f27a",
@@ -58,12 +58,12 @@
     "configs/models/m02_release_evidence.yaml": "e9f8cb6c8ca28925d0c057fdaed95cdf08b2ce3a976380b7bf671730dceda512",
     "configs/models/m02_soft_composite.yaml": "0a378c0a121633b2b560c1a452ab027f35b79d7ea4be4e3817b960bf3637f289",
     "configs/models/m02_var1_transition.yaml": "6bf3fc7a575b05ea4a32297a85c95ff28ef3d8d09dc23af9dacce250591d054e",
-    "events": "b0eb5b3defef10b161683a01c8cd08e5407e1a05b5a24f26ebe4c5f072ed9d6a",
-    "manifest": "5c158803546a7ae95bc7a7fe0cd4c1e8c86203fb3937c76f6c88ac07cfb44828",
-    "mapping": "e7ad23d684669e45996b244a91da514e0591ffefc91c7832c9d223fcf7a694ae",
-    "prices": "9fcdcf133e563063677151defd79843e33455f78756490590ae62f544e65c099",
+    "events": "0bd5d37d2ed5180861f3aa90094d61a148e651835703884d7d04fabd7a001e55",
+    "manifest": "7819faac6f489fdbaa0ec2537575d96978b1738599dc0406674eccb3e325fa4b",
+    "mapping": "104e7d96d08f96200c6021b8d7ec340dd07304769b7a9a3c3067822e2d2f1e2f",
+    "prices": "51f12ebf271c1fa9b712f04ec34a9687365e22d6899cfb13f28d2d2086bb932e",
     "pyproject.toml": "a1f8769f414c7d1bdc3f80fd5ea22f0a7b6fe976f32a12eac2b69a651f532fd6",
-    "scores": "e64dcd8fdb937d94af6ff90ace51a2e9741e713245a014e695d4accd201840e9",
+    "scores": "e3db1a8fcc1ab038da9d75f2087a74a1a84539642cd110e904e7441063f1ebcf",
     "scripts/download_etf_history.py": "d7592d7a7e656e2a495eeb690c62018a9a02c5410730005c29eb7b73d6629afd",
     "src/regime_allocation/backtest/__init__.py": "941e0b2c79789d0d487625ce0aa6747f6c0bc06013239d4de2f205aa0c0f22cb",
     "src/regime_allocation/backtest/engine.py": "92661e784249017827e4ae6ae3f972a08f20817b957f02aa82c52fb94e4ec2a3",
@@ -144,8 +144,8 @@
     "src/regime_allocation/reporting/readme_snapshot.py": "6a2fce127d1cd029f671de05e0acfcdeed9510d4aa26848290b3223e8dbcabd3"
   },
   "sha256_outputs": {
-    "latest_allocation.json": "a927b16e275262fb48bc93ebe41e25b6d1ccfa465cd34d982df4d5fe8741ff38",
-    "performance_summary.csv": "e916017101f8c0766c2d45238cf075044ef46bcea5bba969250e95bac05f35cd"
+    "latest_allocation.json": "fad4daff492893a1026f759ab9f74998b26b29a8111fb85d43f715d95a3d22bb",
+    "performance_summary.csv": "7c17b34e2a6512b2a50f42354f866a57ea13c5e646d2724790f1010a811107ba"
   },
   "history_policy": "Full own-path replay from 2018-01-01; incomplete week excluded from performance.",
   "reconstruction_disclosure": "Newly acquired FRED vintages and mutable Yahoo adjusted prices; not a byte-identical reproduction of the archived publication. Same-history model selection was used; the extended backtest is not an untouched validation sample."
