@@ -1,11 +1,15 @@
 # Documentation
 
-Start with the [project overview](../README.md) for the research contract,
-promoted results, and installation commands. The pages below can be read
-directly on GitHub, including their mathematical notation.
+Start with the [project overview and weekly research snapshot](../README.md).
+The [research overview](architecture/research_overview.md) contains the shared
+contract, equations, and historical publication results. All pages below can
+be read directly on GitHub, including their mathematical notation.
 
 ## Shared documentation
 
+- [Research architecture and published baselines](architecture/research_overview.md)
+- [Weekly updates and automation](operations/weekly_updates.md)
+- [Repository maintenance and artifact policy](architecture/repository_maintenance.md)
 - [Data access and credentials](data_access.md)
 - [Model versioning](architecture/model_versioning.md)
 - [Security policy](../SECURITY.md)

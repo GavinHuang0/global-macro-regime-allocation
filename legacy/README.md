@@ -1,14 +1,15 @@
 # Legacy course-project artifacts
 
-This directory preserves the original team work for provenance and comparison.
+This directory preserves the original team manuscript for provenance and comparison.
 
 - [original_paper.pdf](original_paper.pdf) is the four-author course manuscript.
-- [bayesian_v2.py](bayesian_v2.py) is the surviving Bayesian orchestration/visualization script.
 
-The script is incomplete: its HMM, data-generation, macro-evidence, allocation,
-and backtest dependencies were not recovered. It also reflects methodological
-choices that the rewrite is explicitly testing or replacing. Nothing in this
-directory is imported by the new `regime_allocation` package.
+The incomplete `bayesian_v2.py` orchestration script was removed from the working
+tree and remains available in Git history. Its HMM, data-generation,
+macro-evidence, allocation, and backtest dependencies were not recovered, and
+no research pipeline imported it. The manuscript retains the original model
+description and results. Nothing in this directory is imported by the new
+`regime_allocation` package.
 
 The rebuild was motivated by specific architectural problems in the course
 version: full-sample scaling and HMM fitting; smoothed or Viterbi state paths

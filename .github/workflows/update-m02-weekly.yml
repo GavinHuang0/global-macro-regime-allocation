@@ -1,0 +1,180 @@
+name: Update weekly Model 02 research snapshot
+
+on:
+  workflow_dispatch:
+  schedule:
+    # After the first US trading session; Tuesday retries Monday holidays.
+    - cron: "23 22 * * 1,2"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: update-m02-weekly
+  cancel-in-progress: false
+
+env:
+  PYTHONUNBUFFERED: "1"
+  PUBLICATION_FILES: >-
+    ["README.md",
+     "results/live/m02_weekly/latest_allocation.json",
+     "results/live/m02_weekly/performance_summary.csv",
+     "results/live/m02_weekly/run_manifest.json"]
+
+jobs:
+  compute:
+    name: Test and compute the dated research snapshot
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    outputs:
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
+
+    steps:
+      - name: Check out the triggering commit without push credentials
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install project and test dependencies
+        run: python -m pip install -e ".[dev]"
+
+      - name: Check the live pipeline and README renderer
+        run: >-
+          python -m pytest -q
+          tests/unit/data/test_m02_live_inputs.py
+          tests/unit/portfolio/test_m02_live.py
+          tests/unit/reporting/test_readme_snapshot.py
+
+      - name: Compute the weekly allocation and update the README
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: |
+          if [ -z "$FRED_API_KEY" ]; then
+            echo "::error::Set the repository Actions secret FRED_API_KEY."
+            exit 1
+          fi
+          python -m regime_allocation.cli.update_m02_weekly
+
+      - name: Reject changes outside the publication files
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+
+          allowed = set(json.loads(os.environ["PUBLICATION_FILES"]))
+          status = subprocess.check_output(
+              ["git", "status", "--porcelain=v1", "-z", "--untracked-files=all"]
+          )
+          for record in status.split(b"\0"):
+              if not record:
+                  continue
+              name = record[3:].decode("utf-8")
+              if record[:2].strip() not in (b"M", b"A", b"??") or name not in allowed:
+                  raise SystemExit(f"Unexpected working-tree change: {record!r}")
+          for name in allowed:
+              path = Path(name)
+              if not path.is_file() or path.is_symlink():
+                  raise SystemExit(f"Missing or unsafe publication file: {name}")
+          PY
+
+      - name: Upload only the completed publication files
+        id: upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: m02-weekly-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            README.md
+            results/live/m02_weekly/latest_allocation.json
+            results/live/m02_weekly/performance_summary.csv
+            results/live/m02_weekly/run_manifest.json
+          if-no-files-found: error
+          include-hidden-files: false
+          retention-days: 14
+
+  publish:
+    name: Publish the verified files to the default branch
+    needs: compute
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      SOURCE_SHA: ${{ github.sha }}
+
+    steps:
+      - name: Check out the exact commit used for computation
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Download this run's immutable artifact and verify its digest
+        uses: actions/download-artifact@v8
+        with:
+          artifact-ids: ${{ needs.compute.outputs.artifact-id }}
+          path: ${{ runner.temp }}/m02-weekly-publication
+          digest-mismatch: error
+
+      - name: Validate and stage the exact publication paths
+        env:
+          ARTIFACT_DIR: ${{ runner.temp }}/m02-weekly-publication
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import shutil
+          import subprocess
+
+          if subprocess.check_output(["git", "status", "--porcelain"]):
+              raise SystemExit("Publication checkout is not clean")
+          allowed = set(json.loads(os.environ["PUBLICATION_FILES"]))
+          artifact = Path(os.environ["ARTIFACT_DIR"])
+          entries = list(artifact.rglob("*"))
+          if any(path.is_symlink() for path in entries):
+              raise SystemExit("Publication artifact contains a symbolic link")
+          actual = {path.relative_to(artifact).as_posix() for path in entries if path.is_file()}
+          if actual != allowed:
+              raise SystemExit(f"Unexpected artifact files: {sorted(actual)}")
+          for name in sorted(allowed):
+              destination = Path(name)
+              destination.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copyfile(artifact / name, destination)
+          subprocess.run(["git", "add", "--", *sorted(allowed)], check=True)
+          staged = set(subprocess.check_output(
+              ["git", "diff", "--cached", "--name-only", "-z"]
+          ).decode("utf-8").strip("\0").split("\0")) - {""}
+          if not staged.issubset(allowed):
+              raise SystemExit(f"Unexpected staged files: {sorted(staged)}")
+          subprocess.run(["git", "diff", "--exit-code"], check=True)
+          if subprocess.check_output(["git", "ls-files", "--others", "--exclude-standard"]):
+              raise SystemExit("Unexpected untracked files in publication checkout")
+          PY
+
+      - name: Commit changed research outputs without overwriting newer work
+        run: |
+          if git diff --cached --quiet; then
+            echo "The published snapshot is already up to date."
+            exit 0
+          fi
+          git diff --cached --check
+          git fetch origin "$DEFAULT_BRANCH"
+          if [ "$(git rev-parse FETCH_HEAD)" != "$SOURCE_SHA" ]; then
+            echo "::error::The default branch changed during computation. Run the workflow again."
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update weekly Model 02 research snapshot"
+          git push origin "HEAD:refs/heads/$DEFAULT_BRANCH"
