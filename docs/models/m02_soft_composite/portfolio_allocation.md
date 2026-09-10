@@ -40,43 +40,43 @@ point-in-time price vintages and may change after provider corrections.
 
 ## Weekly signal and execution
 
-Let $t$ index a Monday-anchored holding period, $m(t)$ be the calendar month
-containing that Monday, $d_t^{\mathrm{sig}}$ the Monday signal date, and
-$d_t^{\mathrm{exe}}$ the first common adjusted open in that week.
+Let $`t`$ index a Monday-anchored holding period, $`m(t)`$ be the calendar month
+containing that Monday, $`d_t^{\mathrm{sig}}`$ the Monday signal date, and
+$`d_t^{\mathrm{exe}}`$ the first common adjusted open in that week.
 
 The inference replay is sampled immediately after a deterministic month roll,
 when applicable, and before every same-day release, partial defining update,
 exact-score observation, or probability-map update. The allocation probability
 vector is
 
-$$
+```math
 \boldsymbol p_{m(t)\mid d_t^-}
 =\left(p_{m(t),r\mid d_t^-}\right)_{r\in\mathcal R},
-$$
+```
 
 in the canonical quadrant order documented in
-[`inference.md`](inference.md). The $d_t^-$ cutoff means that no information
+[`inference.md`](inference.md). The $`d_t^-`$ cutoff means that no information
 published on the Monday signal date is used.
 
-The portfolio executes at $d_t^{\mathrm{exe}}$ and exits at
-$d_{t+1}^{\mathrm{exe}}$. A Monday market holiday therefore delays execution
+The portfolio executes at $`d_t^{\mathrm{exe}}`$ and exits at
+$`d_{t+1}^{\mathrm{exe}}`$. A Monday market holiday therefore delays execution
 without adding Monday releases to the target. A live target whose next
 execution open is unavailable is published but excluded from performance.
 
-For asset $a$, the simple weekly holding return is
+For asset $`a`$, the simple weekly holding return is
 
-$$
+```math
 x_{t,a}
 =\frac{P_{a,d_{t+1}^{\mathrm{exe}}}^{\mathrm{adj,open}}}
        {P_{a,d_t^{\mathrm{exe}}}^{\mathrm{adj,open}}}-1.
-$$
+```
 
 Missing execution prices are not forward-filled.
 
 ## Causal return estimation
 
 Each historical weekly return receives the retrospective quadrant implied by
-the signs of the completed Model 02 scores for $m(t)$. Exact zero belongs to
+the signs of the completed Model 02 scores for $`m(t)`$. Exact zero belongs to
 the nonnegative side. This hard quadrant is used only to train return moments;
 the current allocation always integrates the full soft probability vector.
 
@@ -85,12 +85,12 @@ the completed score’s `score_available_at` date are available through the
 Sunday before the current Monday signal. Every fit requires at least 260 common
 labeled weeks.
 
-Let $\overline{\boldsymbol\mu}_t$ be the pooled weekly mean,
-$\overline{\boldsymbol\mu}_{t,r}$ the sample mean for quadrant $r$, and
-$n_{t,r}$ its eligible count. The conditional mean uses 104 pooled
+Let $`\overline{\boldsymbol\mu}_t`$ be the pooled weekly mean,
+$`\overline{\boldsymbol\mu}_{t,r}`$ the sample mean for quadrant $`r`$, and
+$`n_{t,r}`$ its eligible count. The conditional mean uses 104 pooled
 pseudo-weeks:
 
-$$
+```math
 \widetilde{\boldsymbol\mu}_{t,r}
 =\frac{
 n_{t,r}\overline{\boldsymbol\mu}_{t,r}
@@ -98,18 +98,18 @@ n_{t,r}\overline{\boldsymbol\mu}_{t,r}
 }{
 n_{t,r}+104
 }.
-$$
+```
 
 Residuals around the unshrunk quadrant means produce one shared Ledoit–Wolf
-within-quadrant covariance $\boldsymbol C_t$. The posterior return moments are
+within-quadrant covariance $`\boldsymbol C_t`$. The posterior return moments are
 
-$$
+```math
 \boldsymbol\mu_t^{\mathrm{post}}
 =\sum_{r\in\mathcal R}
 p_{m(t),r\mid d_t^-}\widetilde{\boldsymbol\mu}_{t,r},
-$$
+```
 
-$$
+```math
 \boldsymbol B_t^{\mathrm{post}}
 =\sum_{r\in\mathcal R}p_{m(t),r\mid d_t^-}
 \left(
@@ -118,65 +118,65 @@ $$
 \left(
 \widetilde{\boldsymbol\mu}_{t,r}-\boldsymbol\mu_t^{\mathrm{post}}
 \right)^\top,
-$$
+```
 
-$$
+```math
 \boldsymbol\Sigma_t^{\mathrm{week}}
 =\boldsymbol C_t+\boldsymbol B_t^{\mathrm{post}},
 \qquad
 \boldsymbol\Sigma_t^{\mathrm{ann}}
 =52\boldsymbol\Sigma_t^{\mathrm{week}}.
-$$
+```
 
 The expected return in the objective remains in one-week units.
 
 ## Optimization and costs
 
-Let $\mathbf w_t$ be the target and
-$\widehat{\mathbf w}_t^-$ the causal pretrade estimate formed from the
+Let $`\mathbf w_t`$ be the target and
+$`\widehat{\mathbf w}_t^-`$ the causal pretrade estimate formed from the
 previous execution open and the last adjusted close strictly before the Monday
 signal. The optimizer solves
 
-$$
+```math
 \max_{\mathbf w_t}
 \quad
 \left(\boldsymbol\mu_t^{\mathrm{post}}\right)^\top\mathbf w_t
 -\sum_a 0.0005
 \left|w_{t,a}-\widehat w_{t,a}^-\right|
-$$
+```
 
 subject to full investment, long-only weights, the individual and group caps
 above, and
 
-$$
+```math
 \mathbf w_t^\top
 \boldsymbol\Sigma_t^{\mathrm{ann}}
 \mathbf w_t
 \le 0.10^2.
-$$
+```
 
 The 10% annualized volatility ceiling constrains the causal covariance estimate;
 it does not guarantee realized volatility. SLSQP solutions are independently
 checked. The fallback order is feasible pretrade holdings, constrained minimum
 variance, then 100% `BIL`; the run fails if none is feasible.
 
-At the execution open, let $\mathbf w_t^{-,\mathrm{exe}}$ be the previous
+At the execution open, let $`\mathbf w_t^{-,\mathrm{exe}}`$ be the previous
 holdings after realized drift. The charged cost and net weekly return are
 
-$$
+```math
 K_t
 =\sum_a0.0005
 \left|w_{t,a}-w_{t,a}^{-,\mathrm{exe}}\right|,
-$$
+```
 
-$$
+```math
 r_t^{\mathrm{net}}
 =(1-K_t)
 \left(1+\mathbf w_t^\top\mathbf x_t\right)-1.
-$$
+```
 
 The initial formation trade is charged. Reported one-way turnover is half the
-$L^1$ traded notional.
+$`L^1`$ traded notional.
 
 ## Essential comparisons
 
@@ -185,7 +185,7 @@ All comparators use the same weekly execution calendar and cost accounting:
 - `pooled_mean_optimizer` keeps the estimator, optimizer, covariance,
   constraints, and costs but removes the current posterior from the return
   moments;
-- `equal_weight` holds $1/7$ in each strategy ETF and rebalances weekly; and
+- `equal_weight` holds $`1/7`$ in each strategy ETF and rebalances weekly; and
 - `static_60_spy_40_agg` holds 60% `SPY` and 40% `AGG` and rebalances weekly.
 
 The pooled optimizer is the cleanest test of the posterior’s incremental

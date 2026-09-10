@@ -44,8 +44,8 @@ published weekly posterior:
 
 For the original seven assets, the largest recomputed expected-return
 difference from the frozen optimizer audit is
-\(9.9991\times10^{-17}\). Static 60/40 gross returns, costs, net returns, and
-turnover agree with the frozen run to less than \(10^{-16}\). These controls
+$`9.9991\times10^{-17}`$. Static 60/40 gross returns, costs, net returns, and
+turnover agree with the frozen run to less than $`10^{-16}`$. These controls
 show that the posterior and execution schedule are unchanged.
 
 Expanding a multivariate Ledoit--Wolf estimator from seven to twelve assets
@@ -163,7 +163,7 @@ corner portfolios with roughly four effective assets.
 
 The posterior did make a useful relative adjustment: compared with pooled, it
 held 2.67 percentage points less `TLT` and 2.76 points more `GLD` on average.
-Its average half-\(L_1\) target distance from pooled increased from about 1.22%
+Its average half-$`L_1`$ target distance from pooled increased from about 1.22%
 in the seven-ETF run to 4.42%, and realized tracking error rose from about
 0.37% to 1.17%. This explains why the posterior-minus-pooled point estimate
 grew from 1.87 to 24.55 basis points per year. The interval still includes

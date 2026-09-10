@@ -34,9 +34,9 @@ dependent. Point differences should therefore remain descriptive.
 
 ## Latest posterior
 
-At cutoff \(d=\) 16 July 2026, April and May are confirmed; June and July
+At cutoff $`d=`$ 16 July 2026, April and May are confirmed; June and July
 remain filtered distributions. The table reports
-\(p_{m,r\mid d}\).
+$`p_{m,r\mid d}`$.
 
 | Quadrant | June 2026 | July 2026 | August transition forecast |
 |---|---:|---:|---:|

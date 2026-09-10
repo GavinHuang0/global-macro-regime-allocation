@@ -57,7 +57,7 @@ does not establish a statistically reliable incremental posterior return.
 The interval against static 60/40 also includes zero. The interval against
 equal weight is above zero, but equal weight has materially different realized
 risk and is not a clean posterior ablation. The bootstrap fraction above zero
-is descriptive and is not a $p$-value.
+is descriptive and is not a $`p`$-value.
 
 ## Latest published target
 

@@ -10,7 +10,7 @@ investment advice.
 
 | Layer | Promoted baseline | Frequency | Status |
 |---|---|---|---|
-| Inference | `event_driven_bayesian_filter`: fixed-\(\nu=7\) Student-\(t\) release likelihoods around a causal first-order transition prior | Event driven; monthly state | Frozen |
+| Inference | `event_driven_bayesian_filter`: fixed-$`\nu=7`$ Student-$`t`$ release likelihoods around a causal first-order transition prior | Event driven; monthly state | Frozen |
 | Allocation | `posterior_optimized`: posterior mixture moments and a constrained long-only optimizer | Monthly | Frozen |
 
 The inference baseline is compared only with its matched `transition_only`
@@ -19,18 +19,18 @@ replay in the main documentation. The allocation baseline is compared with
 
 ## Canonical notation
 
-- \(m\) is a macroeconomic reference month, \(d\) is an information cutoff,
-  \(r\in\mathcal R\) is one of the four growth–inflation quadrants, and
-  \(p_{m,r\mid d}=\Pr(R_m=r\mid\mathcal D_d)\).
-- \(t\) indexes portfolio rebalances and holding periods,
-  \(\mathbf x_t\) is the strategy-asset return vector,
-  \(\mathbf w_t^{-}\) is the pretrade weight vector, and \(\mathbf w_t\) is
+- $`m`$ is a macroeconomic reference month, $`d`$ is an information cutoff,
+  $`r\in\mathcal R`$ is one of the four growth–inflation quadrants, and
+  $`p_{m,r\mid d}=\Pr(R_m=r\mid\mathcal D_d)`$.
+- $`t`$ indexes portfolio rebalances and holding periods,
+  $`\mathbf x_t`$ is the strategy-asset return vector,
+  $`\mathbf w_t^{-}`$ is the pretrade weight vector, and $`\mathbf w_t`$ is
   the target.
-- \(\boldsymbol\mu_t\) and \(\boldsymbol\Sigma_t\) are the posterior return
-  moments used at rebalance \(t\), and \(K_t\) is realized trading cost.
+- $`\boldsymbol\mu_t`$ and $`\boldsymbol\Sigma_t`$ are the posterior return
+  moments used at rebalance $`t`$, and $`K_t`$ is realized trading cost.
 
 Reference months and information dates are different objects. An observation
-about month \(m\) enters the model only on its recorded publication date.
+about month $`m`$ enters the model only on its recorded publication date.
 Literal model IDs, field names, tickers, and paths appear in backticks.
 
 ## Architecture
@@ -53,10 +53,10 @@ observations, the four z-scores on each axis are equally weighted, and each
 axis is averaged over the current and preceding two months. The signs of the
 smoothed scores define the four states.
 
-The inference layer maintains probabilities over \(4^4=256\) four-month paths.
+The inference layer maintains probabilities over $`4^4=256`$ four-month paths.
 At a month roll it applies a causal expanding transition matrix with symmetric
-Dirichlet-\(0.5\) smoothing. Non-defining releases update the applicable path
-coordinate using block-specific Student-\(t\) likelihoods. Completed
+Dirichlet-$`0.5`$ smoothing. Non-defining releases update the applicable path
+coordinate using block-specific Student-$`t`$ likelihoods. Completed
 deterministic labels are then imposed as exact end-of-day confirmations.
 
 The portfolio signal is the `post_month_roll` current-month marginal from the
@@ -94,8 +94,8 @@ through June 2026.
 | `static_60_spy_40_agg` | 117.41% | 9.57% | 11.21% | 0.874 | -21.60% |
 | `equal_weight` | 65.13% | 6.08% | 6.37% | 0.960 | **-14.77%** |
 
-Posterior minus pooled mean is \(0.184\%\) annualized, with a paired six-month
-block-bootstrap 95% interval of \([-0.364\%,0.795\%]\). The interval includes
+Posterior minus pooled mean is $`0.184\%`$ annualized, with a paired six-month
+block-bootstrap 95% interval of $`[-0.364\%,0.795\%]`$. The interval includes
 zero. Model 01 therefore does not establish a statistically reliable
 allocation edge from the posterior. See
 [`portfolio_backtest_results.md`](portfolio_backtest_results.md).

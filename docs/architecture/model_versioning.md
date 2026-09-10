@@ -4,7 +4,7 @@
 
 | Model | Inference baseline | Allocation baseline | Status |
 |---|---|---|---|
-| `m01_deterministic_composite` | Event-driven fixed-\(\nu=7\) filter over deterministic regimes | Monthly `posterior_optimized` | Frozen benchmark |
+| `m01_deterministic_composite` | Event-driven fixed-$`\nu=7`$ filter over deterministic regimes | Monthly `posterior_optimized` | Frozen benchmark |
 | `m02_soft_composite` | `student_t_7_reduced_core` | Weekly `posterior_optimized` | Promoted; current iteration closed; not frozen |
 
 Model 01 is retained as a stable architectural benchmark. Model 02 is the

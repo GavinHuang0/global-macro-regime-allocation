@@ -6,12 +6,12 @@ the authoritative serialization and provenance contracts.
 
 ## Conventions
 
-\(m\) is a reference month, \(d\) an information cutoff,
-\(r\in\mathcal R\) a quadrant, and \(p_{m,r\mid d}\) its posterior
-probability. Portfolio artifacts use rebalance index \(t\), return vector
-\(\mathbf x_t\), pretrade and target weights \(\mathbf w_t^{-}\) and
-\(\mathbf w_t\), moments \(\boldsymbol\mu_t\) and
-\(\boldsymbol\Sigma_t\), and realized cost \(K_t\). Literal field names and
+$`m`$ is a reference month, $`d`$ an information cutoff,
+$`r\in\mathcal R`$ a quadrant, and $`p_{m,r\mid d}`$ its posterior
+probability. Portfolio artifacts use rebalance index $`t`$, return vector
+$`\mathbf x_t`$, pretrade and target weights $`\mathbf w_t^{-}`$ and
+$`\mathbf w_t`$, moments $`\boldsymbol\mu_t`$ and
+$`\boldsymbol\Sigma_t`$, and realized cost $`K_t`$. Literal field names and
 paths appear in backticks.
 
 ## Deterministic regime data
@@ -95,7 +95,7 @@ Detailed files under `data/processed/m01_bayesian_filter/` are:
 | `joint_path_checkpoints.csv.gz` | Exactly 256 path-probability rows per checkpoint |
 | `marginal_checkpoints.csv` | Four quadrant marginals for each path coordinate and next-month transition forecast |
 | `event_update_audit.csv` | Event status, fit identity, likelihoods, prior/posterior marginals, and update diagnostics |
-| `likelihood_fit_audit.csv` | Causal counts, means, covariance, Student-\(t\) shape, and numerical checks |
+| `likelihood_fit_audit.csv` | Causal counts, means, covariance, Student-$`t`$ shape, and numerical checks |
 | `forecast_predictions.csv` | Forecasts, eventual labels, and explicit scoring eligibility |
 | `evaluation_metrics.csv`, `calibration_bins.csv` | Proper scores, classification metrics, entropy, and reliability inputs |
 | `sensitivity_specifications.csv`, `sensitivity_metrics.csv` | Prespecified one-at-a-time variants and matched results |

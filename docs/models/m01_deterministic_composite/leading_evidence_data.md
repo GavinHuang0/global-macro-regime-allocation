@@ -22,8 +22,8 @@ configured feature in their block.
 
 ## Point-in-time rule
 
-Let \(\rho\) be a monthly or weekly source period and
-\(x_{k,\rho}^{(v)}\) its value in vintage \(v\). The selected release date is
+Let $`\rho`$ be a monthly or weekly source period and
+$`x_{k,\rho}^{(v)}`$ its value in vintage $`v`$. The selected release date is
 the observation's first appearance in the acquired real-time archive. It is
 usable only when:
 
@@ -35,16 +35,16 @@ The lag anchor is month-end for monthly series and `reference_date` for weekly
 series. A rejected first appearance is never replaced with a later revision.
 
 Monthly transformations use the current and previous level from the same
-selected vintage. If \(e\) is the current event and \(\mathcal H_{k,e^-}\)
+selected vintage. If $`e`$ is the current event and $`\mathcal H_{k,e^-}`$
 contains transformed observations released on strictly earlier dates, the
 published monthly feature is
 
-\[
+```math
 z_{k,e}
 =\frac{u_{k,e}-\widehat\mu_{k,e^-}}
 {\widehat\sigma_{k,e^-}},
 \qquad |\mathcal H_{k,e^-}|\ge60.
-\]
+```
 
 All observations published on the same date share the same prior moments.
 Rows that have not completed warm-up remain in the full event table with an
@@ -53,28 +53,28 @@ explicit status rather than receiving an imputed value.
 ## Weekly claims
 
 Claims use innovations rather than persistent levels. For a positive
-first-release claims level \(L_\tau\), define \(y_\tau=\log L_\tau\). Before
-publication date \(d\), fit
+first-release claims level $`L_\tau`$, define $`y_\tau=\log L_\tau`$. Before
+publication date $`d`$, fit
 
-\[
+```math
 y_\tau=a_d+\phi_d y_{\tau-1}+\eta_\tau
-\]
+```
 
-using only levels released strictly before \(d\). At least 52 earlier levels
+using only levels released strictly before $`d`$. At least 52 earlier levels
 are required. The innovation for a new reference week is
 
-\[
+```math
 \varepsilon_\tau
 =y_\tau-\widehat a_d-\widehat\phi_d y_{\tau-1}.
-\]
+```
 
-It is standardized using at least 26 valid innovations released before \(d\):
+It is standardized using at least 26 valid innovations released before $`d`$:
 
-\[
+```math
 z_\tau
 =\frac{\varepsilon_\tau-\overline\varepsilon_{<d}}
 {\widehat\sigma_{\varepsilon,<d}}.
-\]
+```
 
 Each same-day catch-up batch shares one frozen AR fit and one set of scaling
 moments. A later row in the batch may use the preceding reference week's level

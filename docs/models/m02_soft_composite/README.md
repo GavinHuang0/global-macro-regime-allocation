@@ -32,18 +32,18 @@ are not smoothed over three months.
 
 Let the completed score be
 
-$$
+```math
 \boldsymbol z_m=(G_m,I_m)^\top.
-$$
+```
 
 The promoted filter maintains a four-month joint Gaussian state
-$\boldsymbol Z_{m-3:m}$, rolls it with a causal expanding OLS VAR(1), updates
+$`\boldsymbol Z_{m-3:m}`$, rolls it with a causal expanding OLS VAR(1), updates
 it as partial defining releases arrive, and conditions on
-$\boldsymbol z_m$ exactly when all eight defining components are available.
+$`\boldsymbol z_m`$ exactly when all eight defining components are available.
 Mapping uncertainty is added only when the Gaussian state is reported as four
 growth–inflation quadrant probabilities.
 
-Non-defining releases use fixed-$\nu=7$ Student-$t$ observation equations.
+Non-defining releases use fixed-$`\nu=7`$ Student-$`t`$ observation equations.
 The promoted reduced-core graph contains:
 
 1. `weekly_labor_stress`: the initial-claims innovation;
@@ -129,7 +129,7 @@ superiority.
 The main limitations are:
 
 - linear, time-homogeneous VAR dynamics and plug-in parameter estimates;
-- approximate Gaussian state updates for robust Student-$t$ evidence;
+- approximate Gaussian state updates for robust Student-$`t`$ evidence;
 - uncertain mapping from a monthly macro state to one-week ETF returns;
 - repeated weekly training observations sharing one monthly quadrant;
 - a compact, overlapping US ETF universe and few independent macro cycles;

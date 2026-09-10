@@ -3,7 +3,7 @@
 This directory preserves development history that is not part of the promoted
 model contract.
 
-- [Model 01 archive](m01/model_audit.md)
+- [Model 01 archive](m01/README.md)
 - [Model 02 archive](m02/README.md)
 
 Archived documents describe diagnostics, sensitivities, attribution work, and

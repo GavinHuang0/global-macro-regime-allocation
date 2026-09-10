@@ -18,18 +18,18 @@ historical result is deleted.
 
 Let
 
-$$
+```math
 \boldsymbol Z_m=
 \begin{bmatrix}
 G_m\\
 I_m
 \end{bmatrix}
-$$
+```
 
-denote the growth and inflation composite scores for reference month $m$.
+denote the growth and inflation composite scores for reference month $`m`$.
 The filter maintains the four-month joint state
 
-$$
+```math
 \boldsymbol X_m=
 \begin{bmatrix}
 \boldsymbol Z_{m-3}^{\mathsf T} &
@@ -37,7 +37,7 @@ $$
 \boldsymbol Z_{m-1}^{\mathsf T} &
 \boldsymbol Z_m^{\mathsf T}
 \end{bmatrix}^{\mathsf T}.
-$$
+```
 
 All non-control variants retain the selected baseline's:
 
@@ -45,14 +45,14 @@ All non-control variants retain the selected baseline's:
 - OLS VAR(1) transition model;
 - partial first-release updates for score-defining components;
 - expanding, strictly causal emission fits;
-- fixed-$\nu=7$ Student-$t$ release likelihoods;
+- fixed-$`\nu=7`$ Student-$`t`$ release likelihoods;
 - robust release-time update and event-weight audit; and
 - four fixed evaluation checkpoints.
 
-For observation model $b$, event $e$, and event reference month $q(e)$, the
+For observation model $`b`$, event $`e`$, and event reference month $`q(e)`$, the
 general release equation is
 
-$$
+```math
 \boldsymbol y_e
 =
 \boldsymbol a_b
@@ -63,13 +63,13 @@ $$
 \boldsymbol\varepsilon_e
 \sim
 t_{\nu=7}(\boldsymbol 0,\boldsymbol R_b),
-$$
+```
 
-where $\boldsymbol y_e$ is the response vector, $\boldsymbol v_e$ contains
-observed controls, $\boldsymbol H_b$ contains state loadings, and
-$\boldsymbol R_b$ is one residual scale matrix for the observation model.
+where $`\boldsymbol y_e`$ is the response vector, $`\boldsymbol v_e`$ contains
+observed controls, $`\boldsymbol H_b`$ contains state loadings, and
+$`\boldsymbol R_b`$ is one residual scale matrix for the observation model.
 Loading-specific ridge penalties and exact-zero restrictions are described
-below. A model fit used for event $e$ includes only training rows whose entire
+below. A model fit used for event $`e`$ includes only training rows whose entire
 information set was available strictly before the event's publication date.
 Rows sharing the candidate publication timestamp are held out atomically.
 
@@ -101,27 +101,27 @@ fuels, and computers (`IREXPETCOM`). Because the series is not seasonally
 adjusted, its release-time transformation is the same-vintage 12-month log
 change
 
-$$
+```math
 p^{\mathrm{imp}}_e
 =
 100\log\!\left(
 \frac{P^{(v_e)}_m}{P^{(v_e)}_{m-12}}
 \right),
-$$
+```
 
-where $v_e$ is the vintage available at release $e$. The current and lagged
+where $`v_e`$ is the vintage available at release $`e`$. The current and lagged
 levels therefore come from the same vintage. The transformed value is
 standardized using only earlier publication dates. After a 24-observation
 warm-up, it enters an inflation-only emission:
 
-$$
+```math
 y^{\mathrm{imp}}_e
 =a_{\mathrm{imp}}
 +h_{\mathrm{imp},I} I_{q(e)}
 +\varepsilon_e,
 \qquad
 h_{\mathrm{imp},G}=0.
-$$
+```
 
 The experiment separates three questions:
 
@@ -146,50 +146,50 @@ ratio. At every information date, each series contributes only its most recent
 vintage dated no later than that date. This matters because the two archives
 do not always update on the same historical day.
 
-Let $v_e^N$ and $v_e^R$ be the latest nominal and real archive vintages dated
-no later than information date $e$. They need not be the same calendar date.
+Let $`v_e^N`$ and $`v_e^R`$ be the latest nominal and real archive vintages dated
+no later than information date $`e`$. They need not be the same calendar date.
 Define the causally aligned implicit price level
 
-$$
+```math
 Q_m^{(e)}=\frac{\operatorname{RSAFS}_m^{(v_e^N)}}
                    {\operatorname{RRSFS}_m^{(v_e^R)}}.
-$$
+```
 
 The two monthly response coordinates are
 
-$$
+```math
 r^{\mathrm{real}}_e
 =100\log\!\left(
 \frac{\operatorname{RRSFS}^{(v_e^R)}_m}
      {\operatorname{RRSFS}^{(v_e^R)}_{m-1}}
 \right)
-$$
+```
 
 and
 
-$$
+```math
 p^{\mathrm{retail}}_e
 =100\log\!\left(
 \frac{Q_m^{(e)}}{Q_{m-1}^{(e)}}
 \right).
-$$
+```
 
 Within each constituent series, the current and prior levels come from the
 same available snapshot. The identity
 
-$$
+```math
 r^{\mathrm{real}}_e+p^{\mathrm{retail}}_e
 =100\log\!\left(
 \frac{\operatorname{RSAFS}^{(v_e^N)}_m}
      {\operatorname{RSAFS}^{(v_e^N)}_{m-1}}
 \right)
-$$
+```
 
 holds for causally aligned snapshots. Each coordinate receives its own
 strictly lagged expanding standardization after 60 earlier observations. They
 are then estimated jointly with one residual scale matrix. The real-activity
-response uses state-loading ridge penalties $(1,10)$ for growth and inflation,
-respectively; the implicit-price response uses $(10,1)$. Both loadings remain
+response uses state-loading ridge penalties $`(1,10)`$ for growth and inflation,
+respectively; the implicit-price response uses $`(10,1)`$. Both loadings remain
 estimable, but the economically secondary cross-loading is shrunk more
 strongly.
 
@@ -197,15 +197,15 @@ strongly.
 
 Total vehicle unit sales (`TOTALSA`) supply a separate quantity coordinate:
 
-$$
+```math
 u^{\mathrm{veh}}_e
 =100\log\!\left(
 \frac{\operatorname{TOTALSA}^{(v_e)}_m}
      {\operatorname{TOTALSA}^{(v_e)}_{m-1}}
 \right).
-$$
+```
 
-It is standardized against publication dates strictly before $e$ after a
+It is standardized against publication dates strictly before $`e`$ after a
 24-observation warm-up. It loads on growth only; its inflation loading is fixed
 exactly to zero.
 
@@ -233,44 +233,44 @@ month.
 
 The activity response is the existing same-vintage shipment change
 
-$$
+```math
 a^{\mathrm{cap}}_e
 =100\log\!\left(
 \frac{S_m^{(v_e)}}{S_{m-1}^{(v_e)}}
 \right),
-$$
+```
 
 and the pipeline response is
 
-$$
+```math
 d^{\mathrm{cap}}_e
 =100\Delta\log\!\left(\frac{O_m^{(v_e)}}{S_m^{(v_e)}}\right)
 =100\log\!\left(
 \frac{O_m^{(v_e)}/S_m^{(v_e)}}
      {O_{m-1}^{(v_e)}/S_{m-1}^{(v_e)}}
 \right),
-$$
+```
 
-where $O$ denotes orders and $S$ denotes shipments. Equivalently,
-$d^{\mathrm{cap}}_e$ is the orders log change minus the shipments log change
+where $`O`$ denotes orders and $`S`$ denotes shipments. Equivalently,
+$`d^{\mathrm{cap}}_e`$ is the orders log change minus the shipments log change
 from the exact matched event.
 
 Activity retains its previously verified causal standardization. The new
 pipeline coordinate is standardized as
 
-$$
+```math
 z^{\mathrm{pipe}}_e
 =\frac{d^{\mathrm{cap}}_e-\bar d_{e^-}}{s_{e^-}},
-$$
+```
 
-where $\bar d_{e^-}$ and $s_{e^-}$ use only available pipeline observations
-with publication date strictly earlier than $e$. All catch-up rows sharing a
+where $`\bar d_{e^-}`$ and $`s_{e^-}`$ use only available pipeline observations
+with publication date strictly earlier than $`e`$. All catch-up rows sharing a
 publication date are standardized atomically, so no same-day value enters
 another row's mean or standard deviation. The warm-up requires 24 earlier
 values.
 
 The joint activity/pipeline model uses one residual scale matrix. Activity is
-allowed to load on both scores with penalties $(1,10)$, while the pipeline
+allowed to load on both scores with penalties $`(1,10)`$, while the pipeline
 loads on growth only with its inflation loading fixed exactly to zero. Atomic
 add-one and conditional leave-one-out contrasts are reported for both
 coordinates, followed by a direct comparison between the joint redesign and
@@ -285,25 +285,25 @@ but normally describe different reference weeks. A naive bivariate response
 assigned to one reference month would therefore misdate one coordinate. The
 implemented chain-rule factorization is
 
-$$
+```math
 p\!\left(u^I_e\mid\boldsymbol Z_{q_I(e)}\right)
 \;p\!\left(
 u^C_e\mid\boldsymbol Z_{q_C(e)},u^I_e
 \right),
-$$
+```
 
-where $u^I_e$ and $u^C_e$ are the existing expanding log-AR(1) innovations,
-$q_I(e)$ is the ICSA reference month, and $q_C(e)$ is the CCSA reference
+where $`u^I_e`$ and $`u^C_e`$ are the existing expanding log-AR(1) innovations,
+$`q_I(e)`$ is the ICSA reference month, and $`q_C(e)`$ is the CCSA reference
 month. The first factor is the existing ICSA likelihood. In the second factor,
 CCSA remains targeted to its own reference month and the same-publication ICSA
 innovation is an observed control:
 
-$$
+```math
 u^C_e
 =a_C+h_{C,G}G_{q_C(e)}+c_Iu^I_e+\varepsilon^C_e,
 \qquad
 h_{C,I}=0.
-$$
+```
 
 Pairing is permitted only when the two rows have the exact same publication
 date and the ICSA reference week is exactly seven days after the CCSA reference
@@ -341,13 +341,13 @@ The primary checkpoint is `before_any_defining_release`, before any component
 that defines that month's completed composite score has arrived. The other
 checkpoints are after the Employment Situation release, after midmonth
 defining releases, and immediately before the final score-defining release
-day. For a candidate $c$, reference $r$, and lower-is-better loss $L$, the
+day. For a candidate $`c`$, reference $`r`$, and lower-is-better loss $`L`$, the
 reported mean benefit is
 
-$$
+```math
 B_{c,r}=\frac{1}{M}\sum_{m=1}^{M}
 \left(L_{r,m}-L_{c,m}\right).
-$$
+```
 
 Positive benefit therefore always means that the candidate helps. For hard
 quadrant accuracy the subtraction is reversed so the same interpretation
@@ -356,22 +356,22 @@ Brier distance. Continuous-score negative log predictive density (NLPD) is a
 secondary diagnostic, and hard accuracy is descriptive because it discards
 forecast uncertainty.
 
-More precisely, let $\widehat{\boldsymbol p}_m$ be the forecast distribution
-over the four quadrants and let $\boldsymbol p_m^*$ be the soft quadrant map
+More precisely, let $`\widehat{\boldsymbol p}_m`$ be the forecast distribution
+over the four quadrants and let $`\boldsymbol p_m^*`$ be the soft quadrant map
 computed from the completed score. The two proper probability losses are
 
-$$
+```math
 \operatorname{CE}_m
 =-\sum_{r=1}^{4}p_{m,r}^*\log\widehat p_{m,r}
-$$
+```
 
 and
 
-$$
+```math
 \operatorname{Brier}_m
 =\sum_{r=1}^{4}
 \left(\widehat p_{m,r}-p_{m,r}^*\right)^2.
-$$
+```
 
 They score the full probability distribution rather than only its largest
 entry.
@@ -425,7 +425,7 @@ block.
 None of the atomic proper-score comparisons is significant after its
 family-specific Holm adjustment. For example, the pipeline add-one comparison
 has favorable percentile intervals for cross-entropy and Brier, but its raw
-centered $p$-values are 0.085 and 0.082 and its Holm-adjusted values are 0.427
+centered $`p`$-values are 0.085 and 0.082 and its Holm-adjusted values are 0.427
 and 0.409. The signs below are therefore development guidance, not confirmed
 out-of-sample effects.
 
@@ -439,9 +439,9 @@ future locked replay:
 - **Use no price block for now.** Import prices improve both primary proper
   scores relative to input costs and to no price block, while legacy input
   costs are worse than no price block. However, the import-for-input direct
-  swap has cross-entropy and Brier benefits of $-0.000477$ and $-0.000578$
+  swap has cross-entropy and Brier benefits of $`-0.000477`$ and $`-0.000578`$
   after the midmonth defining releases, and its strict-pre-final Brier benefit
-  is $-0.000258$. This fails the predeclared requirement of no material harm at
+  is $`-0.000258`$. This fails the predeclared requirement of no material harm at
   later checkpoints. Import prices remain the preferred price sensitivity,
   but are not selected for the reduced core.
 - **Keep real retail activity and the implicit retail-price coordinate.** Both
@@ -482,15 +482,15 @@ At the primary checkpoint, `all_revised_candidate` has the following benefits:
 | `partial_only` | 0.00369 | 0.000945 | 0.0813 | 3.83 percentage points |
 
 Against the frozen selected baseline, the 95% moving-block intervals are
-$[-0.000178,0.00662]$ for cross-entropy,
-$[-0.000515,0.00287]$ for Brier, and $[-0.0105,0.0368]$ for NLPD. All include
+$`[-0.000178,0.00662]`$ for cross-entropy,
+$`[-0.000515,0.00287]`$ for Brier, and $`[-0.0105,0.0368]`$ for NLPD. All include
 zero. Against `partial_only`, the hard-accuracy interval is positive, but hard
 accuracy is descriptive, the combined comparison is outside the atomic Holm
 families, and its principal proper-score intervals include zero.
 
 The candidate's later-checkpoint full-sample NLPD is also unstable. Its benefit
-relative to the frozen baseline is $-4.83$ after the employment release and
-$-3.01$ after midmonth defining releases, whereas the sensitivity excluding
+relative to the frozen baseline is $`-4.83`$ after the employment release and
+$`-3.01`$ after midmonth defining releases, whereas the sensitivity excluding
 March--May 2020 becomes favorable. This is another reason not to promote the
 combined profile from its favorable primary means.
 
@@ -509,7 +509,7 @@ The following limitations apply even when a mean comparison is favorable:
 - Many event models have short causal histories or long warm-ups. A small
   full-calendar effect can reflect limited usable releases as well as weak
   economics.
-- The Student-$t$ emission, state loadings, residual scale, and VAR parameters
+- The Student-$`t`$ emission, state loadings, residual scale, and VAR parameters
   are plug-in estimates. The filter does not integrate parameter uncertainty.
 - The block factorization is still an approximation. Conditional CCSA handles
   one important contemporaneous dependency, but consumer, price, labor, and

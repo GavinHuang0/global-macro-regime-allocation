@@ -8,18 +8,18 @@ results are in
 
 ## Signal, universe, and timing
 
-Let \(t\) index monthly rebalances, \(m(t)\) the corresponding macro reference
-month, and \(d_t\) the first calendar day of that month. The signal is the
+Let $`t`$ index monthly rebalances, $`m(t)`$ the corresponding macro reference
+month, and $`d_t`$ the first calendar day of that month. The signal is the
 baseline `post_month_roll` marginal:
 
-\[
+```math
 p_{m(t),r\mid d_t^-}
 =\Pr(R_{m(t)}=r\mid\mathcal D_{d_t^-}),
 \qquad r\in\mathcal R.
-\]
+```
 
-The roll has occurred, but releases and confirmations dated \(d_t\) have not.
-If \(d_t\) is not a trading day, the saved signal is unchanged and execution
+The roll has occurred, but releases and confirmations dated $`d_t`$ have not.
+If $`d_t`$ is not a trading day, the saved signal is unchanged and execution
 waits for the first common session.
 
 The strategy assets are `SPY`, `IEF`, `TIP`, `HYG`, `BIL`, `GLD`, and `LQD`.
@@ -28,82 +28,82 @@ total-return proxies.
 
 The target trades at the first common adjusted open and exits at the next
 month's first common adjusted open. The resulting strategy-asset return vector
-is \(\mathbf x_t\). Missing execution prices are not filled. A current target
+is $`\mathbf x_t`$. Missing execution prices are not filled. A current target
 may be published before its exit exists, but it is excluded from performance.
 
 ## Causal return estimation
 
-A historical holding period enters rebalance \(t\)'s expanding sample only
+A historical holding period enters rebalance $`t`$'s expanding sample only
 when both its ending open and deterministic label were available strictly
-before \(d_t\). All seven assets share one complete sample, and at least 60
+before $`d_t`$. All seven assets share one complete sample, and at least 60
 labeled months are required.
 
-Let \(n_{t,r}\) be the number of eligible months in quadrant \(r\),
-\(\overline{\boldsymbol\mu}_{t,r}\) their arithmetic mean return vector, and
-\(\overline{\boldsymbol\mu}_t\) the pooled mean. Regime means receive 24
+Let $`n_{t,r}`$ be the number of eligible months in quadrant $`r`$,
+$`\overline{\boldsymbol\mu}_{t,r}`$ their arithmetic mean return vector, and
+$`\overline{\boldsymbol\mu}_t`$ the pooled mean. Regime means receive 24
 pooled pseudo-months:
 
-\[
+```math
 \widetilde{\boldsymbol\mu}_{t,r}
 =\frac{
 n_{t,r}\overline{\boldsymbol\mu}_{t,r}
 +24\overline{\boldsymbol\mu}_t
 }{n_{t,r}+24}.
-\]
+```
 
 An empty regime receives the pooled mean. Residuals around the unshrunk regime
 sample means are pooled across regimes and passed to Ledoit–Wolf, producing
-one shared monthly within-regime covariance \(\mathbf C_t\).
+one shared monthly within-regime covariance $`\mathbf C_t`$.
 
 The promoted posterior moments are
 
-\[
+```math
 \boldsymbol\mu_t
 =\sum_{r\in\mathcal R}
 p_{m(t),r\mid d_t^-}\widetilde{\boldsymbol\mu}_{t,r},
-\]
+```
 
-\[
+```math
 \mathbf B_t
 =\sum_{r\in\mathcal R}
 p_{m(t),r\mid d_t^-}
 (\widetilde{\boldsymbol\mu}_{t,r}-\boldsymbol\mu_t)
 (\widetilde{\boldsymbol\mu}_{t,r}-\boldsymbol\mu_t)^\top,
-\]
+```
 
-\[
+```math
 \boldsymbol\Sigma_t=\mathbf C_t+\mathbf B_t.
-\]
+```
 
-\(\mathbf B_t\) is the between-regime covariance implied by uncertainty in
+$`\mathbf B_t`$ is the between-regime covariance implied by uncertainty in
 conditional means. Covariance is annualized as
-\(12\boldsymbol\Sigma_t\) for the risk constraint; the objective keeps
+$`12\boldsymbol\Sigma_t`$ for the risk constraint; the objective keeps
 one-month expected-return units.
 
 ## Optimization
 
-Let \(\mathbf w_t^{-}\) be the causal estimate of pretrade weights formed from
-the previous target and the last adjusted close strictly before \(d_t\), and
-let \(\mathbf w_t\) be the new target. The optimizer solves
+Let $`\mathbf w_t^{-}`$ be the causal estimate of pretrade weights formed from
+the previous target and the last adjusted close strictly before $`d_t`$, and
+let $`\mathbf w_t`$ be the new target. The optimizer solves
 
-\[
+```math
 \max_{\mathbf w_t}
 \quad
 \boldsymbol\mu_t^\top\mathbf w_t
 -\sum_a 0.0005\,|w_{t,a}-w_{t,a}^{-}|
-\]
+```
 
 subject to long-only full investment,
 
-\[
+```math
 \mathbf 1^\top\mathbf w_t=1,\qquad \mathbf w_t\ge0,
-\]
+```
 
 and
 
-\[
+```math
 \mathbf w_t^\top(12\boldsymbol\Sigma_t)\mathbf w_t\le0.10^2.
-\]
+```
 
 Individual caps are:
 
@@ -127,32 +127,32 @@ order is feasible pretrade holdings, constrained minimum variance, then all
 
 The target is formed without knowing the execution open. At that later open,
 the previous holdings are drifted using realized asset returns to obtain the
-actual pretrade vector \(\mathbf w_t^{-,\mathrm{exec}}\). Realized cost is
+actual pretrade vector $`\mathbf w_t^{-,\mathrm{exec}}`$. Realized cost is
 
-\[
+```math
 K_t
 =\sum_a0.0005
 \left|w_{t,a}-w_{t,a}^{-,\mathrm{exec}}\right|.
-\]
+```
 
-If \(g_t=\mathbf w_t^\top\mathbf x_t\), the net holding return is
+If $`g_t=\mathbf w_t^\top\mathbf x_t`$, the net holding return is
 
-\[
+```math
 r_t^{\mathrm{net}}=(1-K_t)(1+g_t)-1.
-\]
+```
 
 The initial formation trade is charged. Daily NAV records pretrade and
 post-trade open values, so entry cost is included in return and drawdown.
-Reported one-way turnover is half the \(L^1\) change in weights.
+Reported one-way turnover is half the $`L^1`$ change in weights.
 
 ## Essential comparisons
 
 `pooled_mean_optimizer` is the clean posterior ablation. It retains the causal
 sample, optimizer, caps, costs, and execution, but uses
-\(\overline{\boldsymbol\mu}_t\) instead of the current posterior-weighted mean.
+$`\overline{\boldsymbol\mu}_t`$ instead of the current posterior-weighted mean.
 Its between-regime covariance uses causal historical regime frequencies.
 
-`equal_weight` holds \(1/7\) in each strategy asset and rebalances monthly.
+`equal_weight` holds $`1/7`$ in each strategy asset and rebalances monthly.
 `static_60_spy_40_agg` holds 60% `SPY` and 40% `AGG`. Both pay the same
 realized cost schedule. The 60/40 benchmark has a different opportunity set
 because `AGG` is benchmark-only.
@@ -167,14 +167,14 @@ Headline metrics are total return, CAGR, annualized volatility, zero-rate and
 `BIL`-excess Sharpe, daily-NAV maximum drawdown, annualized turnover, and cost
 drag.
 
-For comparator \(b\), the annualized mean-return difference is
+For comparator $`b`$, the annualized mean-return difference is
 
-\[
+```math
 \Delta^{(b)}
 =12\,\overline{
 r_t^{\mathrm{posterior}}-r_t^{(b)}
 }.
-\]
+```
 
 Uncertainty uses 10,000 paired circular block-bootstrap resamples with
 six-month blocks and seed `20260718`. An interval containing zero does not

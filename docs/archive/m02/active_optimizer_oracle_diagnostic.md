@@ -40,30 +40,30 @@ already published weekly signal table:
   `5821824dcfe6a82347d1df176467b74d0199cb7724bb08f5e07daf08801fbc4a`.
 
 The largest recomputed expected-mean mismatch against the frozen upstream
-audit is \(9.9991\times10^{-17}\). The diagnostic therefore changes the
+audit is $`9.9991\times10^{-17}`$. The diagnostic therefore changes the
 allocation rule, not the posterior or the weekly return estimator.
 
 ## Benchmark-relative active optimizer
 
-Let \(b_t\) be the frozen pooled-mean target, and let
-\(\mu_t^{\mathrm{post}}\) and \(\mu_t^{\mathrm{pool}}\) be the posterior and
+Let $`b_t`$ be the frozen pooled-mean target, and let
+$`\mu_t^{\mathrm{post}}`$ and $`\mu_t^{\mathrm{pool}}`$ be the posterior and
 pooled weekly expected-return vectors. The optimizer selects active weights
-\(a_t\) and a total target \(w_t\):
+$`a_t`$ and a total target $`w_t`$:
 
-$$
+```math
 w_t=b_t+a_t,
 \qquad
 \Delta\mu_t=\mu_t^{\mathrm{post}}-\mu_t^{\mathrm{pool}}.
-$$
+```
 
 Its objective is
 
-$$
+```math
 \max_{a_t}\left[
 \Delta\mu_t^\top a_t
 -\sum_i c_i\left|w_{t,i}-w_{t,i}^{-,\mathrm{pretrade}}\right|
 \right].
-$$
+```
 
 The cost term is the estimated cost of trading the complete strategy target,
 not merely the active sleeve. The target is subsequently simulated as its own
@@ -75,7 +75,7 @@ The locked active limits are:
 |---|---:|
 | Annualized tracking error versus pooled | 1.00% |
 | Active weight per asset | ±5.00% |
-| One-way active exposure, \(\frac12\sum_i|a_{t,i}|\) | 10.00% |
+| One-way active exposure, $`\frac12\sum_i\lvert a_{t,i}\rvert`$ | 10.00% |
 | Sum of active weights | 0 |
 | Annualized total volatility | 10.00% |
 | Transaction cost | 5 bp one way |

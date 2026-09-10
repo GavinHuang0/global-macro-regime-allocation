@@ -22,14 +22,14 @@ schema or downstream model definitions.
 
 ## Point-in-time rule
 
-For a macro observation in reference month \(m\), the pipeline identifies its
+For a macro observation in reference month $`m`$, the pipeline identifies its
 first eligible publication and reads both:
 
-- the newly released level for \(m\); and
+- the newly released level for $`m`$; and
 - the preceding level visible in that same vintage.
 
 Monthly changes are calculated locally from those two levels. This prevents a
-later revision of month \(m-1\) from entering month \(m\)'s first-release
+later revision of month $`m-1`$ from entering month $`m`$'s first-release
 feature.
 
 The authenticated FRED path uses:

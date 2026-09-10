@@ -2,8 +2,8 @@
 
 This directory preserves the original team work for provenance and comparison.
 
-- `original_paper.pdf` is the four-author course manuscript.
-- `bayesian_v2.py` is the surviving Bayesian orchestration/visualization script.
+- [original_paper.pdf](original_paper.pdf) is the four-author course manuscript.
+- [bayesian_v2.py](bayesian_v2.py) is the surviving Bayesian orchestration/visualization script.
 
 The script is incomplete: its HMM, data-generation, macro-evidence, allocation,
 and backtest dependencies were not recovered. It also reflects methodological

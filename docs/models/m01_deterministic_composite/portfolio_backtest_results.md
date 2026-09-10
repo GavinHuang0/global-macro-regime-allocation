@@ -36,7 +36,7 @@ six-month blocks:
 | `static_60_spy_40_agg` | +0.252% | [-2.623%, +3.098%] | 57.22% |
 | `equal_weight` | +3.931% | [+1.440%, +6.346%] | 99.90% |
 
-The fractions are not \(p\)-values. Posterior and pooled monthly returns have
+The fractions are not $`p`$-values. Posterior and pooled monthly returns have
 correlation 0.9973, and their interval includes zero. Because pooled mean
 holds the estimator, constraints, execution, and costs fixed while removing
 the current posterior, it is the cleanest allocation ablation. Model 01 does
@@ -60,7 +60,7 @@ variation.
 ## Latest target
 
 At the 1 July 2026 `post_month_roll` signal,
-\(p_{m,r\mid d}\) was:
+$`p_{m,r\mid d}`$ was:
 
 | Quadrant | Probability |
 |---|---:|

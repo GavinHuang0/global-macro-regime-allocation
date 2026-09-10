@@ -10,11 +10,14 @@ allocation. The repository contains two published model lines:
 
 The project is for reproducible research, not investment advice.
 
+Browse the [documentation index](docs/README.md) for model specifications,
+data access, and research archives.
+
 ## Promoted baselines
 
 | Model | Promoted inference baseline | Promoted allocation baseline | Frequency | Status |
 |---|---|---|---|---|
-| Model 01 | Event-driven fixed-\(\nu=7\) Bayesian filter over deterministic hard regimes | `posterior_optimized` | Monthly | Frozen benchmark |
+| Model 01 | Event-driven fixed-$`\nu=7`$ Bayesian filter over deterministic hard regimes | `posterior_optimized` | Monthly | Frozen benchmark |
 | Model 02 | `student_t_7_reduced_core` | `posterior_optimized` | Weekly | Promoted; current iteration closed; not frozen |
 
 Only these baselines are part of the main model contract. Pooled-mean,
@@ -28,7 +31,7 @@ Both models use the same principles:
 
 1. **Point-in-time macro data.** A transformation uses the first eligible
    release and the prior level visible in that same vintage.
-2. **Causal fitting.** A signal at information cutoff \(d\) uses only returns,
+2. **Causal fitting.** A signal at information cutoff $`d`$ uses only returns,
    labels, and releases available by its declared cutoff.
 3. **Explicit execution.** Targets trade at the first common adjusted open of
    the holding period; the next common open ends the period.
@@ -52,17 +55,17 @@ point-in-time releases
 
 | Symbol | Meaning |
 |---|---|
-| \(m\) | Macro reference month |
-| \(d\) | Information cutoff |
-| \(r\in\mathcal R\) | One of four growth/inflation quadrants |
-| \(p_{m,r\mid d}\) | Probability of quadrant \(r\) for month \(m\), given information through \(d\) |
-| \(\boldsymbol z_m\), \(\boldsymbol Z_m\) | Model 02 completed score and corresponding random state |
-| \(t\) | Portfolio rebalance and holding-period index |
-| \(\mathbf x_t\) | Asset simple-return vector |
-| \(\mathbf w_t^{-}\), \(\mathbf w_t\) | Pretrade and target weights |
-| \(\boldsymbol\mu_t\), \(\boldsymbol\Sigma_t\) | Expected-return vector and covariance used by the allocator |
-| \(K_t\) | Realized trading cost |
-| \(A\) | Annualization factor: 12 for Model 01 and 52 for Model 02 |
+| $`m`$ | Macro reference month |
+| $`d`$ | Information cutoff |
+| $`r\in\mathcal R`$ | One of four growth/inflation quadrants |
+| $`p_{m,r\mid d}`$ | Probability of quadrant $`r`$ for month $`m`$, given information through $`d`$ |
+| $`\boldsymbol z_m`$, $`\boldsymbol Z_m`$ | Model 02 completed score and corresponding random state |
+| $`t`$ | Portfolio rebalance and holding-period index |
+| $`\mathbf x_t`$ | Asset simple-return vector |
+| $`\mathbf w_t^{-}`$, $`\mathbf w_t`$ | Pretrade and target weights |
+| $`\boldsymbol\mu_t`$, $`\boldsymbol\Sigma_t`$ | Expected-return vector and covariance used by the allocator |
+| $`K_t`$ | Realized trading cost |
+| $`A`$ | Annualization factor: 12 for Model 01 and 52 for Model 02 |
 
 The canonical quadrant order is:
 
@@ -71,14 +74,14 @@ The canonical quadrant order is:
 3. growth up / inflation down; and
 4. growth down / inflation down.
 
-Model 01 has a hard monthly regime \(R_m\). Model 02 instead defines the
+Model 01 has a hard monthly regime $`R_m`$. Model 02 instead defines the
 completed continuous score
 
-\[
+```math
 \boldsymbol z_m=(G_m,I_m)^\top
-\]
+```
 
-and models its uncertain state as \(\boldsymbol Z_m\), whose reporting
+and models its uncertain state as $`\boldsymbol Z_m`$, whose reporting
 distribution is integrated over the same four quadrants.
 Model 01 and Model 02 inference scores are not directly comparable: Model 01
 scores eventual one-hot regimes, while Model 02 scores continuous states and
@@ -91,12 +94,12 @@ a soft Gaussian quadrant map.
 Model 01 forms equal-weight growth and inflation composites from eight
 first-release macro components. Transformations are standardized with strictly
 lagged expanding moments, averaged within each axis, and smoothed over three
-months. The signs of the two smoothed composites define \(R_m\).
+months. The signs of the two smoothed composites define $`R_m`$.
 
 An expanding first-order Markov transition model evolves a four-month joint
 regime path. Five leading-release blocks update that path with
-regime-conditioned multivariate Student-\(t\) likelihoods using fixed
-\(\nu=7\). Completed composite regimes enter later as exact end-of-day
+regime-conditioned multivariate Student-$`t`$ likelihoods using fixed
+$`\nu=7`$. Completed composite regimes enter later as exact end-of-day
 confirmations.
 
 At the month-end checkpoint over 97 scored targets, the promoted filter has
@@ -139,14 +142,14 @@ See the [Model 01 model card](docs/models/m01_deterministic_composite/README.md)
 ### Inference
 
 Model 02 removes Model 01's three-month smoothing and hard latent-regime
-target. It evolves the continuous random state \(\boldsymbol Z_m\) through an expanding
+target. It evolves the continuous random state $`\boldsymbol Z_m`$ through an expanding
 causal VAR(1) and a rolling four-month joint Gaussian state.
 
 The promoted `student_t_7_reduced_core` baseline combines:
 
 - sequential partial releases of the score-defining components;
 - exact end-of-day conditioning when a monthly score is complete;
-- fixed-\(\nu=7\) robust non-defining release updates; and
+- fixed-$`\nu=7`$ robust non-defining release updates; and
 - three reduced-core evidence models: initial claims, joint real-retail and
   implicit-price evidence, and joint capital-goods activity and pipeline
   evidence.
@@ -212,6 +215,7 @@ Primary documents:
 - [Data access and credentials](docs/data_access.md)
 - [Security policy](SECURITY.md)
 - [Research archive](docs/archive/README.md)
+- [Legacy course-project artifacts](legacy/README.md)
 
 Primary machine-readable outputs:
 

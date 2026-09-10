@@ -91,7 +91,7 @@ initial snapshot before applying the ordinary lag and active-source gates.
   before its month roll.
 - Verified all 881 recorded likelihood fits: historical event dates and target
   label dates are strictly before the scored release date.
-- Independently evaluated the multivariate Student-$t$ density against SciPy; the
+- Independently evaluated the multivariate Student-$`t`$ density against SciPy; the
   maximum numerical discrepancy was below `7e-16`.
 - Checked that each saved 256-path posterior is finite, nonnegative, and sums to
   one within tolerance.

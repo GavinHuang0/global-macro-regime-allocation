@@ -7,43 +7,43 @@ point-in-time evidence table and reads no network credential.
 
 ## 1. Questions and estimands
 
-Let \(\mathcal E\) denote the seven observation models enabled by the selected
-baseline and let \(b\in\mathcal E\) be one model. Two experiments answer
+Let $`\mathcal E`$ denote the seven observation models enabled by the selected
+baseline and let $`b\in\mathcal E`$ be one model. Two experiments answer
 different questions:
 
-$$
+```math
 \mathcal E_b^{\mathrm{add}}=\{b\},
 \qquad
 \mathcal E_b^{\mathrm{leave}}=\mathcal E\setminus\{b\}.
-$$
+```
 
-The add-one variant enables only \(b\) on top of `partial_only`. It estimates
-the block's standalone value. The leave-one-out variant removes only \(b\)
+The add-one variant enables only $`b`$ on top of `partial_only`. It estimates
+the block's standalone value. The leave-one-out variant removes only $`b`$
 from `student_t_7_combined`. It estimates the block's conditional value in the
 presence of all the other legacy blocks.
 
-For a lower-is-better loss \(L\), define
+For a lower-is-better loss $`L`$, define
 
-$$
+```math
 A_b=L(\texttt{partial\_only})
     -L(\texttt{partial\_only}+b),
-$$
+```
 
 and
 
-$$
+```math
 C_b=L(\texttt{baseline}-b)
     -L(\texttt{baseline}).
-$$
+```
 
 For accuracy, the subtraction is reversed where necessary so that positive
-\(A_b\) and positive \(C_b\) always mean that the block helps. Add-one and
+$`A_b`$ and positive $`C_b`$ always mean that the block helps. Add-one and
 leave-one-out effects need not add to the baseline's total change because the
 Bayesian updates are nonlinear, sequential, and informationally dependent.
 
 Every candidate retains:
 
-- fixed-\(\nu=7\) Student-\(t\) emissions;
+- fixed-$`\nu=7`$ Student-$`t`$ emissions;
 - OLS VAR(1) transition dynamics;
 - partial first-release updates for score-defining components;
 - the baseline ridge schedules and covariance estimators;
@@ -104,7 +104,7 @@ selected baseline's semantic non-defining event updates.
 The table reports block-benefit units. Positive numbers mean the block helps;
 negative numbers mean the model is better without it.
 
-| Block | \(A_b\), NLPD | \(C_b\), NLPD | \(A_b\), cross-entropy | \(C_b\), cross-entropy | \(A_b\), Brier | \(C_b\), Brier |
+| Block | $`A_b`$, NLPD | $`C_b`$, NLPD | $`A_b`$, cross-entropy | $`C_b`$, cross-entropy | $`A_b`$, Brier | $`C_b`$, Brier |
 |---|---:|---:|---:|---:|---:|---:|
 | Weekly labor stress | 0.065786 | 0.065813 | 0.001018 | 0.001025 | -0.0000685 | -0.0000668 |
 | Monthly labor demand | -0.0000223 | -0.0000362 | -0.0000139 | -0.0000177 | -0.00000713 | -0.00000826 |
@@ -118,15 +118,15 @@ No atomic contrast is significant after the fourteen-test Holm correction in
 the full sample. In the segment-aware sensitivity excluding March-May 2020,
 weekly labor stress has a positive NLPD benefit in both arms:
 
-$$
+```math
 A_{\mathrm{claims}}=0.01934,
 \qquad
 C_{\mathrm{claims}}=0.01936.
-$$
+```
 
 Their 95% block-bootstrap intervals are approximately
-\([0.01566,0.02391]\) and \([0.01575,0.02387]\). The centered two-sided
-\(p\)-value is 0.0002 and the fourteen-test Holm-adjusted \(p\)-value is
+$`[0.01566,0.02391]`$ and $`[0.01575,0.02387]`$. The centered two-sided
+$`p`$-value is 0.0002 and the fourteen-test Holm-adjusted $`p`$-value is
 0.0028 in both arms. This result is specific to continuous-score NLPD. Weekly
 claims slightly improves quadrant cross-entropy and hard accuracy but slightly
 worsens Brier distance, so it is the strongest block without being a uniform
@@ -146,7 +146,7 @@ nearly cancel in aggregate.
 
 Consumer demand and business investment have small positive benefits in both
 arms across the three probabilistic losses. Their intervals include zero and
-their multiplicity-adjusted \(p\)-values equal one. The agreement of both arms
+their multiplicity-adjusted $`p`$-values equal one. The agreement of both arms
 is evidence of direction, not proof of material forecast value.
 
 Monthly labor demand and input costs are negative in both arms. Housing is
@@ -168,8 +168,8 @@ matching reduced core:
 
 The consumer replacement improves mean score NLPD relative to having no
 consumer block; its 95% percentile-bootstrap interval for the
-candidate-minus-reference NLPD is \([-0.0247,-0.00054]\). Its centered test is
-weaker (raw \(p=0.076\), three-test Holm-adjusted \(p=0.229\)), and its quadrant
+candidate-minus-reference NLPD is $`[-0.0247,-0.00054]`$. Its centered test is
+weaker (raw $`p=0.076`$, three-test Holm-adjusted $`p=0.229`$), and its quadrant
 cross-entropy is slightly worse. It is therefore a useful continuous-score
 candidate, not a clear replacement for the legacy consumer likelihood.
 

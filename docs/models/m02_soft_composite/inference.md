@@ -19,35 +19,35 @@ out-of-sample result.
 
 ## State, timing, and notation
 
-Let $m$ be a monthly reference period, $d$ an information cutoff, and
-$\mathcal D_d$ the information available at that cutoff. The completed,
+Let $`m`$ be a monthly reference period, $`d`$ an information cutoff, and
+$`\mathcal D_d`$ the information available at that cutoff. The completed,
 unsmoothed score is
 
-$$
+```math
 \boldsymbol z_m=(G_m,I_m)^\top,
-$$
+```
 
-where $G_m$ and $I_m$ are equal-weight averages of four causally
+where $`G_m`$ and $`I_m`$ are equal-weight averages of four causally
 standardized growth and inflation components. Each component uses its first
 eligible release, reads the current and prior reference months from the same
 vintage, and requires 60 earlier valid observations for standardization.
 
-The filter treats the monthly score as the random state $\boldsymbol Z_m$ and
+The filter treats the monthly score as the random state $`\boldsymbol Z_m`$ and
 maintains a four-month joint Gaussian:
 
-$$
+```math
 \boldsymbol Z_{m-3:m}\mid\mathcal D_d
 \sim\mathcal N(\boldsymbol\mu_d,\boldsymbol P_d).
-$$
+```
 
 The expanding monthly transition is
 
-$$
+```math
 \boldsymbol Z_{m+1}
 =\boldsymbol c+\boldsymbol A\boldsymbol Z_m+\boldsymbol\eta_{m+1},
 \qquad
 \boldsymbol\eta_{m+1}\sim\mathcal N(\boldsymbol 0,\boldsymbol Q).
-$$
+```
 
 Every VAR and observation-model fit uses only rows available strictly before
 the release being processed. On a calendar day, the replay applies a month
@@ -56,15 +56,15 @@ end of day.
 
 Partial defining releases update the applicable monthly state as their first
 releases arrive. When all eight defining components are available, the
-completed $\boldsymbol z_m$ is conditioned as an exact observation. Mapping
+completed $`\boldsymbol z_m`$ is conditioned as an exact observation. Mapping
 uncertainty is added only when the Gaussian state is translated into quadrant
 probabilities; it is not VAR process noise.
 
-For event $e$, publication date $d_e$, reference month $m(e)$, and
-observation model $b$, the reduced-core non-defining evidence uses a
-fixed-$\nu=7$ Student-$t$ equation:
+For event $`e`$, publication date $`d_e`$, reference month $`m(e)`$, and
+observation model $`b`$, the reduced-core non-defining evidence uses a
+fixed-$`\nu=7`$ Student-$`t`$ equation:
 
-$$
+```math
 \boldsymbol y_e\mid\boldsymbol Z_{m(e)}
 \sim t_7\!\left(
 \boldsymbol a_b
@@ -72,7 +72,7 @@ $$
 +\boldsymbol C_b\boldsymbol v_e,
 \boldsymbol\Psi_b
 \right).
-$$
+```
 
 The implementation uses the documented robust approximate Gaussian moment
 update so the rolling joint state remains Gaussian.
@@ -92,8 +92,8 @@ import prices, vehicle sales, continued claims, and inflation expectations.
 
 ## Quadrant probabilities
 
-Let $R_m\in\mathcal R$ denote the reporting quadrant and
-$p_{m,r\mid d}=\Pr(R_m=r\mid\mathcal D_d)$. Every table and serialized vector
+Let $`R_m\in\mathcal R`$ denote the reporting quadrant and
+$`p_{m,r\mid d}=\Pr(R_m=r\mid\mathcal D_d)`$. Every table and serialized vector
 uses this order:
 
 1. `growth_up_inflation_up`;
@@ -119,7 +119,7 @@ burn-in, 183 common target months from January 2011 through May 2026 are scored.
 
 The following values are candidate minus reference:
 
-| Reference | $\Delta$ NLPD | $\Delta$ cross-entropy | $\Delta$ Brier | $\Delta$ accuracy |
+| Reference | $`\Delta`$ NLPD | $`\Delta`$ cross-entropy | $`\Delta`$ Brier | $`\Delta`$ accuracy |
 |---|---:|---:|---:|---:|
 | `transition_only` | -0.067415 | +0.000418 | +0.000860 | +0.016393 |
 | `partial_only` | -0.066712 | -0.001260 | -0.000051 | +0.016393 |
