@@ -1,9 +1,10 @@
 # Documentation
 
 Start with the [project overview and weekly research snapshot](../README.md).
-The [research overview](architecture/research_overview.md) contains the shared
-contract, equations, and historical publication results. All pages below can
-be read directly on GitHub, including their mathematical notation.
+The [research overview](architecture/research_overview.md) describes the shared
+research principles, equations, and historical publication results. The model
+specifications below explain the data transformations, inference, allocation,
+and evaluation methods in detail.
 
 ## Shared documentation
 
@@ -55,5 +56,5 @@ experiments outside the promoted model contract.
 
 ## Original course project
 
-The [legacy archive](../legacy/README.md) links to the original paper and the
-surviving course-project script.
+The [legacy archive](../legacy/README.md) contains the original course manuscript,
+its authorship attribution, and the methodological context for the rebuild.

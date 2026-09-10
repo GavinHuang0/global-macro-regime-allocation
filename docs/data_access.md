@@ -2,6 +2,16 @@
 
 ## Macro-data providers
 
+The weekly M02 update requires authenticated FRED access through `FRED_API_KEY`:
+
+```bash
+python -m regime_allocation.cli.update_m02_weekly
+```
+
+It acquires the required historical vintages and writes dated working data under
+`outputs/m02_weekly_live/`. See the [weekly update guide](operations/weekly_updates.md)
+for credential setup and the generated artifacts.
+
 The Model 01 acquisition commands support two St. Louis Fed data paths:
 
 | Mode | Behavior |
@@ -71,8 +81,10 @@ derived research artifacts and provenance, never credentials.
 
 ## ETF data
 
-Portfolio stages use the local Yahoo Finance adjusted-price snapshot declared
-in:
+The weekly M02 command downloads adjusted ETF history from Yahoo Finance and
+records its coverage and input hash in the
+[run manifest](../results/live/m02_weekly/run_manifest.json).
+Historical portfolio stages use the local snapshot declared in:
 
 ```text
 data/manifests/us_cross_asset_etf_universe_v1.json
@@ -84,10 +96,12 @@ point-in-time market data.
 
 ## GitHub Actions
 
-The manual reproduction workflow reads the repository secret named exactly
-`FRED_API_KEY`. It has read-only repository permission, does not persist Git
-credentials, and uploads only non-secret generated artifacts. It does not
-commit, push, tag, or publish refreshed results.
+The [manual Model 01 reproduction workflow](../.github/workflows/reproduce-model-01.yml)
+uses read-only repository permission and uploads generated artifacts without
+committing them. The [weekly M02 workflow](../.github/workflows/update-m02-weekly.yml)
+additionally publishes validated results and the README snapshot through a
+separate job with write permission. Both read the repository secret
+`FRED_API_KEY`; credential values are excluded from generated artifacts.
 
 ## Official references
 

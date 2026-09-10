@@ -4,12 +4,10 @@ This directory preserves the original team manuscript for provenance and compari
 
 - [original_paper.pdf](original_paper.pdf) is the four-author course manuscript.
 
-The incomplete `bayesian_v2.py` orchestration script was removed from the working
-tree and remains available in Git history. Its HMM, data-generation,
-macro-evidence, allocation, and backtest dependencies were not recovered, and
-no research pipeline imported it. The manuscript retains the original model
-description and results. Nothing in this directory is imported by the new
-`regime_allocation` package.
+The manuscript documents the original model design and results. The original
+execution environment and complete implementation are not part of this
+repository. Model 01 and Model 02 are independent implementations in the
+`regime_allocation` package; they do not import material from this directory.
 
 The rebuild was motivated by specific architectural problems in the course
 version: full-sample scaling and HMM fitting; smoothed or Viterbi state paths
@@ -24,5 +22,5 @@ as a clean, independently testable alternative rather than a patch to that
 code.
 
 Authorship of the original material remains with the course team: Zekai Yao,
-Mianchen Zhang, Gavin Huang, and Serin Gleave. New model packages represent
-Gavin Huang's subsequent independent rebuild.
+Mianchen Zhang, Gavin Huang, and Serin Gleave. Model 01 and Model 02 represent
+Gavin Huang's subsequent independent rebuild and extensions.

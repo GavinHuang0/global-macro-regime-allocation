@@ -1,28 +1,28 @@
 # Research architecture and published baselines
 
-This technical overview preserves the research contract, notation, model
-specifications, and historical results summarized in the original project
-README. The reported performance below belongs to the **published 2026 research
-snapshots and their stated sample windows**; it is not the current weekly run.
+This overview describes the shared research principles, model specifications,
+notation, and published results. The performance below belongs to the
+**published 2026 research snapshots and their stated sample windows**. The
+weekly research output is reported separately with its own dates and inputs.
 
-For the dated weekly research output and local setup, see the
+For the dated weekly research output, see the
 [project README](../../README.md). Use the [documentation index](../README.md)
 for the full model specifications and operating guides.
 
-Model 01 is the frozen monthly benchmark. Model 02 is the promoted weekly model;
-its published iteration is closed for now, but the model line is not frozen.
-Later releases must preserve the existing publication and identify their changes.
+Model 01 is the frozen monthly benchmark. Model 02 is the promoted weekly model,
+with a recorded historical publication and a separately updated research run.
+Later model releases must preserve existing publications and identify their changes.
 
 ## Promoted baselines
 
 | Model | Promoted inference baseline | Promoted allocation baseline | Frequency | Status |
 |---|---|---|---|---|
 | Model 01 | Event-driven fixed-$`\nu=7`$ Bayesian filter over deterministic hard regimes | `posterior_optimized` | Monthly | Frozen benchmark |
-| Model 02 | `student_t_7_reduced_core` | `posterior_optimized` | Weekly | Promoted; current iteration closed; not frozen |
+| Model 02 | `student_t_7_reduced_core` | `posterior_optimized` | Weekly | Promoted; versioned model with a retained historical publication |
 
 Only these baselines are part of the main model contract. Pooled-mean,
 equal-weight, and 60/40 portfolios remain as essential allocation comparisons.
-Other experimental variants are retained outside the main reading path and did
+Other experimental variants are documented in the research archive and did
 not replace a promoted baseline.
 
 ## Shared research contract
@@ -177,19 +177,20 @@ The formal sample contains 445 complete weeks from 1 January 2018 through
 
 | Method | CAGR | Ann. volatility | Sharpe | Max drawdown |
 |---|---:|---:|---:|---:|
-| Posterior-optimized | **9.86%** | 10.42% | **0.956** | **-21.75%** |
+| Posterior-optimized | **9.86%** | 10.42% | 0.956 | -21.75% |
 | Pooled-mean | 9.83% | 10.50% | 0.946 | -21.99% |
 | Static 60/40 | 9.60% | 11.62% | 0.847 | -22.02% |
-| Equal-weight | 6.09% | **6.34%** | 0.964 | **-14.69%** |
+| Equal-weight | 6.09% | **6.34%** | **0.964** | **-14.69%** |
 
 Posterior minus pooled mean is +0.019% annualized arithmetic return with a 95%
 paired block-bootstrap interval of [-0.088%, +0.130%]. The posterior is the
 promoted allocation baseline, but this sample does not establish a reliable
 incremental edge over pooled mean.
 
-Model 02 is closed at this current promoted state for now. Hash-pinned
-artifacts remain reproducible, while the model line stays open to future
-versioned changes.
+Model 02's published manifests identify the source and data snapshots used for
+its recorded results. Exact reproduction requires those inputs; fresh provider
+downloads can produce different historical values. Subsequent model changes
+are recorded as separate versioned releases.
 
 See the [Model 02 model card](../../docs/models/m02_soft_composite/README.md).
 
@@ -202,7 +203,8 @@ data/processed/          derived local data; ignored by Git
 docs/models/             promoted model specifications and results
 docs/archive/            development history outside the main model contract
 results/published/       public machine-readable outputs
-scripts/                 market-data acquisition utility
+results/live/            dated outputs from the weekly research update
+scripts/                 market-data acquisition and provider comparison utilities
 src/regime_allocation/   data, features, models, portfolio, backtest, and CLI code
 tests/                   unit and integration contracts
 ```
@@ -236,33 +238,43 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e ".[dev]"
 ```
 
-Model 01:
+Model 01's stages are listed below. The allocation stage also requires the
+ETF history described in the [data access guide](../data_access.md). The
+[Model 01 reproduction workflow](../../.github/workflows/reproduce-model-01.yml)
+records the complete acquisition and build sequence.
 
 ```powershell
-python -m regime_allocation.cli.build_m01_dataset --provider auto
-python -m regime_allocation.cli.build_m01_evidence --provider auto
-python -m regime_allocation.cli.build_m01_transition
-python -m regime_allocation.cli.build_m01_inference
-python -m regime_allocation.cli.build_m01_backtest
+.\.venv\Scripts\python.exe -m regime_allocation.cli.build_m01_dataset --provider auto
+.\.venv\Scripts\python.exe -m regime_allocation.cli.build_m01_evidence --provider auto
+.\.venv\Scripts\python.exe -m regime_allocation.cli.build_m01_transition
+.\.venv\Scripts\python.exe -m regime_allocation.cli.build_m01_inference
+.\.venv\Scripts\python.exe -m regime_allocation.cli.build_m01_backtest
 ```
 
-Model 02 current publication and weekly allocation:
+Model 02's historical publication and allocation stages consume prepared
+upstream score, probability-map, transition, evidence, and ETF artifacts.
+Their specifications and dependencies are described in the
+[Model 02 model card](../models/m02_soft_composite/README.md).
 
 ```powershell
-python -m regime_allocation.cli.build_m02_current_baseline
-python -m regime_allocation.cli.build_m02_backtest
+.\.venv\Scripts\python.exe -m regime_allocation.cli.build_m02_current_baseline
+.\.venv\Scripts\python.exe -m regime_allocation.cli.build_m02_backtest
 ```
 
-Run the complete test suite:
+With the required data and artifacts available, run the complete test suite:
 
 ```powershell
-python -m pytest -q
+.\.venv\Scripts\python.exe -m pytest -q
 ```
 
 `--provider auto` uses the FRED API when `FRED_API_KEY` is available and the
 keyless ALFRED path otherwise. Credentials are read only from the environment
-and are never written to manifests, cache identifiers, URLs, or logs. See
+and are never written to manifests, cache identifiers, published URLs, or logs. See
 [data access](../../docs/data_access.md) for the complete policy.
+
+The [weekly operations guide](../operations/weekly_updates.md) describes the
+separate live-update command. It creates dated research outputs without
+replacing the archival publication.
 
 ## Limitations
 

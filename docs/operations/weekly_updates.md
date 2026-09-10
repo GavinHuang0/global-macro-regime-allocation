@@ -12,17 +12,18 @@ updates the generated section of the repository README. The live run uses
 
 ## Enable GitHub updates
 
-1. Push the workflow, CLI, tests, and README markers to the repository's default
-   branch.
-2. Open the repository on GitHub. Choose **Settings → Secrets and variables →
+The workflow runs from the repository's default branch. For a fork, first
+check that GitHub Actions is enabled in the repository.
+
+1. Open the repository on GitHub. Choose **Settings → Secrets and variables →
    Actions → New repository secret**. Use the name `FRED_API_KEY` and paste the
    key into the secret value field. Save it there; do not put it in a tracked
    file, workflow, commit message, or issue. See GitHub's
    [repository secret instructions](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets#creating-secrets-for-a-repository).
-3. Open **Actions → Update weekly Model 02 research snapshot → Run workflow**,
+2. Open **Actions → Update weekly Model 02 research snapshot → Run workflow**,
    select the default branch, and start a manual run. The workflow deliberately
    skips other branches.
-4. Check both the compute and publish jobs. A successful publish creates a
+3. Check both the compute and publish jobs. A successful publish creates a
    commit by `github-actions[bot]` only when the four publication files change.
    Repository or organization policies must permit the publish job's
    `contents: write` permission and its push to the default branch. Branch
@@ -48,7 +49,25 @@ partial update. GitHub's
 [workflow permissions reference](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#permissions)
 describes how job permissions interact with repository policy.
 
-## Run locally on Windows
+## Run locally
+
+Install the package using the [quick start](../../README.md#quick-start).
+The update command reads `FRED_API_KEY` from its process environment.
+
+### macOS and Linux
+
+In Bash or Zsh, enter the key at a hidden prompt and export it for the current
+terminal session:
+
+```bash
+printf 'FRED API key: '
+read -r -s FRED_API_KEY
+printf '\n'
+export FRED_API_KEY
+python -m regime_allocation.cli.update_m02_weekly
+```
+
+### Windows
 
 To make the key available to local Python, open Start and search for **Edit
 environment variables for your account**. Under **User variables**, choose
@@ -74,8 +93,8 @@ Use the installed virtual environment to run the same checks and update:
 .\.venv\Scripts\python.exe -m regime_allocation.cli.update_m02_weekly
 ```
 
-The local command updates files for review; GitHub publishing belongs to the
-workflow. Inspect `git diff` and the run manifest after a successful run.
+Local runs write the same publication files without committing or pushing.
+Inspect `git diff` and the run manifest after a successful run.
 
 ## Read the dates and research scope
 

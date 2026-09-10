@@ -1,10 +1,10 @@
 # Repository maintenance
 
-The repository keeps executable model stages, their specifications, and the
-evidence behind research decisions together. Cleanup removes unused code while
-preserving the ability to inspect and reproduce those decisions.
+Executable model stages, specifications, and results are maintained as linked
+research artifacts. Changes must preserve the dependencies and provenance
+needed to inspect and reproduce recorded research decisions.
 
-## What remains part of the research
+## Research artifacts
 
 | Location | Maintenance purpose |
 |---|---|
@@ -12,6 +12,7 @@ preserving the ability to inspect and reproduce those decisions.
 | [`configs/models/`](../../configs/models/) | Explicit designs for current models, benchmarks, and historical experiments |
 | [`data/manifests/`](../../data/manifests/) | Input, output, configuration, and source provenance for recorded runs |
 | [`results/published/`](../../results/published/) | Reviewable evidence, including experiments that did not justify promotion |
+| [`results/live/`](../../results/live/) | Dated outputs from the weekly research update |
 | [`docs/archive/`](../archive/) | Historical methods and decision records |
 | [`legacy/`](../../legacy/) | Original course manuscript and authorship attribution |
 | [`tests/`](../../tests/) | Behavioral, causality, configuration, and artifact checks |
@@ -28,12 +29,7 @@ with `python -m`, even when they have no console-script entry in
 [`pyproject.toml`](../../pyproject.toml). Package `__init__.py` files remain part
 of package discovery even when there is no direct import of the package name.
 
-The incomplete course-project `legacy/bayesian_v2.py` script was removed: its
-local dependencies were missing and no research stage used it. Its source
-remains in Git history; the manuscript and team attribution remain in the
-[legacy archive](../../legacy/README.md).
-
-## Checking a proposed cleanup
+## Changing or removing code
 
 1. Search tracked source, tests, console-script entries, workflows, configs,
    manifests, and documentation for references. Inspect the import graph and
