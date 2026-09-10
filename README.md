@@ -284,9 +284,8 @@ input and implementation hashes in [`data/manifests/`](data/manifests/).
 
 ## Attribution
 
-The original course project was produced by Zekai Yao, Mianchen Zhang, Gavin
-Huang, and Serin Gleave. M01 and M02 are Gavin Huang's subsequent independent
-reimplementation and extensions. The [original manuscript](legacy/README.md)
+An original course project attributed to Gavin Huang, Zekai Yao, Mianchen Zhang, and Serin Gleave used the idea of classifying macro regimes to optimize FICC allocations. M01 and M02 are Gavin Huang's independent
+implementations of a redesigned architecture. The [original manuscript](legacy/README.md)
 is retained in the repository.
 
 This product uses the FRED API but is not endorsed or certified by the Federal
