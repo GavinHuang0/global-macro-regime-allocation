@@ -89,7 +89,7 @@ if ([string]::IsNullOrWhiteSpace($env:FRED_API_KEY)) {
 Use the installed virtual environment to run the same checks and update:
 
 ```powershell
-.\.venv\Scripts\python.exe -m pytest -q tests/unit/data/test_m02_live_inputs.py tests/unit/portfolio/test_m02_live.py tests/unit/reporting/test_readme_snapshot.py
+.\.venv\Scripts\python.exe -m pytest -q tests/unit/data/test_etf_history_download.py tests/unit/data/test_m02_live_inputs.py tests/unit/portfolio/test_m02_live.py tests/unit/reporting/test_readme_snapshot.py
 .\.venv\Scripts\python.exe -m regime_allocation.cli.update_m02_weekly
 ```
 
@@ -116,3 +116,11 @@ the failed Actions step, correct the missing secret or provider problem, and
 rerun. If publishing reports that the default branch moved, start a new run
 from its latest commit. A permission or branch-protection rejection requires
 a repository policy decision; the workflow never force-pushes.
+
+Yahoo can return an incomplete latest row in multi-day price history even when
+its one-day daily response is complete. The downloader recovers missing price
+fields only for the requested latest session, at least 30 minutes after that
+session closes. It requires matching session dates, provider identity, observed
+prices and volume, and corporate actions. Both raw responses and a recovery
+record are retained in the working market-data manifest. Historical gaps,
+conflicting responses, or missing adjusted closes still stop publication.

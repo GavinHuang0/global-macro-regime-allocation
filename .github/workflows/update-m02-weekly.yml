@@ -50,6 +50,7 @@ jobs:
       - name: Check the live pipeline and README renderer
         run: >-
           python -m pytest -q
+          tests/unit/data/test_etf_history_download.py
           tests/unit/data/test_m02_live_inputs.py
           tests/unit/portfolio/test_m02_live.py
           tests/unit/reporting/test_readme_snapshot.py
