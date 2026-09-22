@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
   "release_id": "m02_weekly_live_v1",
-  "generated_at": "2026-09-16T00:30:07.885441+00:00",
-  "signal_week": "2026-09-14",
-  "information_cutoff": "2026-09-14T00:00:00-04:00",
-  "execution_date": "2026-09-14",
-  "latest_price_download_session": "2026-09-15",
+  "generated_at": "2026-09-22T00:55:04.910550+00:00",
+  "signal_week": "2026-09-21",
+  "information_cutoff": "2026-09-21T00:00:00-04:00",
+  "execution_date": "2026-09-21",
+  "latest_price_download_session": "2026-09-21",
   "runtime_versions": {
     "numpy": "2.5.3",
-    "pandas": "3.0.5",
+    "pandas": "3.0.6",
     "scipy": "1.18.1",
     "scikit-learn": "1.9.1",
     "pyyaml": "6.0.3",
@@ -24,21 +24,21 @@
     "latest_release_by_family": {
       "evidence:business_investment_activity_pipeline:core_capital_goods_orders_shipments_gap_log_change": "2026-08-26",
       "evidence:business_investment_activity_pipeline:core_capital_goods_shipments_log_change": "2026-08-26",
-      "evidence:consumer_demand_real_decomposition:implicit_retail_price_log_change": "2026-08-14",
-      "evidence:consumer_demand_real_decomposition:real_retail_and_food_services_log_change": "2026-08-14",
-      "evidence:weekly_labor_stress:initial_claims_innovation": "2026-09-10",
+      "evidence:consumer_demand_real_decomposition:implicit_retail_price_log_change": "2026-09-16",
+      "evidence:consumer_demand_real_decomposition:real_retail_and_food_services_log_change": "2026-09-16",
+      "evidence:weekly_labor_stress:initial_claims_innovation": "2026-09-17",
       "defining:average_hourly_earnings": "2026-09-04",
       "defining:consumer_activity": "2026-08-26",
       "defining:core_cpi": "2026-09-11",
       "defining:core_pce": "2026-08-26",
-      "defining:industrial_production": "2026-08-18",
+      "defining:industrial_production": "2026-09-18",
       "defining:payrolls": "2026-09-04",
       "defining:producer_prices": "2026-09-10",
       "defining:unemployment_rate": "2026-09-04"
     }
   },
   "sha256_inputs_configs_implementation": {
-    "components": "af7cd0ca844b61398c29c43b1df768e67e2dc4f109a3289843306b7f24c4d800",
+    "components": "9aca5cd68a926dc54e31eb0973f85667d967e64b17ff22a8709477d69c19ee36",
     "configs/models/m01_deterministic_composite.yaml": "db688bf20b2e40cdc226922e29638c0831cc049d11e38c49c84260713ba3cafe",
     "configs/models/m01_deterministic_composite_transition.yaml": "9b2bff7f5470dce9a1c9eec23dde588128612ffbe6b125641b2c23568b76af2f",
     "configs/models/m01_event_driven_bayesian_filter.yaml": "fdf1087b5c61a4007883b1c61f89df6daf6ed06f949c4a119ed316905876f27a",
@@ -58,12 +58,12 @@
     "configs/models/m02_release_evidence.yaml": "e9f8cb6c8ca28925d0c057fdaed95cdf08b2ce3a976380b7bf671730dceda512",
     "configs/models/m02_soft_composite.yaml": "0a378c0a121633b2b560c1a452ab027f35b79d7ea4be4e3817b960bf3637f289",
     "configs/models/m02_var1_transition.yaml": "6bf3fc7a575b05ea4a32297a85c95ff28ef3d8d09dc23af9dacce250591d054e",
-    "events": "11ab84134abf406712fe6b1365ce3a0bb210f459481a4e1c18a05278d622d20c",
-    "manifest": "8404151ee773e19b0e69fadaa283931966d40f2e8b5d28567a575e076c18070b",
+    "events": "351d46298add08e4f75607604b31ae0ea8a5f15bb8d21c249aae38c3d06c50ec",
+    "manifest": "603810a098cc28cb56eca470c1cfe4c9dc9a92b654e75baaaf586507379be383",
     "mapping": "104e7d96d08f96200c6021b8d7ec340dd07304769b7a9a3c3067822e2d2f1e2f",
-    "prices": "d55c9523bee3a8ed67aaf42e7126baa7106446cfbac271d3c324e38c4728541b",
+    "prices": "b20836a83841b3084fc5458bd555f18e1c1e1592303a011ad14102db42221eff",
     "pyproject.toml": "a1f8769f414c7d1bdc3f80fd5ea22f0a7b6fe976f32a12eac2b69a651f532fd6",
-    "scores": "6002f50b36e05faaaf397e805e33d8fa4c3f457a80a9acd88acea34792f1de42",
+    "scores": "f909137a91c2b00d500c9db4eb4e9dd3cdc3ac9d3c42d3d4a24060f1285fcf4b",
     "scripts/download_etf_history.py": "2593ec667aeffd03038c6c1505353c0ee95ace41afd245d1c30e37d6e90a8b77",
     "src/regime_allocation/backtest/__init__.py": "941e0b2c79789d0d487625ce0aa6747f6c0bc06013239d4de2f205aa0c0f22cb",
     "src/regime_allocation/backtest/engine.py": "92661e784249017827e4ae6ae3f972a08f20817b957f02aa82c52fb94e4ec2a3",
@@ -144,8 +144,8 @@
     "src/regime_allocation/reporting/readme_snapshot.py": "6a2fce127d1cd029f671de05e0acfcdeed9510d4aa26848290b3223e8dbcabd3"
   },
   "sha256_outputs": {
-    "latest_allocation.json": "f9800086be65dee8d12c7be9948dc2b1a34236b7402a1d206715242206e87fb8",
-    "performance_summary.csv": "8ce2ff86ca91fb1b4aed568da800fc6679b807cd3e0eb7ce01c1ada8c8f5997a"
+    "latest_allocation.json": "b425b9cebd8ed9cec7f7b79fc43594159e2034f67d608aa97844f8a637114361",
+    "performance_summary.csv": "70d3ee839fb25d3b7267128c403265bb498d8561a40e36213ec10e36894afb6e"
   },
   "history_policy": "Full own-path replay from 2018-01-01; incomplete week excluded from performance.",
   "reconstruction_disclosure": "Newly acquired FRED vintages and mutable Yahoo adjusted prices; not a byte-identical reproduction of the archived publication. Same-history model selection was used; the extended backtest is not an untouched validation sample."
