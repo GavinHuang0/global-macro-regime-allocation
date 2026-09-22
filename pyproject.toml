@@ -18,6 +18,7 @@ dependencies = [
 ]
 
 [project.scripts]
+build-m03-source-audit = "regime_allocation.cli.build_m03_source_audit:main"
 update-m02-weekly = "regime_allocation.cli.update_m02_weekly:main"
 build-m01-dataset = "regime_allocation.cli.build_m01_dataset:main"
 build-m01-evidence = "regime_allocation.cli.build_m01_evidence:main"

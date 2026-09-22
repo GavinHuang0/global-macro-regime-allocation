@@ -49,6 +49,12 @@ be fixed in an experiment specification before inspecting its test outcomes.
 
 ### 1. Source data, vintages, and availability
 
+**Implementation:** the initial [M03 source-data layer](source_data.md) now
+provides a versioned registry, immutable snapshots, availability and exclusion
+ledgers, and source comparisons. It remains a separate data experiment;
+verified intraday publication times and independent market-data validation
+are still open research work.
+
 **Current limitations.** Point-in-time coverage varies by series and archive
 start. Some historical component gaps and a producer-price series splice are
 explicitly configured. Publication and vintage dates provide a conservative

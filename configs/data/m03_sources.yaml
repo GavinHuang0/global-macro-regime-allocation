@@ -1,0 +1,303 @@
+# Calendar boundaries inherit the cited M02/M01 configurations.
+# A null vintage_end is open-ended; the caller must supply an explicit as-of cutoff.
+# The old publication cutoff below is provenance, not a live acquisition limit.
+schema_version: 1
+registry_id: m03_sources_v1
+provider_id: fred_api
+source_definition_version: m03_sources_v1
+description: Initial M03 registry of the nine M02 score sources and five reduced-core evidence inputs.
+  Definitions refer to the linked FRED series pages; acquisition boundaries are configured policies,
+  not verified archive inception dates.
+reference_publication_vintage_end: '2026-07-20'
+release_id_semantics: inherited_acquisition_configuration_not_verified_publication_timestamp
+acquisition_scope: all_score_and_evidence_sources
+defaults:
+  observation_start: '1989-01-01'
+  max_release_lag_days: 92
+  archive_start_latest_only: true
+sources:
+- series_id: PAYEMS
+  component: payrolls
+  transform: log_difference
+  release_id: 50
+  role: score
+  definition: Total nonfarm payroll employment, as defined by the FRED PAYEMS series.
+  frequency: monthly
+  source_url: https://fred.stlouisfed.org/series/PAYEMS
+  source_definition_version: m03_sources_v1
+  source_config: configs/models/m02_soft_composite.yaml
+  observation_start: '1989-01-01'
+  vintage_start: '1990-01-01'
+  vintage_end: null
+  active_start: null
+  active_end: null
+  vintage_start_status: configured_policy_boundary
+  verified_archive_start: null
+  release_timestamp_status: archive_date_only_not_verified_intraday
+  axis: growth
+- series_id: INDPRO
+  component: industrial_production
+  transform: log_difference
+  release_id: 13
+  role: score
+  definition: Total industrial production index, as defined by the FRED INDPRO series.
+  frequency: monthly
+  source_url: https://fred.stlouisfed.org/series/INDPRO
+  source_definition_version: m03_sources_v1
+  source_config: configs/models/m02_soft_composite.yaml
+  observation_start: '1989-01-01'
+  vintage_start: '1990-01-01'
+  vintage_end: null
+  active_start: null
+  active_end: null
+  vintage_start_status: configured_policy_boundary
+  verified_archive_start: null
+  release_timestamp_status: archive_date_only_not_verified_intraday
+  axis: growth
+- series_id: PCEC96
+  component: consumer_activity
+  transform: log_difference
+  release_id: 54
+  role: score
+  definition: Real personal consumption expenditures, as defined by the FRED PCEC96 series.
+  frequency: monthly
+  source_url: https://fred.stlouisfed.org/series/PCEC96
+  source_definition_version: m03_sources_v1
+  source_config: configs/models/m02_soft_composite.yaml
+  observation_start: '1989-01-01'
+  vintage_start: '1990-01-01'
+  vintage_end: null
+  active_start: null
+  active_end: null
+  vintage_start_status: configured_policy_boundary
+  verified_archive_start: null
+  release_timestamp_status: archive_date_only_not_verified_intraday
+  axis: growth
+- series_id: UNRATE
+  component: unemployment_rate
+  transform: negative_difference
+  release_id: 50
+  role: score
+  definition: Civilian unemployment rate, as defined by the FRED UNRATE series.
+  frequency: monthly
+  source_url: https://fred.stlouisfed.org/series/UNRATE
+  source_definition_version: m03_sources_v1
+  source_config: configs/models/m02_soft_composite.yaml
+  observation_start: '1989-01-01'
+  vintage_start: '1990-01-01'
+  vintage_end: null
+  active_start: null
+  active_end: null
+  vintage_start_status: configured_policy_boundary
+  verified_archive_start: null
+  release_timestamp_status: archive_date_only_not_verified_intraday
+  axis: growth
+- series_id: CPILFESL
+  component: core_cpi
+  transform: log_difference
+  release_id: 10
+  role: score
+  definition: Consumer prices for all urban consumers excluding food and energy, as defined by FRED
+    CPILFESL.
+  frequency: monthly
+  source_url: https://fred.stlouisfed.org/series/CPILFESL
+  source_definition_version: m03_sources_v1
+  source_config: configs/models/m02_soft_composite.yaml
+  observation_start: '1989-01-01'
+  vintage_start: '1996-12-12'
+  vintage_end: null
+  active_start: null
+  active_end: null
+  vintage_start_status: configured_policy_boundary
+  verified_archive_start: null
+  release_timestamp_status: archive_date_only_not_verified_intraday
+  axis: inflation
+- series_id: PCEPILFE
+  component: core_pce
+  transform: log_difference
+  release_id: 54
+  role: score
+  definition: Personal consumption expenditures price index excluding food and energy, as defined
+    by FRED PCEPILFE.
+  frequency: monthly
+  source_url: https://fred.stlouisfed.org/series/PCEPILFE
+  source_definition_version: m03_sources_v1
+  source_config: configs/models/m02_soft_composite.yaml
+  observation_start: '1989-01-01'
+  vintage_start: '2000-08-01'
+  vintage_end: null
+  active_start: null
+  active_end: null
+  vintage_start_status: configured_policy_boundary
+  verified_archive_start: null
+  release_timestamp_status: archive_date_only_not_verified_intraday
+  axis: inflation
+- series_id: PPILFE
+  component: producer_prices
+  transform: log_difference
+  release_id: 46
+  role: score
+  definition: Discontinued seasonally adjusted Stage of Processing producer-price index for finished
+    goods excluding food and energy.
+  frequency: monthly
+  source_url: https://fred.stlouisfed.org/series/PPILFE
+  source_definition_version: m03_sources_v1
+  source_config: configs/models/m02_soft_composite.yaml
+  observation_start: '1989-01-01'
+  vintage_start: '1996-12-11'
+  vintage_end: '2016-02-17'
+  active_start: null
+  active_end: '2015-12-01'
+  vintage_start_status: configured_policy_boundary
+  verified_archive_start: null
+  release_timestamp_status: archive_date_only_not_verified_intraday
+  axis: inflation
+  notes: Configured M02 splice uses PPILFE through December 2015 and WPSFD4131 from January 2016,
+    in same-vintage changes rather than levels; this does not establish identical measurement across
+    the break.
+- series_id: WPSFD4131
+  component: producer_prices
+  transform: log_difference
+  release_id: 46
+  role: score
+  definition: Seasonally adjusted Final Demand-Intermediate Demand producer-price index for finished
+    goods excluding foods and energy; FRED identifies it as the PPILFE replacement.
+  frequency: monthly
+  source_url: https://fred.stlouisfed.org/series/WPSFD4131
+  source_definition_version: m03_sources_v1
+  source_config: configs/models/m02_soft_composite.yaml
+  observation_start: '1989-01-01'
+  vintage_start: '2015-03-13'
+  vintage_end: null
+  active_start: '2016-01-01'
+  active_end: null
+  vintage_start_status: configured_policy_boundary
+  verified_archive_start: null
+  release_timestamp_status: archive_date_only_not_verified_intraday
+  axis: inflation
+  notes: Configured M02 splice uses PPILFE through December 2015 and WPSFD4131 from January 2016,
+    in same-vintage changes rather than levels; this does not establish identical measurement across
+    the break.
+- series_id: AHETPI
+  component: average_hourly_earnings
+  transform: log_difference
+  release_id: 50
+  role: score
+  definition: Average hourly earnings of production and nonsupervisory employees in total private
+    employment, as defined by FRED AHETPI.
+  frequency: monthly
+  source_url: https://fred.stlouisfed.org/series/AHETPI
+  source_definition_version: m03_sources_v1
+  source_config: configs/models/m02_soft_composite.yaml
+  observation_start: '1989-01-01'
+  vintage_start: '1999-08-06'
+  vintage_end: null
+  active_start: null
+  active_end: null
+  vintage_start_status: configured_policy_boundary
+  verified_archive_start: null
+  release_timestamp_status: archive_date_only_not_verified_intraday
+  axis: inflation
+- series_id: ICSA
+  component: initial_claims_innovation
+  transform: expanding_log_ar1_innovation
+  release_id: 180
+  role: evidence
+  definition: Initial unemployment-insurance claims, as defined by the FRED ICSA series.
+  frequency: weekly
+  source_url: https://fred.stlouisfed.org/series/ICSA
+  source_definition_version: m03_sources_v1
+  source_config: configs/models/m01_non_defining_release_evidence.yaml
+  observation_start: '1994-01-01'
+  vintage_start: '1994-01-01'
+  vintage_end: null
+  active_start: null
+  active_end: null
+  vintage_start_status: configured_policy_boundary
+  verified_archive_start: null
+  release_timestamp_status: archive_date_only_not_verified_intraday
+  reference_alfred_policy_vintage_start: '2013-08-15'
+  notes: The FRED acquisition uses the shared configured 1994-01-01 boundary. The separately recorded
+    ALFRED-only boundary is not applied to FRED and does not verify archive inception.
+- series_id: NEWORDER
+  component: core_capital_goods_orders_log_change
+  transform: log_difference
+  release_id: 95
+  role: evidence
+  definition: New orders for nondefense capital goods excluding aircraft, as defined by FRED NEWORDER.
+  frequency: monthly
+  source_url: https://fred.stlouisfed.org/series/NEWORDER
+  source_definition_version: m03_sources_v1
+  source_config: configs/models/m01_non_defining_release_evidence.yaml
+  observation_start: '1994-01-01'
+  vintage_start: '1994-01-01'
+  vintage_end: null
+  active_start: null
+  active_end: null
+  vintage_start_status: configured_policy_boundary
+  verified_archive_start: null
+  release_timestamp_status: archive_date_only_not_verified_intraday
+  reference_alfred_policy_vintage_start: '2000-01-01'
+  notes: The FRED acquisition uses the shared configured 1994-01-01 boundary. The separately recorded
+    ALFRED-only boundary is not applied to FRED and does not verify archive inception.
+- series_id: RSAFS
+  component: retail_sales_log_change
+  transform: log_difference
+  release_id: 9
+  role: evidence
+  definition: Advance nominal retail and food services sales, as defined by FRED RSAFS.
+  frequency: monthly
+  source_url: https://fred.stlouisfed.org/series/RSAFS
+  source_definition_version: m03_sources_v1
+  source_config: configs/models/m02_inference_sensitivities.yaml
+  observation_start: '2000-01-01'
+  vintage_start: '2001-06-01'
+  vintage_end: null
+  active_start: null
+  active_end: null
+  vintage_start_status: configured_policy_boundary
+  verified_archive_start: null
+  release_timestamp_status: archive_date_only_not_verified_intraday
+  reference_alfred_policy_vintage_start: '2001-06-13'
+  notes: The promoted real/implicit-price decomposition acquires RSAFS and RRSFS under the same configured
+    observation/vintage window, then aligns the latest available source vintage at each event date.
+- series_id: ANXAVS
+  component: core_capital_goods_shipments_log_change
+  transform: log_difference
+  release_id: 95
+  role: evidence
+  definition: Shipments of nondefense capital goods excluding aircraft, as defined by FRED ANXAVS.
+  frequency: monthly
+  source_url: https://fred.stlouisfed.org/series/ANXAVS
+  source_definition_version: m03_sources_v1
+  source_config: configs/models/m02_release_evidence.yaml
+  observation_start: '1994-01-01'
+  vintage_start: '2011-05-01'
+  vintage_end: null
+  active_start: null
+  active_end: null
+  vintage_start_status: configured_policy_boundary
+  verified_archive_start: null
+  release_timestamp_status: archive_date_only_not_verified_intraday
+- series_id: RRSFS
+  component: real_retail_and_food_services_log_change
+  transform: log_difference
+  release_id: 9
+  role: evidence
+  definition: St. Louis Fed real retail and food services sales, constructed from nominal RSAFS deflated
+    by CPIAUCSL.
+  frequency: monthly
+  source_url: https://fred.stlouisfed.org/series/RRSFS
+  source_definition_version: m03_sources_v1
+  source_config: configs/models/m02_inference_sensitivities.yaml
+  observation_start: '2000-01-01'
+  vintage_start: '2001-06-01'
+  vintage_end: null
+  active_start: null
+  active_end: null
+  vintage_start_status: configured_policy_boundary
+  verified_archive_start: null
+  release_timestamp_status: archive_date_only_not_verified_intraday
+  notes: FRED lists Selected Real Retail Sales Series as the release. release_id=9 is retained from
+    the M02 acquisition configuration; it is not independent calendar verification. Combined with
+    RSAFS, this input supports the implicit retail-price coordinate.
