@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
   "release_id": "m02_weekly_live_v1",
-  "generated_at": "2026-09-23T00:41:59.826118+00:00",
-  "signal_week": "2026-09-21",
-  "information_cutoff": "2026-09-21T00:00:00-04:00",
-  "execution_date": "2026-09-21",
-  "latest_price_download_session": "2026-09-22",
+  "generated_at": "2026-09-29T02:04:41.506766+00:00",
+  "signal_week": "2026-09-28",
+  "information_cutoff": "2026-09-28T00:00:00-04:00",
+  "execution_date": "2026-09-28",
+  "latest_price_download_session": "2026-09-28",
   "runtime_versions": {
     "numpy": "2.5.3",
     "pandas": "3.0.6",
@@ -22,11 +22,11 @@
     "status": "fresh",
     "reason": "All required input families passed release-age checks at the signal cutoff.",
     "latest_release_by_family": {
-      "evidence:business_investment_activity_pipeline:core_capital_goods_orders_shipments_gap_log_change": "2026-08-26",
-      "evidence:business_investment_activity_pipeline:core_capital_goods_shipments_log_change": "2026-08-26",
+      "evidence:business_investment_activity_pipeline:core_capital_goods_orders_shipments_gap_log_change": "2026-09-25",
+      "evidence:business_investment_activity_pipeline:core_capital_goods_shipments_log_change": "2026-09-25",
       "evidence:consumer_demand_real_decomposition:implicit_retail_price_log_change": "2026-09-16",
       "evidence:consumer_demand_real_decomposition:real_retail_and_food_services_log_change": "2026-09-16",
-      "evidence:weekly_labor_stress:initial_claims_innovation": "2026-09-17",
+      "evidence:weekly_labor_stress:initial_claims_innovation": "2026-09-24",
       "defining:average_hourly_earnings": "2026-09-04",
       "defining:consumer_activity": "2026-08-26",
       "defining:core_cpi": "2026-09-11",
@@ -58,10 +58,10 @@
     "configs/models/m02_release_evidence.yaml": "e9f8cb6c8ca28925d0c057fdaed95cdf08b2ce3a976380b7bf671730dceda512",
     "configs/models/m02_soft_composite.yaml": "0a378c0a121633b2b560c1a452ab027f35b79d7ea4be4e3817b960bf3637f289",
     "configs/models/m02_var1_transition.yaml": "6bf3fc7a575b05ea4a32297a85c95ff28ef3d8d09dc23af9dacce250591d054e",
-    "events": "428405c1d30d74707535c38eadef770b78dd9276efa334d32f0b7b8585f9ac03",
-    "manifest": "0eeae5fd97a76970f11f9b1733df881abc7dd514b98ed23906465f37ebb5a9fb",
+    "events": "c25d0d4941f98d146321cde7d96149716a2f42936de6eab44e50cf9b1de339e3",
+    "manifest": "e59876472daf69221499121d6b54bda0359860166ac9f5a8077718b0ba473a6f",
     "mapping": "104e7d96d08f96200c6021b8d7ec340dd07304769b7a9a3c3067822e2d2f1e2f",
-    "prices": "66166b6be4023caaf9b933943a6c3b6d63bb109dcdce1107eab7591fe39ee5f3",
+    "prices": "182e76f4a98ef0371ffbf9d57046aa37e43b51c2ffd26428860e0f074c9e32cb",
     "pyproject.toml": "2d8aebaa2a569d917fa34306bc1091cbe809a90b5c5d3ae12521456b3ce87a29",
     "scores": "f909137a91c2b00d500c9db4eb4e9dd3cdc3ac9d3c42d3d4a24060f1285fcf4b",
     "scripts/download_etf_history.py": "2593ec667aeffd03038c6c1505353c0ee95ace41afd245d1c30e37d6e90a8b77",
@@ -151,8 +151,8 @@
     "src/regime_allocation/reporting/readme_snapshot.py": "6a2fce127d1cd029f671de05e0acfcdeed9510d4aa26848290b3223e8dbcabd3"
   },
   "sha256_outputs": {
-    "latest_allocation.json": "ef1142e1dc6c8074534f9be5c17266400c6e160c23df2ec96566baf272230f24",
-    "performance_summary.csv": "4891e2deed0df4ae1e36e2d8301ec863569cb48ac162a7b2a6877eb79c9c22d7"
+    "latest_allocation.json": "bd5abce60745d170c861354f46db10905b94063e0ba76ae28941405a607d543d",
+    "performance_summary.csv": "4ab88df958023d1595b43b40a6c111d36557a9f1f8685bda498cdfeb8f615056"
   },
   "history_policy": "Full own-path replay from 2018-01-01; incomplete week excluded from performance.",
   "reconstruction_disclosure": "Newly acquired FRED vintages and mutable Yahoo adjusted prices; not a byte-identical reproduction of the archived publication. Same-history model selection was used; the extended backtest is not an untouched validation sample."
