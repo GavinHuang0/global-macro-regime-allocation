@@ -1,18 +1,18 @@
 {
   "schema_version": 1,
   "release_id": "m02_weekly_live_v1",
-  "generated_at": "2026-09-30T01:21:13.727915+00:00",
-  "signal_week": "2026-09-28",
-  "information_cutoff": "2026-09-28T00:00:00-04:00",
-  "execution_date": "2026-09-28",
-  "latest_price_download_session": "2026-09-29",
+  "generated_at": "2026-10-06T02:21:14.719934+00:00",
+  "signal_week": "2026-10-05",
+  "information_cutoff": "2026-10-05T00:00:00-04:00",
+  "execution_date": "2026-10-05",
+  "latest_price_download_session": "2026-10-05",
   "runtime_versions": {
     "numpy": "2.5.3",
     "pandas": "3.0.6",
     "scipy": "1.18.1",
     "scikit-learn": "1.9.1",
     "pyyaml": "6.0.3",
-    "tzdata": "2026.4"
+    "tzdata": "2026.5"
   },
   "data_sources": {
     "macro": "https://api.stlouisfed.org/fred",
@@ -26,19 +26,19 @@
       "evidence:business_investment_activity_pipeline:core_capital_goods_shipments_log_change": "2026-09-25",
       "evidence:consumer_demand_real_decomposition:implicit_retail_price_log_change": "2026-09-16",
       "evidence:consumer_demand_real_decomposition:real_retail_and_food_services_log_change": "2026-09-16",
-      "evidence:weekly_labor_stress:initial_claims_innovation": "2026-09-24",
-      "defining:average_hourly_earnings": "2026-09-04",
-      "defining:consumer_activity": "2026-08-26",
+      "evidence:weekly_labor_stress:initial_claims_innovation": "2026-10-01",
+      "defining:average_hourly_earnings": "2026-10-02",
+      "defining:consumer_activity": "2026-09-30",
       "defining:core_cpi": "2026-09-11",
-      "defining:core_pce": "2026-08-26",
+      "defining:core_pce": "2026-09-30",
       "defining:industrial_production": "2026-09-18",
-      "defining:payrolls": "2026-09-04",
+      "defining:payrolls": "2026-10-02",
       "defining:producer_prices": "2026-09-10",
-      "defining:unemployment_rate": "2026-09-04"
+      "defining:unemployment_rate": "2026-10-02"
     }
   },
   "sha256_inputs_configs_implementation": {
-    "components": "9aca5cd68a926dc54e31eb0973f85667d967e64b17ff22a8709477d69c19ee36",
+    "components": "be781aa999cdaae7aa7528e50d1bddd6d002bb7c006cd9a59b96ba6d2ccbe661",
     "configs/models/m01_deterministic_composite.yaml": "db688bf20b2e40cdc226922e29638c0831cc049d11e38c49c84260713ba3cafe",
     "configs/models/m01_deterministic_composite_transition.yaml": "9b2bff7f5470dce9a1c9eec23dde588128612ffbe6b125641b2c23568b76af2f",
     "configs/models/m01_event_driven_bayesian_filter.yaml": "fdf1087b5c61a4007883b1c61f89df6daf6ed06f949c4a119ed316905876f27a",
@@ -58,12 +58,12 @@
     "configs/models/m02_release_evidence.yaml": "e9f8cb6c8ca28925d0c057fdaed95cdf08b2ce3a976380b7bf671730dceda512",
     "configs/models/m02_soft_composite.yaml": "0a378c0a121633b2b560c1a452ab027f35b79d7ea4be4e3817b960bf3637f289",
     "configs/models/m02_var1_transition.yaml": "6bf3fc7a575b05ea4a32297a85c95ff28ef3d8d09dc23af9dacce250591d054e",
-    "events": "6c1872e3b1df2384cdc41b86aac5dfbbda728eab44a088283bdee1c8d123a5a9",
-    "manifest": "b398014f7978007c522cc7dcdacde635d99866c37870b4fd7d9137c943f07c1d",
-    "mapping": "104e7d96d08f96200c6021b8d7ec340dd07304769b7a9a3c3067822e2d2f1e2f",
-    "prices": "0c69750a1c25694a0d5a39796529ae4cbc7831cdcc01d889ef8b01899526a099",
+    "events": "2c1c1c6850ad6e49cd9cf58c855d3820c435cf4dcf81984fae09ffae49b97a10",
+    "manifest": "8bdbfbb0d595ca2f12900453722dbf61a28667403329f5c93001753a16995e95",
+    "mapping": "f2c3011380f2b47020b012eebd34e39bdd54d8c0c163d83b5de325bcc21e83b9",
+    "prices": "238bc7189fc51b9175b3a0e4d340f29ccf96fbc3e8bf4d69df3abbd773687eb3",
     "pyproject.toml": "2d8aebaa2a569d917fa34306bc1091cbe809a90b5c5d3ae12521456b3ce87a29",
-    "scores": "f909137a91c2b00d500c9db4eb4e9dd3cdc3ac9d3c42d3d4a24060f1285fcf4b",
+    "scores": "ce760c492a36960198228d603bc3220846b6a446ae2002737fba9f992f1266fc",
     "scripts/download_etf_history.py": "2593ec667aeffd03038c6c1505353c0ee95ace41afd245d1c30e37d6e90a8b77",
     "src/regime_allocation/backtest/__init__.py": "941e0b2c79789d0d487625ce0aa6747f6c0bc06013239d4de2f205aa0c0f22cb",
     "src/regime_allocation/backtest/engine.py": "92661e784249017827e4ae6ae3f972a08f20817b957f02aa82c52fb94e4ec2a3",
@@ -151,8 +151,8 @@
     "src/regime_allocation/reporting/readme_snapshot.py": "6a2fce127d1cd029f671de05e0acfcdeed9510d4aa26848290b3223e8dbcabd3"
   },
   "sha256_outputs": {
-    "latest_allocation.json": "90bf2d9576e6b4057dcd0a0b7455d8902dc344008407c425c609274fa838195b",
-    "performance_summary.csv": "ca02897d0adefb005a66b0005ec84c65413dc99d65547e044efd9bd52d6a1528"
+    "latest_allocation.json": "8fa145c4b86e9027e21f0ca06c3b50f314d28690bf35cc7569b0cfd2848df093",
+    "performance_summary.csv": "507c9525e807f2c447046bbc97c4afd009c60fe0e15d6c618091226b2b82f2b8"
   },
   "history_policy": "Full own-path replay from 2018-01-01; incomplete week excluded from performance.",
   "reconstruction_disclosure": "Newly acquired FRED vintages and mutable Yahoo adjusted prices; not a byte-identical reproduction of the archived publication. Same-history model selection was used; the extended backtest is not an untouched validation sample."

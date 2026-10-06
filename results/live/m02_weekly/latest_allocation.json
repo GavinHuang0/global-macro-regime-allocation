@@ -3,32 +3,32 @@
   "status": "research_only",
   "model_variant": "student_t_7_reduced_core",
   "release_id": "m02_weekly_live_v1",
-  "generated_at": "2026-09-30T01:21:13.727915+00:00",
-  "signal_week": "2026-09-28",
-  "information_cutoff": "2026-09-28T00:00:00-04:00",
-  "macro_as_of": "2026-09-25",
-  "price_as_of": "2026-09-25",
-  "valid_until": "2026-10-05T00:00:00-04:00",
+  "generated_at": "2026-10-06T02:21:14.719934+00:00",
+  "signal_week": "2026-10-05",
+  "information_cutoff": "2026-10-05T00:00:00-04:00",
+  "macro_as_of": "2026-10-02",
+  "price_as_of": "2026-10-02",
+  "valid_until": "2026-10-12T00:00:00-04:00",
   "data_freshness": {
     "status": "fresh",
     "reason": "All required input families passed release-age checks at the signal cutoff."
   },
   "weights": {
-    "SPY": 0.34999999999999976,
+    "SPY": 0.3500000000000002,
     "IEF": 0.0,
     "TIP": 0.0,
-    "HYG": 0.14999999999999936,
+    "HYG": 0.14999999999999983,
     "BIL": 0.0,
-    "GLD": 0.24999999999999983,
-    "LQD": 0.2500000000000011
+    "GLD": 0.25000000000000017,
+    "LQD": 0.24999999999999978
   },
   "quadrant_posterior": {
-    "growth_up_inflation_up": 0.26390419068142973,
-    "growth_down_inflation_up": 0.3598915207001757,
-    "growth_up_inflation_down": 0.2219366244258147,
-    "growth_down_inflation_down": 0.15426766419257987
+    "growth_up_inflation_up": 0.27621523020965205,
+    "growth_down_inflation_up": 0.3531748579119867,
+    "growth_up_inflation_down": 0.2203406668978501,
+    "growth_down_inflation_down": 0.15026924498051114
   },
-  "forecast_weekly_return": 0.001677042852873974,
-  "estimated_annual_volatility": 0.09833170140087713,
+  "forecast_weekly_return": 0.001703172880787902,
+  "estimated_annual_volatility": 0.09838536947510704,
   "optimization_outcome": "optimal"
 }
