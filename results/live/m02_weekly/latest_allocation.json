@@ -3,7 +3,7 @@
   "status": "research_only",
   "model_variant": "student_t_7_reduced_core",
   "release_id": "m02_weekly_live_v1",
-  "generated_at": "2026-10-27T01:32:08.774021+00:00",
+  "generated_at": "2026-10-28T01:28:23.175947+00:00",
   "signal_week": "2026-10-26",
   "information_cutoff": "2026-10-26T00:00:00-04:00",
   "macro_as_of": "2026-10-22",
@@ -14,21 +14,21 @@
     "reason": "All required input families passed release-age checks at the signal cutoff."
   },
   "weights": {
-    "SPY": 0.34999999999999926,
+    "SPY": 0.3500000000000002,
     "IEF": 0.0,
     "TIP": 0.0,
-    "HYG": 0.1500000000000005,
+    "HYG": 0.1500000000000006,
     "BIL": 0.0,
-    "GLD": 0.24999999999999967,
-    "LQD": 0.2500000000000005
+    "GLD": 0.2500000000000005,
+    "LQD": 0.2499999999999987
   },
   "quadrant_posterior": {
-    "growth_up_inflation_up": 0.32636153225088016,
-    "growth_down_inflation_up": 0.37493356949062945,
-    "growth_up_inflation_down": 0.18947449444325648,
+    "growth_up_inflation_up": 0.3263615322508798,
+    "growth_down_inflation_up": 0.37493356949063006,
+    "growth_up_inflation_down": 0.18947449444325615,
     "growth_down_inflation_down": 0.10923040381523397
   },
-  "forecast_weekly_return": 0.0017297646998100122,
-  "estimated_annual_volatility": 0.09838035904482365,
+  "forecast_weekly_return": 0.0017297644168684891,
+  "estimated_annual_volatility": 0.09838037016005564,
   "optimization_outcome": "optimal"
 }

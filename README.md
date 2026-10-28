@@ -17,7 +17,7 @@ Data freshness: All required input families passed release\-age checks at the si
 | Information cutoff | `2026-10-26T00:00:00-04:00` |
 | Latest macro release used | `2026-10-22` |
 | Final price close used | `2026-10-23` |
-| Generated | `2026-10-27T01:32:08Z` |
+| Generated | `2026-10-28T01:28:23Z` |
 | Valid until (exclusive) | `2026-11-02T00:00:00-05:00` |
 
 The cutoff is Monday 00:00 America/New_York; releases on the signal day are excluded.
