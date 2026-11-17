@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "release_id": "m02_weekly_live_v1",
-  "generated_at": "2026-11-11T01:59:31.647767+00:00",
-  "signal_week": "2026-11-09",
-  "information_cutoff": "2026-11-09T00:00:00-05:00",
-  "execution_date": "2026-11-09",
-  "latest_price_download_session": "2026-11-10",
+  "generated_at": "2026-11-17T04:36:58.359137+00:00",
+  "signal_week": "2026-11-16",
+  "information_cutoff": "2026-11-16T00:00:00-05:00",
+  "execution_date": "2026-11-16",
+  "latest_price_download_session": "2026-11-16",
   "runtime_versions": {
-    "numpy": "2.5.4",
+    "numpy": "2.5.5",
     "pandas": "3.1.1",
     "scipy": "1.18.1",
     "scikit-learn": "1.9.1",
@@ -26,19 +26,19 @@
       "evidence:business_investment_activity_pipeline:core_capital_goods_shipments_log_change": "2026-10-27",
       "evidence:consumer_demand_real_decomposition:implicit_retail_price_log_change": "2026-10-15",
       "evidence:consumer_demand_real_decomposition:real_retail_and_food_services_log_change": "2026-10-15",
-      "evidence:weekly_labor_stress:initial_claims_innovation": "2026-11-05",
+      "evidence:weekly_labor_stress:initial_claims_innovation": "2026-11-12",
       "defining:average_hourly_earnings": "2026-11-06",
       "defining:consumer_activity": "2026-10-29",
-      "defining:core_cpi": "2026-10-14",
+      "defining:core_cpi": "2026-11-10",
       "defining:core_pce": "2026-10-29",
       "defining:industrial_production": "2026-10-16",
       "defining:payrolls": "2026-11-06",
-      "defining:producer_prices": "2026-10-15",
+      "defining:producer_prices": "2026-11-13",
       "defining:unemployment_rate": "2026-11-06"
     }
   },
   "sha256_inputs_configs_implementation": {
-    "components": "a43d5a2703857ea3f88507964fa21a8d9001fc8023bafd14294b411909fe8a4d",
+    "components": "b37302bf907fc7c39fb43e3b0eac8e0be5480ac83764b6b1be58f19c9a7d5bec",
     "configs/models/m01_deterministic_composite.yaml": "db688bf20b2e40cdc226922e29638c0831cc049d11e38c49c84260713ba3cafe",
     "configs/models/m01_deterministic_composite_transition.yaml": "9b2bff7f5470dce9a1c9eec23dde588128612ffbe6b125641b2c23568b76af2f",
     "configs/models/m01_event_driven_bayesian_filter.yaml": "fdf1087b5c61a4007883b1c61f89df6daf6ed06f949c4a119ed316905876f27a",
@@ -58,12 +58,12 @@
     "configs/models/m02_release_evidence.yaml": "e9f8cb6c8ca28925d0c057fdaed95cdf08b2ce3a976380b7bf671730dceda512",
     "configs/models/m02_soft_composite.yaml": "0a378c0a121633b2b560c1a452ab027f35b79d7ea4be4e3817b960bf3637f289",
     "configs/models/m02_var1_transition.yaml": "6bf3fc7a575b05ea4a32297a85c95ff28ef3d8d09dc23af9dacce250591d054e",
-    "events": "33d55f5730be53a4a69d90a8df90f480bf08dd0efd6c3c44ce855333b5408738",
-    "manifest": "e9598dfaa6ae524cc0e8832f12183d455ee8ad464550084e54665b4dffc51e91",
+    "events": "2aec1e74657ffef414dae2a89d9ec6bd26dd9322802a2cdf45e4c238d3a9389d",
+    "manifest": "5debbbd9f0a840d9e7b731b42c04c715fed31f4c61201538718f18888a44d4f2",
     "mapping": "e7ed6d25ae0878edc7f8b5ac9158de08ff062afb180334b262a20f35d26cc9a0",
-    "prices": "b4934386b72e6ac79f673eb9a6050ceba0eebd55a8e992f151ba950270578a94",
+    "prices": "12c36dbf7318dec03b20f4274d686fe2c6be29747b0a7d8e495d6ea41e1ca0da",
     "pyproject.toml": "2d8aebaa2a569d917fa34306bc1091cbe809a90b5c5d3ae12521456b3ce87a29",
-    "scores": "0480a808d8b4f3325aaa1861ddf23ee2ff0c7d982e4a0cd319f5e5e4dfa15642",
+    "scores": "a7a054d215545204aa421a1ebea0874cb1e2280d90f5d94b9e4fd9d976236540",
     "scripts/download_etf_history.py": "2593ec667aeffd03038c6c1505353c0ee95ace41afd245d1c30e37d6e90a8b77",
     "src/regime_allocation/backtest/__init__.py": "941e0b2c79789d0d487625ce0aa6747f6c0bc06013239d4de2f205aa0c0f22cb",
     "src/regime_allocation/backtest/engine.py": "92661e784249017827e4ae6ae3f972a08f20817b957f02aa82c52fb94e4ec2a3",
@@ -151,8 +151,8 @@
     "src/regime_allocation/reporting/readme_snapshot.py": "6a2fce127d1cd029f671de05e0acfcdeed9510d4aa26848290b3223e8dbcabd3"
   },
   "sha256_outputs": {
-    "latest_allocation.json": "a98847ec3398465dea61cc18353271290a3e51cf4a125e01b0be1e8e1887b815",
-    "performance_summary.csv": "e18aa609ed6ea5402e672bad2e7773412220aaddd6ba118897f20f8908a86968"
+    "latest_allocation.json": "7425c28ab16714887ddfb6b33b9b8c91988930f2867747cc0207c6cf08aace3d",
+    "performance_summary.csv": "6d4b68ce4c5388f7a1495c1cfcd50524e22405f71eca101a9268619f6928c5e4"
   },
   "history_policy": "Full own-path replay from 2018-01-01; incomplete week excluded from performance.",
   "reconstruction_disclosure": "Newly acquired FRED vintages and mutable Yahoo adjusted prices; not a byte-identical reproduction of the archived publication. Same-history model selection was used; the extended backtest is not an untouched validation sample."
