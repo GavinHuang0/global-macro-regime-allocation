@@ -8,17 +8,17 @@ ETF allocations.
 
 ## Model 02 weekly research snapshot
 
-**Research only · FRESH at generation.** Signal week: **2026-11-16**.
+**Research only · FRESH at generation.** Signal week: **2026-11-23**.
 
 Data freshness: All required input families passed release\-age checks at the signal cutoff\.
 
 | Snapshot timing | As of |
 |---|---|
-| Information cutoff | `2026-11-16T00:00:00-05:00` |
-| Latest macro release used | `2026-11-13` |
-| Final price close used | `2026-11-13` |
-| Generated | `2026-11-18T03:45:06Z` |
-| Valid until (exclusive) | `2026-11-23T00:00:00-05:00` |
+| Information cutoff | `2026-11-23T00:00:00-05:00` |
+| Latest macro release used | `2026-11-19` |
+| Final price close used | `2026-11-20` |
+| Generated | `2026-11-24T06:09:55Z` |
+| Valid until (exclusive) | `2026-11-30T00:00:00-05:00` |
 
 The cutoff is Monday 00:00 America/New_York; releases on the signal day are excluded.
 Price coverage records the final close used by estimation and pretrade holdings.
@@ -35,10 +35,10 @@ Price coverage records the final close used by estimation and pretrade holdings.
 
 | Macro quadrant | Posterior probability |
 |---|---:|
-| Growth up / inflation up | 29.3% |
-| Growth down / inflation up | 34.1% |
-| Growth up / inflation down | 22.8% |
-| Growth down / inflation down | 13.7% |
+| Growth up / inflation up | 30.3% |
+| Growth down / inflation up | 34.3% |
+| Growth up / inflation down | 22.5% |
+| Growth down / inflation down | 12.9% |
 
 | Model estimate | Value |
 |---|---:|
