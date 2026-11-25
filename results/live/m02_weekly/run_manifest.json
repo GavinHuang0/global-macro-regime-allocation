@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
   "release_id": "m02_weekly_live_v1",
-  "generated_at": "2026-11-24T06:09:55.340732+00:00",
+  "generated_at": "2026-11-25T04:57:02.671132+00:00",
   "signal_week": "2026-11-23",
   "information_cutoff": "2026-11-23T00:00:00-05:00",
   "execution_date": "2026-11-23",
-  "latest_price_download_session": "2026-11-23",
+  "latest_price_download_session": "2026-11-24",
   "runtime_versions": {
     "numpy": "2.5.5",
     "pandas": "3.1.1",
@@ -58,10 +58,10 @@
     "configs/models/m02_release_evidence.yaml": "e9f8cb6c8ca28925d0c057fdaed95cdf08b2ce3a976380b7bf671730dceda512",
     "configs/models/m02_soft_composite.yaml": "0a378c0a121633b2b560c1a452ab027f35b79d7ea4be4e3817b960bf3637f289",
     "configs/models/m02_var1_transition.yaml": "6bf3fc7a575b05ea4a32297a85c95ff28ef3d8d09dc23af9dacce250591d054e",
-    "events": "89d365e0693e4107daf3977b7af3ecd684410bacc265750f262343a3d5b7877d",
-    "manifest": "6e16039cf746d237aa853621023ac6e12223a37acc1e742ccc7a6ffe9d1fbb49",
+    "events": "ec3074713635eef60e56f1b0cfd3e167e46ad66bc757bb1f7f0468a2317740cd",
+    "manifest": "d4954033a88b24a35ee7488c0ff015fcf03d13337ba4b734d31684e8f786b1b2",
     "mapping": "e7ed6d25ae0878edc7f8b5ac9158de08ff062afb180334b262a20f35d26cc9a0",
-    "prices": "ecda5903a7f673b1e5d3bb69698b22b74dcbe7d44d589b94d1470a334f65b0d5",
+    "prices": "988d12e2359fc0450872e14fe85e583b1d8eb8c1825cc41de393edf98fe925e7",
     "pyproject.toml": "2d8aebaa2a569d917fa34306bc1091cbe809a90b5c5d3ae12521456b3ce87a29",
     "scores": "19b6b90c27aeff46b9394656b28c87b492e89e2092802b62c52f071240a86d1e",
     "scripts/download_etf_history.py": "2593ec667aeffd03038c6c1505353c0ee95ace41afd245d1c30e37d6e90a8b77",
@@ -151,8 +151,8 @@
     "src/regime_allocation/reporting/readme_snapshot.py": "6a2fce127d1cd029f671de05e0acfcdeed9510d4aa26848290b3223e8dbcabd3"
   },
   "sha256_outputs": {
-    "latest_allocation.json": "55d59a6d1fdf559e4ad761b61202a887dd4ccf8b09461a255e68425c298fed60",
-    "performance_summary.csv": "51d95a863dead8f55423cbc9ed703c8dc8fafb017f1325f2fd21d004b0c3268a"
+    "latest_allocation.json": "9323ab55a6d70c91337cd5017aace1364bfb805b75a4a31c2f91bb43f987df88",
+    "performance_summary.csv": "1aec24143b1ae8c235abf4f0e9c786c734279b4d1d29fb771e56370018fb447f"
   },
   "history_policy": "Full own-path replay from 2018-01-01; incomplete week excluded from performance.",
   "reconstruction_disclosure": "Newly acquired FRED vintages and mutable Yahoo adjusted prices; not a byte-identical reproduction of the archived publication. Same-history model selection was used; the extended backtest is not an untouched validation sample."
